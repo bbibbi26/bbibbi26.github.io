@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>냥냐/삐용</title>
-    <!-- 구글 폰트에서 Black Han Sans 불러오기 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+    <!-- Gmarket Sans 폰트 불러오기 -->
+    <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
     
     <style>
         :root {
@@ -15,8 +13,9 @@
             --soft-pink: #ffe4f1;
             --cyber-white: #ffffff;
             --accent-blue: #70d6ff;
-            /* 전역 폰트 변수 설정 */
-            --font-main: 'Black Han Sans', sans-serif;
+            /* 폰트 설정: 기본은 Medium, 아주 얇은 곳은 Light 사용 */
+            --font-main: 'GmarketSansMedium', sans-serif;
+            --font-light: 'GmarketSansLight', sans-serif;
         }
 
         body {
@@ -27,7 +26,7 @@
                 linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
             background-size: 100% 100%, 30px 30px, 30px 30px;
             color: var(--main-pink);
-            /* 폰트 적용 */
+            /* 전체 폰트 적용 */
             font-family: var(--font-main);
             display: flex;
             justify-content: center;
@@ -51,13 +50,13 @@
         }
 
         .loader-box {
-            width: 320px;
+            width: 300px;
             text-align: left;
         }
 
         .loader-bar {
             width: 0%;
-            height: 6px;
+            height: 4px;
             background: var(--main-pink);
             box-shadow: 0 0 15px var(--main-pink);
             margin: 15px 0;
@@ -65,10 +64,12 @@
         }
 
         .loading-text {
-            font-size: 1rem;
+            /* 로딩 텍스트는 조금 더 얇게 설정 */
+            font-family: var(--font-light);
+            font-size: 0.9rem;
             letter-spacing: 1px;
             margin-bottom: 5px;
-            height: 24px;
+            height: 20px;
         }
 
         /* --- 로그인 프레임 --- */
@@ -76,67 +77,75 @@
             display: none;
             position: relative;
             width: 380px;
-            padding: 60px 40px;
-            background: rgba(255, 255, 255, 0.92);
-            border: 3px solid var(--main-pink);
-            box-shadow: 0 0 25px rgba(255, 126, 185, 0.3);
+            padding: 50px 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--main-pink);
+            box-shadow: 0 0 20px rgba(255, 126, 185, 0.3);
             text-align: center;
             clip-path: polygon(0 0, 100% 0, 100% 88%, 88% 100%, 0 100%);
             backdrop-filter: blur(10px);
-            animation: fadeIn 1s ease-out;
+            animation: fadeIn 1s;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
         .top-accent {
-            position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+            position: absolute; top: 0; left: 0; width: 100%; height: 5px;
             background: linear-gradient(90deg, var(--main-pink), var(--accent-blue));
         }
 
         h1 {
-            font-size: 3.5rem;
+            font-size: 3rem; 
+            font-weight: normal; /* Gmarket Sans 자체 두께 사용 */
             margin-bottom: 40px;
-            letter-spacing: 4px;
-            color: var(--main-pink);
-            text-shadow: 3px 3px 0px #fff, -2px -2px 0px var(--accent-blue);
+            letter-spacing: 8px; 
+            color: var(--main-pink); 
+            text-transform: uppercase;
+            text-shadow: 2px 2px 0px #fff, -2px -2px 0px var(--accent-blue);
             animation: glitch-anim 3s infinite;
         }
 
         @keyframes glitch-anim {
             0% { transform: none; }
-            5% { transform: skew(1.5deg); opacity: 0.8; }
-            10% { transform: none; }
+            10% { transform: skew(1deg); opacity: 0.8; }
+            20% { transform: none; }
             100% { transform: none; }
         }
 
         input {
-            width: 100%; background: #fff; border: 2px solid var(--main-pink);
-            padding: 15px; color: var(--main-pink); font-size: 1.2rem;
+            width: 100%; background: #fff; border: 1px solid var(--main-pink);
+            padding: 15px; color: var(--main-pink); font-size: 1.1rem;
             text-align: center; outline: none; box-sizing: border-box;
-            border-bottom: 5px solid var(--main-pink);
+            border-bottom: 4px solid var(--main-pink);
+            /* 입력창 폰트 적용 */
             font-family: var(--font-main);
         }
 
         button {
-            width: 100%; margin-top: 25px; padding: 15px; background: var(--main-pink);
-            border: none; color: #fff; font-size: 1.3rem;
-            letter-spacing: 4px; cursor: pointer; transition: 0.3s;
+            width: 100%; margin-top: 20px; padding: 15px; background: var(--main-pink);
+            border: none; color: #fff; font-size: 1.1rem;
+            letter-spacing: 5px; cursor: pointer; transition: 0.3s;
             clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
+            /* 버튼 폰트 적용 */
             font-family: var(--font-main);
         }
 
-        button:hover { 
-            background: #ff50a0; 
-            box-shadow: 0 0 20px rgba(255, 126, 185, 0.6);
-            transform: translateY(-2px);
-        }
+        button:hover { background: #ff50a0; box-shadow: 0 0 20px rgba(255, 126, 185, 0.6); }
 
-        .footer-info { margin-top: 35px; font-size: 0.8rem; color: var(--main-pink); display: flex; justify-content: space-between; opacity: 0.8; }
+        .footer-info { 
+            margin-top: 30px; 
+            font-size: 0.75rem; 
+            color: var(--main-pink); 
+            display: flex; 
+            justify-content: space-between; 
+            opacity: 0.7;
+            /* 하단 정보는 얇은 폰트 적용 */
+            font-family: var(--font-light);
+        }
     </style>
 </head>
 <body>
 
-    <!-- 로딩 화면 -->
     <div id="loading-screen">
         <div class="loader-box">
             <div class="loading-text" id="status-msg">SYSTEM BOOTING...</div>
@@ -145,7 +154,6 @@
         </div>
     </div>
 
-    <!-- 메인 로그인 콘텐츠 -->
     <div class="login-frame" id="login-content">
         <div class="top-accent"></div>
         <h1>냥냥펀치</h1>
@@ -158,7 +166,6 @@
     </div>
 
     <script>
-        // --- 로딩 시뮬레이션 스크립트 ---
         const messages = [
             "섹시코테의 머리칼을 빗어주는 중...",
             "환상의 옷장 정리중...",
@@ -173,7 +180,7 @@
         const statusMsg = document.getElementById('status-msg');
 
         const interval = setInterval(() => {
-            progress += Math.floor(Math.random() * 15) + 5; 
+            progress += Math.floor(Math.random() * 15) + 5;
             if (progress >= 100) {
                 progress = 100;
                 clearInterval(interval);
@@ -184,7 +191,7 @@
             
             const msgIndex = Math.floor((progress / 100) * messages.length);
             if (messages[msgIndex]) statusMsg.innerText = messages[msgIndex];
-        }, 350);
+        }, 400);
 
         function finishLoading() {
             setTimeout(() => {
@@ -205,9 +212,6 @@
                 alert("DENIED: INCORRECT PASSCODE.");
             }
         }
-    </script>
-</body>
-</html>
     </script>
 </body>
 </html>
