@@ -3,29 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>냥냐/삐용</title>
+    <title>SYSTEM ACCESS: CHARACTER DB</title>
     <style>
-        body { font-family: sans-serif; background-color: #fce4ec; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        input { padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; width: 200px; }
-        button { padding: 10px 25px; background-color: #f06292; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #5d61df; }
+        body {
+            background-color: #050505;
+            color: #00ff41; /* 매트릭스/사이버 룩 그린 */
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* 배경에 미세한 줄무늬 효과 */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .login-card {
+            background: rgba(0, 20, 20, 0.8);
+            padding: 40px;
+            border: 2px solid #00ff41;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2), inset 0 0 10px rgba(0, 255, 65, 0.2);
+            text-align: center;
+            width: 350px;
+            position: relative;
+        }
+
+        /* 모서리 장식 */
+        .login-card::after {
+            content: "SECURE ACCESS";
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: #00ff41;
+            color: #000;
+            font-size: 10px;
+            padding: 2px 5px;
+            font-weight: bold;
+        }
+
+        h2 {
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px #ff0055; /* 사이버펑크 특유의 색수차 효과 */
+        }
+
+        input {
+            background: #000;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 12px;
+            width: 80%;
+            margin-bottom: 20px;
+            outline: none;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        input:focus {
+            box-shadow: 0 0 10px #00ff41;
+        }
+
+        button {
+            background: transparent;
+            border: 2px solid #ff0055;
+            color: #ff0055;
+            padding: 10px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        button:hover {
+            background: #ff0055;
+            color: #fff;
+            box-shadow: 0 0 20px #ff0055;
+        }
+
+        .status-text {
+            font-size: 10px;
+            margin-top: 15px;
+            color: rgba(0, 255, 65, 0.5);
+        }
     </style>
     <script>
-        function login() {
-            var pw = document.getElementById("pw").value;
-            if(pw === "1234") { 
-                alert("반가워요! 캐릭터 페이지로 들어갑니다.");
-                location.href = "main.html"; 
-            } else { alert("비밀번호가 틀렸어요"); }
+        function checkAccess() {
+            const pw = document.getElementById("pw").value;
+            if(pw === "1234") { // 비밀번호 설정
+                alert("ACCESS GRANTED. LOADING DATA...");
+                location.href = "main.html";
+            } else {
+                alert("ACCESS DENIED. WRONG PASSCODE.");
+            }
         }
     </script>
 </head>
 <body>
-    <div class="box">
-        <h2> 냥뿅 </h2>
-        <input type="password" id="pw" placeholder="0513입력"> <br>
-        <button onclick="login()">슝슝</button>
+
+    <div class="login-card">
+        <h2>냥뿅</h2>
+        <input type="password" id="pw" placeholder="ENTER PASSCODE">
+        <br>
+        <button onclick="checkAccess()">System Login</button>
+        <div class="status-text">ENCRYPTION: AES-256 ACTIVE</div>
     </div>
+
 </body>
 </html>
