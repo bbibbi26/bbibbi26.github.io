@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>냥냐/삐용</title>
+    <title>냥냐/삐용 - HOME</title>
     <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
     
     <style>
         :root {
             --main-pink: #ff7eb9;
             --soft-pink: #ffe4f1;
-            --cyber-white: #ffffff;
             --accent-blue: #70d6ff;
             --font-main: 'GmarketSansBold', sans-serif;
             --font-light: 'GmarketSansLight', sans-serif;
@@ -25,137 +24,229 @@
             background-size: 100% 100%, 30px 30px, 30px 30px;
             color: var(--main-pink);
             font-family: var(--font-main);
+            margin: 0; padding: 20px;
             display: flex; justify-content: center; align-items: center;
-            height: 100vh; margin: 0; overflow: hidden;
+            min-height: 100vh;
+            overflow: hidden; /* 꽃가루가 화면 밖으로 나가지 않도록 설정 */
+            position: relative; /* 자식 요소인 꽃가루의 기준점이 됨 */
         }
 
-        /* --- 로딩 화면 --- */
-        #loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--soft-pink); z-index: 100;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 1s ease-out;
+        /* --- 꽃가루 스타일 --- */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #fff; /* 꽃가루 색상 (흰색) */
+            border-radius: 50%; /* 둥근 모양 */
+            opacity: 0; /* 처음에는 안 보임 */
+            animation: fall infinite linear; /* 떨어지는 애니메이션 */
         }
-        .loader-box { width: 300px; text-align: left; }
-        .loader-bar { width: 0%; height: 4px; background: var(--main-pink); box-shadow: 0 0 15px var(--main-pink); margin: 15px 0; transition: width 0.5s; }
-        .loading-text { font-family: var(--font-light); font-size: 0.9rem; letter-spacing: 1px; margin-bottom: 5px; height: 20px; }
 
-        /* --- 로그인 프레임 (자연스러운 테두리 그라데이션 적용) --- */
-        .login-frame {
-            display: none;
-            position: relative;
-            width: 380px;
-            padding: 60px 40px;
-            
-            /* [수정 포인트] 배경과 테두리를 하나로 합침 */
-            background-color: rgba(255, 255, 255, 0.95);
+        @keyframes fall {
+            0% {
+                top: -10px; /* 화면 위에서 시작 */
+                opacity: 1; /* 보이게 함 */
+            }
+            100% {
+                top: 100vh; /* 화면 아래로 이동 */
+                opacity: 0; /* 사라짐 */
+            }
+        }
+
+        /* --- 공통 카드 스타일 --- */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
             border: 3px solid transparent;
-            border-radius: 50px 15px 50px 15px;
-            background-image: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), 
+            border-radius: 50px 15px 50px 15px; 
+            background-image: linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)), 
                               linear-gradient(90deg, var(--main-pink), var(--accent-blue));
             background-origin: border-box;
             background-clip: padding-box, border-box;
-            
-            box-shadow: 15px 15px 30px rgba(255, 126, 185, 0.15), 
-                        -5px -5px 15px rgba(255, 255, 255, 0.8);
-            
+            box-shadow: 10px 10px 25px rgba(255, 126, 185, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative; /* 꽃가루보다 위에 표시되도록 설정 */
+            z-index: 1; 
+        }
+
+        /* --- 전체 컨테이너 --- */
+        .main-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 25px;
+            animation: slideUp 0.8s ease-out;
+            position: relative; /* 꽃가루보다 위에 표시되도록 설정 */
+            z-index: 1;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 사이드바 영역 --- */
+        .sidebar {
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
-            backdrop-filter: blur(15px);
-            animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-
-        /* 기존 상단 줄은 투명하게 처리하여 부자연스러움 제거 */
-        .top-accent { display: none; }
-
-        h1 {
-            font-size: 3rem; margin-bottom: 40px; letter-spacing: 6px; 
-            color: var(--main-pink); text-transform: uppercase;
-            text-shadow: 2px 2px 0px #fff;
-            animation: glitch-anim 3s infinite;
+        .profile-circle {
+            width: 100px; height: 100px;
+            background: var(--soft-pink);
+            border-radius: 35px 10px 35px 10px;
+            border: 2px solid var(--main-pink);
+            margin-bottom: 20px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 2.5rem;
+            box-shadow: 0 5px 15px rgba(255, 126, 185, 0.2);
         }
 
-        @keyframes glitch-anim {
-            0% { transform: none; }
-            10% { transform: skew(1.2deg); opacity: 0.9; }
-            20% { transform: none; }
-            100% { transform: none; }
+        .menu-list { width: 100%; list-style: none; padding: 0; margin-top: 30px; }
+        .menu-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 15px 5px;
+            cursor: pointer;
+            font-family: var(--font-light);
+            transition: 0.3s;
+            font-size: 0.9rem;
+        }
+        .menu-item:hover {
+            background: var(--soft-pink);
+            color: var(--main-pink);
+            transform: translateX(10px);
         }
 
-        input {
-            width: 100%; background: #fff; border: 2px solid var(--soft-pink);
-            border-radius: 15px; padding: 15px; color: var(--main-pink); font-size: 1.1rem;
-            text-align: center; outline: none; box-sizing: border-box;
-            font-family: var(--font-main); box-shadow: inset 2px 2px 5px rgba(0,0,0,0.02);
-            transition: 0.3s ease;
+        /* --- 콘텐츠 영역 --- */
+        .content-area {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 25px;
         }
-        input:focus { border-color: var(--main-pink); box-shadow: 0 0 10px rgba(255, 126, 185, 0.1); }
 
-        button {
-            width: 100%; margin-top: 25px; padding: 18px; background: var(--main-pink);
-            border: none; color: #fff; font-size: 1.2rem; letter-spacing: 5px; cursor: pointer; 
-            border-radius: 15px 40px 15px 40px; font-family: var(--font-main);
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 8px 20px rgba(255, 126, 185, 0.3);
+        .top-banner {
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        button:hover { background: #ff50a0; transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 25px rgba(255, 126, 185, 0.4); }
-        button:active { transform: translateY(0px) scale(0.98); }
 
-        .footer-info { margin-top: 30px; font-size: 0.75rem; color: var(--main-pink); display: flex; justify-content: space-between; opacity: 0.7; font-family: var(--font-light); }
+        .top-banner h2 { font-size: 2rem; margin: 0; letter-spacing: 2px; }
+
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .grid-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            cursor: pointer;
+        }
+
+        .grid-item:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(255, 126, 185, 0.2);
+        }
+
+        .grid-item i { font-size: 2.5rem; margin-bottom: 15px; display: block; }
+        .grid-item span { font-size: 1.1rem; }
+
+        .logout-link {
+            margin-top: auto;
+            font-family: var(--font-light);
+            font-size: 0.8rem;
+            opacity: 0.5;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .logout-link:hover { opacity: 1; color: var(--accent-blue); }
+
+        @media (max-width: 800px) {
+            .main-wrapper { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
+    <div id="confetti-container"></div>
 
-    <div id="loading-screen">
-        <div class="loader-box">
-            <div class="loading-text" id="status-msg">SYSTEM BOOTING...</div>
-            <div class="loader-bar" id="progress-bar"></div>
-            <div class="loading-text" id="percent">0%</div>
-        </div>
-    </div>
+    <div class="main-wrapper">
+        <aside class="sidebar glass-card">
+            <div class="profile-circle">🐱</div>
+            <div style="font-size: 1.4rem;">섹시코테</div>
+            <div style="font-family: var(--font-light); font-size: 0.8rem; opacity: 0.7; margin-top: 5px;">NYA-PPI UNIT #01</div>
+            
+            <ul class="menu-list">
+                <li class="menu-item">🎀 스타일 보관함</li>
+                <li class="menu-item">💌 냥냥 메시지</li>
+                <li class="menu-item">⚙️ 시스템 설정</li>
+            </ul>
 
-    <div class="login-frame" id="login-content">
-        <h1>냥냥펀치</h1>
-        <input type="password" id="passcode" placeholder="PASSCODE_REQUIRED">
-        <button onclick="validateAccess()">ENTER SYSTEM</button>
-        <div class="footer-info">
-            <span>UNIT: NYA-PPI</span>
-            <span>SECURE_MODE: ON</span>
-        </div>
+            <div class="logout-link" onclick="location.href='index.html'">LOGOUT_SESSION</div>
+        </aside>
+
+        <main class="content-area">
+            <div class="top-banner glass-card">
+                <div>
+                    <h2>WELCOME BACK</h2>
+                    <p style="font-family: var(--font-light); opacity: 0.8; margin-top: 10px;">시스템이 정상 가동 중입니다.</p>
+                </div>
+                <div style="font-size: 3rem;">💖</div>
+            </div>
+
+            <div class="grid-menu">
+                <div class="grid-item glass-card">
+                    <i>🐾</i>
+                    <span>리포트</span>
+                </div>
+                <div class="grid-item glass-card">
+                    <i>🥊</i>
+                    <span>트레이닝</span>
+                </div>
+                <div class="grid-item glass-card">
+                    <i>📸</i>
+                    <span>갤러리</span>
+                </div>
+                <div class="grid-item glass-card">
+                    <i>🔒</i>
+                    <span>비밀공간</span>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        const messages = ["섹시코테의 머리칼을 빗어주는 중...", "환상의 옷장 정리중...", "엉킨 꼬리털 풀어내는 중...", "놀 준비 완료.", "접속중..."];
-        let progress = 0;
-        const progressBar = document.getElementById('progress-bar');
-        const percentText = document.getElementById('percent');
-        const statusMsg = document.getElementById('status-msg');
+        // 꽃가루 생성 함수
+        function createConfetti() {
+            const container = document.getElementById('confetti-container');
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
 
-        const interval = setInterval(() => {
-            progress += Math.floor(Math.random() * 15) + 5;
-            if (progress >= 100) { progress = 100; clearInterval(interval); finishLoading(); }
-            progressBar.style.width = progress + "%";
-            percentText.innerText = progress + "%";
-            const msgIndex = Math.floor((progress / 100) * messages.length);
-            if (messages[msgIndex]) statusMsg.innerText = messages[msgIndex];
-        }, 400);
+            // 랜덤한 위치, 크기, 애니메이션 속도 설정
+            confetti.style.left = Math.random() * 100 + 'vw'; 
+            confetti.style.width = Math.random() * 10 + 5 + 'px'; 
+            confetti.style.height = confetti.style.width; 
+            confetti.style.animationDuration = Math.random() * 3 + 2 + 's'; 
 
-        function finishLoading() {
+            container.appendChild(confetti);
+
+            // 애니메이션이 끝나면 꽃가루 제거
             setTimeout(() => {
-                document.getElementById('loading-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('loading-screen').style.display = 'none';
-                    document.getElementById('login-content').style.display = 'block';
-                }, 1000);
-            }, 500);
+                confetti.remove();
+            }, parseFloat(confetti.style.animationDuration) * 1000);
         }
 
-        function validateAccess() {
-            const pass = document.getElementById('passcode').value;
-            if(pass === "1234") { alert("ACCESS GRANTED."); location.href = "main.html"; } 
-            else { alert("DENIED."); }
-        }
+        // 일정 시간마다 꽃가루 생성
+        setInterval(createConfetti, 100); 
     </script>
 </body>
 </html>
