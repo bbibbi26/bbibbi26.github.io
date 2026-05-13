@@ -11,13 +11,12 @@
             --main-pink: #ff7eb9;
             --main-purple: #9d00ff;
             --dark-bg: #050508;
-            --panel-bg: rgba(15, 15, 25, 0.85);
+            --panel-bg: rgba(15, 15, 25, 0.9);
             --accent-blue: #00f3ff;
             --font-main: 'GmarketSansBold', sans-serif;
             --font-light: 'GmarketSansLight', sans-serif;
         }
 
-        /* --- body 스타일 --- */
         body {
             background-color: #fce4ec;
             background-image: 
@@ -29,15 +28,10 @@
             background-size: 100% 100%, 100% 100%, 100% 100%, 40px 40px, 40px 40px;
             color: #fff;
             font-family: var(--font-main);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
+            margin: 0; display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; overflow: hidden;
         }
 
-        /* --- 부팅 로더 --- */
         #boot-loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #050508; z-index: 9999; display: flex;
@@ -46,7 +40,6 @@
             transition: opacity 0.5s ease;
         }
 
-        /* --- 배경 여백 로그창 --- */
         .ambient-log-layer {
             position: fixed; bottom: 30px; left: 30px; width: 400px;
             height: auto; pointer-events: none; z-index: 1;
@@ -55,24 +48,15 @@
             flex-direction: column; gap: 5px;
         }
 
-        .log-line { animation: logFadeIn 1s ease-out forwards; white-space: nowrap; text-shadow: 0 0 5px var(--main-pink); }
-
-        @keyframes logFadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- 메인 터미널 박스 --- */
         .terminal-frame {
-            width: 85vw; height: 80vh; max-width: 1100px;
+            width: 85vw; height: 85vh; max-width: 1100px;
             background: var(--panel-bg);
             border: 1px solid rgba(255, 126, 185, 0.3);
             border-radius: 60px 20px 60px 20px;
             backdrop-filter: blur(25px);
             display: flex; position: relative; z-index: 10;
-            box-shadow: 0 20px 60px rgba(255, 126, 185, 0.2), 0 0 40px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 20px 60px rgba(255, 126, 185, 0.2);
             overflow: hidden;
-            transform-origin: center;
             animation: terminalScanOpen 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
         }
 
@@ -82,202 +66,206 @@
             100% { transform: scaleY(1); opacity: 1; }
         }
 
-        .terminal-frame::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
-            background: linear-gradient(90deg, transparent, var(--main-pink), var(--main-purple), transparent);
-            box-shadow: 0 0 15px var(--main-pink);
-        }
-
-        /* 사이드바 */
         .sidebar {
-            width: 280px; border-right: 1px solid rgba(255, 255, 255, 0.05);
+            width: 260px; border-right: 1px solid rgba(255, 255, 255, 0.05);
             display: flex; flex-direction: column; padding: 40px; background: rgba(0, 0, 0, 0.3);
         }
 
         .profile-hex {
-            width: 80px; height: 80px; margin: 0 auto 20px;
+            width: 70px; height: 70px; margin: 0 auto 15px;
             background: linear-gradient(135deg, var(--main-pink), var(--main-purple));
-            border-radius: 25px 10px; display: flex; justify-content: center; align-items: center;
-            font-size: 2.5rem;
+            border-radius: 20px 8px; display: flex; justify-content: center; align-items: center; font-size: 2rem;
         }
 
-        .nav-menu { list-style: none; padding: 0; margin-top: 30px; flex-grow: 1; }
+        .nav-menu { list-style: none; padding: 0; margin-top: 20px; flex-grow: 1; }
         .nav-item {
-            padding: 15px; margin-bottom: 8px; border-radius: 10px 20px;
-            cursor: pointer; font-family: var(--font-light); color: rgba(255, 255, 255, 0.4); transition: 0.3s;
+            padding: 12px; margin-bottom: 5px; border-radius: 10px 15px;
+            cursor: pointer; font-family: var(--font-light); color: rgba(255, 255, 255, 0.4); font-size: 0.85rem;
         }
-        .nav-item:hover, .nav-item.active { color: var(--main-pink); background: rgba(255, 126, 185, 0.1); }
+        .nav-item.active { color: var(--main-pink); background: rgba(255, 126, 185, 0.1); }
 
-        /* 메인 콘텐츠 */
-        .main-content { flex: 1; display: flex; flex-direction: column; padding: 50px; overflow: hidden; }
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 40px; overflow: hidden; }
 
-        .top-info { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
-        #current-time { font-size: 2.5rem; font-weight: bold; text-shadow: 0 0 10px var(--main-pink); }
-        #current-date { font-size: 1rem; color: var(--accent-blue); opacity: 0.8; }
-
-        .glitch-title { margin: 0; letter-spacing: 2px; color: var(--main-pink); animation: titleGlitch 1s steps(5) 1.2s both; }
-
-        @keyframes titleGlitch {
-            0% { clip-path: inset(50% 0 50% 0); }
-            20% { clip-path: inset(20% 0 80% 0); transform: translateX(-5px); }
-            40% { clip-path: inset(80% 0 10% 0); transform: translateX(5px); }
-            60% { clip-path: inset(0% 0 0% 0); }
-        }
-
-        /* --- [NEW] 게시판(Board) 스타일 --- */
+        /* --- [게시판 디자인] --- */
         .system-board {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 30px 10px;
-            padding: 25px;
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            animation: fadeInBoard 1.5s ease-out 1.4s both;
+            flex: 1; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px 5px; padding: 25px; display: flex; flex-direction: column;
+            animation: fadeInBoard 1s ease-out 1.2s both;
         }
 
-        @keyframes fadeInBoard { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .board-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 126, 185, 0.3);
-            padding-bottom: 10px;
-            margin-bottom: 15px;
+        .board-header { 
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--main-pink); padding-bottom: 10px; margin-bottom: 15px;
         }
+        
+        /* 입력창 디자인 */
+        .input-area { display: flex; gap: 10px; margin-bottom: 20px; }
+        #comment-input {
+            flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px; padding: 12px; color: #fff; font-family: var(--font-light); outline: none;
+        }
+        #comment-input:focus { border-color: var(--main-pink); }
+        
+        .save-btn {
+            background: var(--main-pink); border: none; color: #fff; padding: 0 20px;
+            border-radius: 10px; cursor: pointer; font-family: var(--font-main); transition: 0.3s;
+        }
+        .save-btn:hover { background: var(--main-purple); transform: scale(1.05); }
 
-        .board-header span { font-size: 0.8rem; color: var(--accent-blue); letter-spacing: 1px; }
-
-        .post-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; }
+        .post-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; }
         .post-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-family: var(--font-light);
-            font-size: 0.9rem;
-            transition: 0.2s;
-            cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: var(--font-light); font-size: 0.9rem; animation: slideIn 0.3s ease-out;
         }
-        .post-item:hover { background: rgba(255, 126, 185, 0.05); color: var(--main-pink); }
-        .post-item .post-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .post-item .post-date { font-size: 0.75rem; color: rgba(255, 255, 255, 0.3); margin-left: 15px; }
+        .post-text { flex: 1; color: #eee; }
+        .post-date { font-size: 0.7rem; color: var(--accent-blue); margin: 0 15px; }
+        .del-btn { color: #ff4d4d; cursor: pointer; font-size: 0.7rem; opacity: 0.5; }
+        .del-btn:hover { opacity: 1; }
 
-        .disconnect-btn { margin-top: auto; font-family: var(--font-light); font-size: 0.8rem; color: rgba(255,255,255,0.2); cursor: pointer; text-align: right; }
-        .disconnect-btn:hover { color: var(--main-pink); }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeInBoard { from { opacity: 0; } to { opacity: 1; } }
 
-        /* 스크롤바 커스텀 */
+        .disconnect-btn { margin-top: 20px; font-size: 0.75rem; color: rgba(255,255,255,0.2); cursor: pointer; text-align: right; }
+        
+        /* 스크롤바 */
         .post-list::-webkit-scrollbar { width: 4px; }
         .post-list::-webkit-scrollbar-thumb { background: var(--main-pink); border-radius: 10px; }
-
     </style>
 </head>
 <body>
 
-    <div id="boot-loader">
-        <div id="loader-text">> AUTHENTICATING...</div>
-    </div>
-
-    <div class="ambient-log-layer" id="ambient-logs">
-        <div class="log-line">>> SYSTEM READY. INITIALIZING AMBIENT LOGS...</div>
-    </div>
+    <div id="boot-loader"><div id="loader-text">> AUTHENTICATING...</div></div>
+    <div class="ambient-log-layer" id="ambient-logs"></div>
 
     <div class="terminal-frame">
         <aside class="sidebar">
             <div class="profile-hex">🐱</div>
             <div style="text-align: center;">
-                <h3 style="margin: 0;">냥냥펀치</h3>
-                <p style="font-size: 0.7rem; color: var(--accent-blue);">ADMIN_UNIT_01</p>
+                <h3 style="margin: 0; font-size: 1.1rem;">냥냥펀치</h3>
+                <p style="font-size: 0.6rem; color: var(--accent-blue); letter-spacing: 1px;">ADMIN_UNIT_01</p>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item active">DASHBOARD</li>
                 <li class="nav-item">WARDROBE</li>
                 <li class="nav-item">MESSAGES</li>
-                <li class="nav-item">CONTROL</li>
             </ul>
         </aside>
 
         <main class="main-content">
             <div class="top-info">
                 <div>
-                    <div id="current-date">LOADING...</div>
-                    <div id="current-time">00:00:00</div>
+                    <div id="current-date" style="font-size: 0.8rem; color: var(--accent-blue);">DATE</div>
+                    <div id="current-time" style="font-size: 2rem; font-weight: bold; color: #fff;">00:00:00</div>
                 </div>
-                <h2 class="glitch-title">CORE TERMINAL</h2>
+                <h2 style="color: var(--main-pink); margin: 0; letter-spacing: 2px;">CORE_SYSTEM</h2>
             </div>
 
             <section class="system-board">
                 <div class="board-header">
-                    <strong>MISSION_BOARD</strong>
-                    <span>TOTAL_POSTS: 04</span>
+                    <strong>SYSTEM_COMMENTS</strong>
+                    <span id="post-count" style="font-size: 0.7rem; color: var(--accent-blue);">POSTS: 0</span>
                 </div>
-                <ul class="post-list">
-                    <li class="post-item">
-                        <span class="post-title">[공지] 시스템 보안 프로토콜 업데이트 안내</span>
-                        <span class="post-date">2026.05.13</span>
-                    </li>
-                    <li class="post-item">
-                        <span class="post-title">[임무] 섹시코테 헤어 케어 세션 (LV.MAX)</span>
-                        <span class="post-date">2026.05.12</span>
-                    </li>
-                    <li class="post-item">
-                        <span class="post-title">[기밀] 환상의 옷장 신규 아이템 입고 완료</span>
-                        <span class="post-date">2026.05.10</span>
-                    </li>
-                    <li class="post-item">
-                        <span class="post-title">[보고] 구역 07 주변 츄르 매설 확인</span>
-                        <span class="post-date">2026.05.08</span>
-                    </li>
-                </ul>
+                
+                <div class="input-area">
+                    <input type="text" id="comment-input" placeholder="새로운 코멘트를 입력하세요..." maxlength="50">
+                    <button class="save-btn" onclick="saveComment()">SAVE</button>
+                </div>
+
+                <ul class="post-list" id="post-list">
+                    </ul>
             </section>
 
-            <div class="disconnect-btn" onclick="location.href='index.html'">TERMINATE_SESSION</div>
+            <div class="disconnect-btn" onclick="location.href='index.html'">TERMINATE_SESSION >></div>
         </main>
     </div>
 
     <script>
-        // 부팅 로더 제어
+        // 1. 초기 부팅 연출
         window.addEventListener('load', () => {
-            const loader = document.getElementById('boot-loader');
-            const text = document.getElementById('loader-text');
-            
             setTimeout(() => {
-                text.innerHTML = "> ACCESS GRANTED.";
-                text.style.color = "var(--accent-blue)";
-                
+                document.getElementById('loader-text').innerHTML = "> ACCESS GRANTED.";
+                document.getElementById('loader-text').style.color = "var(--accent-blue)";
                 setTimeout(() => {
-                    loader.style.opacity = "0";
-                    setTimeout(() => loader.remove(), 500);
+                    document.getElementById('boot-loader').style.opacity = "0";
+                    setTimeout(() => document.getElementById('boot-loader').remove(), 500);
                 }, 400);
             }, 600);
+            loadComments(); // 게시판 데이터 불러오기
         });
 
-        // 1. 실시간 시계
+        // 2. 게시판 기능 (LocalStorage 사용)
+        const commentInput = document.getElementById('comment-input');
+        const postList = document.getElementById('post-list');
+        const postCount = document.getElementById('post-count');
+
+        function saveComment() {
+            const text = commentInput.value.trim();
+            if (!text) return;
+
+            const newPost = {
+                id: Date.now(),
+                content: text,
+                date: new Date().toLocaleDateString('ko-KR')
+            };
+
+            const comments = JSON.parse(localStorage.getItem('nya_comments') || '[]');
+            comments.unshift(newPost); // 최신글이 위로
+            localStorage.setItem('nya_comments', JSON.stringify(comments));
+
+            commentInput.value = '';
+            renderComments();
+        }
+
+        function loadComments() {
+            renderComments();
+        }
+
+        function renderComments() {
+            const comments = JSON.parse(localStorage.getItem('nya_comments') || '[]');
+            postList.innerHTML = '';
+            postCount.innerText = `POSTS: ${String(comments.length).padStart(2, '0')}`;
+
+            comments.forEach(post => {
+                const li = document.createElement('li');
+                li.className = 'post-item';
+                li.innerHTML = `
+                    <span class="post-text">${post.content}</span>
+                    <span class="post-date">${post.date}</span>
+                    <span class="del-btn" onclick="deleteComment(${post.id})">DELETE</span>
+                `;
+                postList.appendChild(li);
+            });
+        }
+
+        function deleteComment(id) {
+            let comments = JSON.parse(localStorage.getItem('nya_comments') || '[]');
+            comments = comments.filter(c => c.id !== id);
+            localStorage.setItem('nya_comments', JSON.stringify(comments));
+            renderComments();
+        }
+
+        // 엔터키 저장 지원
+        commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
+
+        // 3. 기타 시스템 기능 (시계, 로그)
         function updateClock() {
             const now = new Date();
             document.getElementById('current-time').textContent = now.toLocaleTimeString('en-GB');
-            document.getElementById('current-date').textContent = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+            document.getElementById('current-date').textContent = now.toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
         }
-        setInterval(updateClock, 1000);
-        updateClock();
+        setInterval(updateClock, 1000); updateClock();
 
-        // 2. 여백 로그 시스템 (30초 간격)
-        const logMessages = ["CHECKING CORE TEMP...", "ENCRYPTED PACKETS RECEIVED", "NYA-PPI PROTOCOL ACTIVE", "FIREWALL: NO INTRUSIONS", "NEURAL LINK STABLE"];
         const logLayer = document.getElementById('ambient-logs');
-
-        function addAmbientLog() {
-            const msg = logMessages[Math.floor(Math.random() * logMessages.length)];
-            const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-            const logLine = document.createElement('div');
-            logLine.className = 'log-line';
-            logLine.textContent = `[${time}] ${msg}`;
-            logLayer.appendChild(logLine);
-            if (logLayer.childNodes.length > 5) logLayer.removeChild(logLayer.firstChild);
+        function addLog() {
+            const logs = ["SYNCING...", "ENCRYPTED", "STABLE", "BACKUP_OK"];
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${logs[Math.floor(Math.random()*logs.length)]}`;
+            logLayer.appendChild(line);
+            if(logLayer.childNodes.length > 5) logLayer.removeChild(logLayer.firstChild);
         }
-        setInterval(addAmbientLog, 30000);
-        addAmbientLog();
+        setInterval(addLog, 30000); addLog();
     </script>
 </body>
 </html>
