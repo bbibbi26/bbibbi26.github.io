@@ -149,13 +149,52 @@
         .post-item.me:hover .delete-btn { opacity: 1; }
         .delete-btn:hover { background: var(--main-pink); color: #fff; }
 
+        /* --- 큐피트 화살 재생기 디자인 --- */
         .music-section { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
-        .music-ctrl {
-            font-size: 0.65rem; color: var(--accent-blue); cursor: pointer;
-            border: 1px dashed var(--accent-blue); padding: 8px; text-align: center;
-            transition: 0.3s; margin-bottom: 12px;
+        
+        .arrow-container {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; height: 40px; position: relative; margin-bottom: 10px;
         }
-        .music-ctrl:hover { background: rgba(0, 243, 255, 0.1); }
+
+        /* 화살 깃털 (재생 버튼) */
+        .arrow-feather {
+            cursor: pointer; font-size: 1.2rem; filter: drop-shadow(0 0 5px var(--accent-blue));
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2;
+        }
+        .arrow-feather:hover { transform: scale(1.2) rotate(-10deg); color: var(--main-pink); }
+
+        /* 화살대 (재생 바) */
+        .arrow-shaft {
+            flex: 1; height: 2px; background: rgba(255, 255, 255, 0.1);
+            margin: 0 10px; position: relative; border-radius: 2px;
+        }
+        .shaft-progress {
+            position: absolute; left: 0; top: 0; height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--main-pink));
+            width: 0%; border-radius: 2px;
+        }
+
+        /* 화살촉 하트 (노브) */
+        .arrow-heart-knob {
+            position: absolute; top: 50%; left: 0%; transform: translate(-50%, -50%);
+            font-size: 0.9rem; cursor: pointer; transition: left 0.1s linear;
+            filter: drop-shadow(0 0 8px var(--main-pink)); z-index: 3;
+        }
+        .arrow-heart-knob.beating { animation: heartBeat 0.8s infinite; }
+
+        /* 화살촉 (고정 아이콘) */
+        .arrow-tip {
+            font-size: 1.1rem; color: var(--main-pink);
+            filter: drop-shadow(0 0 5px var(--main-pink)); margin-left: 5px;
+        }
+
+        @keyframes heartBeat {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.3); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
         .volume-container { display: flex; flex-direction: column; gap: 6px; }
         .volume-label { font-size: 0.55rem; color: rgba(255, 255, 255, 0.4); display: flex; justify-content: space-between; }
         #volume-range {
@@ -225,7 +264,14 @@
                 </div>
 
                 <div class="music-section">
-                    <div class="music-ctrl" onclick="toggleMusic()" id="music-btn">> MUSIC: OFF</div>
+                    <div class="arrow-container">
+                        <div class="arrow-feather" onclick="toggleMusic()" id="music-btn">🏹</div>
+                        <div class="arrow-shaft" id="progress-bar">
+                            <div class="shaft-progress" id="shaft-fill"></div>
+                            <div class="arrow-heart-knob" id="heart-knob">💘</div>
+                        </div>
+                        <div class="arrow-tip">🎯</div>
+                    </div>
                     <div class="volume-container">
                         <div class="volume-label"><span>VOL</span><span id="vol-value">30%</span></div>
                         <input type="range" id="volume-range" min="0" max="100" value="30" oninput="changeVolume(this.value)">
@@ -278,25 +324,18 @@
         let session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
-        // --- 수정된 실시간 프로필 동기화 로직 ---
         function updateProfile() {
             const nameVal = document.getElementById('edit-name').value.trim();
             const iconVal = document.getElementById('edit-icon').value.trim();
-            
             if(nameVal) session.name = nameVal;
             if(iconVal) session.icon = iconVal;
-            
-            // 1. 로컬 스토리지 업데이트
             localStorage.setItem('nya_current_session', JSON.stringify(session));
             const userTypeKey = (session.type === 'me') ? 'nya_me_session' : 'nya_other_session';
             localStorage.setItem(userTypeKey, JSON.stringify(session));
-            
-            // 2. Firebase 실시간 DB에 내 프로필 정보 저장 (다른 기기 동기화용)
             database.ref('user_profiles/' + session.type).set({
                 name: session.name,
                 icon: session.icon
             });
-            
             renderProfile();
         }
 
@@ -313,7 +352,6 @@
             }
         }
 
-        // --- 이미지 파일 처리 로직 (Base64) ---
         function handleDrop(e) {
             e.preventDefault();
             const files = e.dataTransfer.files;
@@ -367,25 +405,43 @@
             });
         }
 
+        // --- 음악 제어 및 큐피트 화살 애니메이션 로직 ---
         const bgm = new Audio('bgm.mp3');
         bgm.loop = true;
         bgm.volume = 0.3;
         let isPlaying = false;
+        let progressAnim;
 
         function toggleMusic() {
             const btn = document.getElementById('music-btn');
+            const knob = document.getElementById('heart-knob');
+            
             if (!isPlaying) {
                 bgm.play().catch(() => console.log("Interaction required"));
-                btn.innerText = "> MUSIC: ON";
                 btn.style.color = "var(--main-pink)";
-                btn.style.borderColor = "var(--main-pink)";
+                knob.classList.add('beating');
+                isPlaying = true;
+                updateProgressBar();
             } else {
                 bgm.pause();
-                btn.innerText = "> MUSIC: OFF";
                 btn.style.color = "var(--accent-blue)";
-                btn.style.borderColor = "var(--accent-blue)";
+                knob.classList.remove('beating');
+                isPlaying = false;
+                cancelAnimationFrame(progressAnim);
             }
-            isPlaying = !isPlaying;
+        }
+
+        function updateProgressBar() {
+            if (!isPlaying) return;
+            const shaftFill = document.getElementById('shaft-fill');
+            const knob = document.getElementById('heart-knob');
+            
+            if (bgm.duration) {
+                const percent = (bgm.currentTime / bgm.duration) * 100;
+                shaftFill.style.width = `${percent}%`;
+                knob.style.left = `${percent}%`;
+            }
+            progressAnim = requestAnimationFrame(updateProgressBar);
         }
 
         function changeVolume(val) {
@@ -437,12 +493,9 @@
             iconBox.style.background = (session.type === 'me') ? 
                 'linear-gradient(135deg, var(--main-pink), var(--main-purple))' : 
                 'linear-gradient(135deg, #00c6ff, #0072ff)';
-            
             document.getElementById('edit-name').value = session.name;
             document.getElementById('edit-icon').value = session.icon || '';
             renderProfile();
-
-            // Firebase에서 내 프로필 실시간 감시 (다른 기기 변경 대응)
             database.ref('user_profiles/' + session.type).on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -452,7 +505,6 @@
                     renderProfile();
                 }
             });
-
             setTimeout(() => {
                 const loader = document.getElementById('boot-loader');
                 if(loader) {
@@ -460,7 +512,6 @@
                     setTimeout(() => loader.remove(), 500);
                 }
             }, 800);
-
             chatRef.limitToLast(30).on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -482,28 +533,23 @@
             commentInput.value = '';
         }
 
-        // --- 개선된 이미지/텍스트 통합 렌더링 로직 ---
         function renderComments(data) {
             postList.innerHTML = '';
             if (!data) return;
             const entries = Object.entries(data);
             document.getElementById('post-count').innerText = `MEMORIES: ${String(entries.length).padStart(2, '0')}`;
-            
             entries.forEach(([key, post]) => {
                 const li = document.createElement('li');
                 const isMe = post.senderType === session.type;
                 li.className = `post-item ${isMe ? 'me' : 'other'}`;
-                
                 let displayContent = "";
                 const isBase64 = post.content.startsWith('data:image/');
                 const isUrl = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i.test(post.content);
-
                 if (isBase64 || isUrl) {
                     displayContent = `<img src="${post.content}" alt="Sent Image" style="max-width:100%; border-radius:10px; margin-top:8px; display:block; cursor:pointer;" onclick="window.open(this.src)">`;
                 } else {
                     displayContent = post.content;
                 }
-
                 li.innerHTML = `
                     ${isMe ? `<div class="delete-btn" onclick="deleteMessage('${key}')">✕</div>` : ''}
                     <div class="post-sender">${post.senderName}</div>
