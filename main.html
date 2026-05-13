@@ -229,6 +229,29 @@
         const session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
+        // [추가] 마지막 메시지 키 저장용 (중복 소리 방지)
+        let lastMessageKey = null;
+
+        // [추가] 시스템 비프음 재생 함수
+        function playSystemSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(850, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            } catch (e) { console.log("Sound interaction required"); }
+        }
+
         function createLogLine() {
             const logBg = document.getElementById('system-log-bg');
             if(!logBg) return;
@@ -257,7 +280,17 @@
             }, 800);
 
             chatRef.on('value', (snapshot) => {
-                renderComments(snapshot.val());
+                const data = snapshot.val();
+                if (data) {
+                    const keys = Object.keys(data);
+                    const latestKey = keys[keys.length - 1];
+                    // 새 메시지가 올 때만 소리 재생 (최초 로딩 시 소리 방지 위해 null 체크)
+                    if (lastMessageKey && lastMessageKey !== latestKey) {
+                        playSystemSound();
+                    }
+                    lastMessageKey = latestKey;
+                }
+                renderComments(data);
             });
         });
 
