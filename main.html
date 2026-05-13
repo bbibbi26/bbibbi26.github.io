@@ -82,6 +82,19 @@
 
         #session-icon { width:55px; height:55px; margin-bottom:15px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
 
+        /* [추가] 메뉴 아이템 스타일 */
+        .menu-item {
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-block;
+            width: 100%;
+        }
+        .menu-item:hover {
+            color: var(--accent-blue);
+            text-shadow: 0 0 8px var(--accent-blue);
+            transform: translateX(5px);
+        }
+
         .main-content { flex: 1; display: flex; flex-direction: column; padding: 30px 40px; overflow: hidden; }
         .system-board { flex: 1; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
         .board-header { font-size: 0.65rem; color: var(--main-pink); margin-bottom: 10px; opacity: 0.7; }
@@ -197,9 +210,9 @@
                 <h3 id="session-name" style="margin: 0; font-size: 0.9rem;"></h3>
                 <p id="session-status" style="font-size: 0.6rem; color: var(--accent-blue); margin-bottom:20px;">STATUS: ONLINE</p>
                 <div style="font-size: 0.65rem; color:rgba(255,255,255,0.3); line-height:2.2;">
-                    > DASHBOARD<br>
-                    > STORAGE<br>
-                    > NETWORK
+                    <div class="menu-item" onclick="handleMenu('DASHBOARD')">> DASHBOARD</div><br>
+                    <div class="menu-item" onclick="handleMenu('STORAGE')">> STORAGE</div><br>
+                    <div class="menu-item" onclick="handleMenu('NETWORK')">> NETWORK</div>
                 </div>
                 <div class="music-section">
                     <div class="music-ctrl" onclick="toggleMusic()" id="music-btn">> MUSIC: OFF</div>
@@ -255,7 +268,7 @@
         const session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
-        // [추가] 배경음악 및 상태 관리
+        // [배경음악 설정]
         const bgm = new Audio('bgm.mp3');
         bgm.loop = true;
         bgm.volume = 0.3;
@@ -281,6 +294,28 @@
             const vol = val / 100;
             bgm.volume = vol;
             document.getElementById('vol-value').innerText = val + "%";
+        }
+
+        // [추가] 메뉴 클릭 핸들러
+        function handleMenu(type) {
+            playSystemSound(); // 클릭 효과음
+            
+            // 시스템 로그에 기록 남기기
+            const logBg = document.getElementById('system-log-bg');
+            const div = document.createElement('div');
+            div.style.color = "var(--accent-blue)";
+            div.innerText = `> ACCESSING_${type}... OK`;
+            logBg.appendChild(div);
+            if (logBg.childNodes.length > 6) logBg.removeChild(logBg.firstChild);
+
+            if(type === 'DASHBOARD') {
+                alert("DASHBOARD: 시스템 통합 상태가 양호합니다.");
+            } else if(type === 'STORAGE') {
+                const count = document.getElementById('post-count').innerText;
+                alert(`STORAGE: ${count} 항목이 데이터베이스에 안전하게 보관 중입니다.`);
+            } else if(type === 'NETWORK') {
+                alert("NETWORK: Firebase 실시간 연결이 활성화되어 있습니다.");
+            }
         }
 
         let lastMessageKey = null;
