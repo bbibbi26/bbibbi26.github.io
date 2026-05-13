@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>냥냐/삐용 - HOME</title>
+    <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --main-pink: #ff7eb9;
+            --soft-pink: #ffe4f1;
+            --cyber-white: #ffffff;
+            --accent-blue: #70d6ff;
+            --font-main: 'GmarketSansBold', sans-serif;
+            --font-light: 'GmarketSansLight', sans-serif;
+        }
+
+        body {
+            background-color: var(--soft-pink);
+            background-image: 
+                radial-gradient(circle at 50% 50%, #ffffff 0%, #ffe4f1 100%),
+                linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            color: var(--main-pink);
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* --- 메인 컨테이너 --- */
+        .main-container {
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 25px;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 공통 카드 스타일 (로그인 박스 디자인 계승) --- */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            border: 3px solid transparent;
+            border-radius: 40px 15px 40px 15px;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), 
+                              linear-gradient(135deg, var(--main-pink), var(--accent-blue));
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            box-shadow: 10px 10px 25px rgba(255, 126, 185, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            transition: 0.3s;
+        }
+
+        /* --- 사이드바: 프로필 영역 --- */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .profile-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 35px 10px 35px 10px;
+            background: var(--soft-pink);
+            margin-bottom: 20px;
+            border: 3px solid var(--main-pink);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+        }
+
+        .user-name { font-size: 1.5rem; margin-bottom: 5px; }
+        .user-status { font-family: var(--font-light); font-size: 0.85rem; opacity: 0.8; margin-bottom: 20px; }
+
+        .menu-list { width: 100%; list-style: none; padding: 0; margin: 20px 0; }
+        .menu-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 10px 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: var(--font-light);
+            border-left: 4px solid transparent;
+        }
+        .menu-item:hover {
+            background: var(--soft-pink);
+            border-left: 4px solid var(--main-pink);
+            padding-left: 20px;
+        }
+
+        /* --- 메인 콘텐츠 영역 --- */
+        .content-area {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 25px;
+        }
+
+        .top-banner {
+            padding: 40px;
+            color: var(--main-pink);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-banner h2 { font-size: 2.2rem; margin: 0; letter-spacing: 2px; }
+
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .grid-item {
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 126, 185, 0.2);
+        }
+
+        .grid-item i { font-size: 2.5rem; margin-bottom: 15px; }
+
+        /* 하단 로그아웃 버튼 */
+        .logout-btn {
+            margin-top: auto;
+            padding: 10px 20px;
+            font-size: 0.8rem;
+            color: var(--main-pink);
+            cursor: pointer;
+            text-decoration: underline;
+            font-family: var(--font-light);
+            opacity: 0.6;
+        }
+        .logout-btn:hover { opacity: 1; }
+
+        /* 반응형 모바일 */
+        @media (max-width: 850px) {
+            .main-container { grid-template-columns: 1fr; }
+            .sidebar { order: 2; }
+            .content-area { order: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <aside class="sidebar glass-card">
+            <div class="profile-img">🐱</div>
+            <div class="user-name">섹시코테</div>
+            <div class="user-status">UNIT: NYA-PPI / STATUS: ONLINE</div>
+            
+            <ul class="menu-list">
+                <li class="menu-item">🎀 MY WARDROBE</li>
+                <li class="menu-item">💌 MESSAGES</li>
+                <li class="menu-item">⚙️ SYSTEM SETTINGS</li>
+                <li class="menu-item">⭐ FAVORITES</li>
+            </ul>
+
+            <div class="logout-btn" onclick="location.href='index.html'">LOGOUT SYSTEM</div>
+        </aside>
+
+        <main class="content-area">
+            <div class="top-banner glass-card">
+                <div>
+                    <h2>WELCOME BACK!</h2>
+                    <p style="font-family: var(--font-light); margin-top: 10px;">오늘도 냥냥한 하루 되세요.</p>
+                </div>
+                <div style="font-size: 3rem; opacity: 0.5;">🥊</div>
+            </div>
+
+            <div class="grid-menu">
+                <div class="grid-item glass-card">
+                    <span>🐾</span>
+                    <p>냥냥 리포트</p>
+                </div>
+                <div class="grid-item glass-card">
+                    <span>🥊</span>
+                    <p>펀치 스케줄</p>
+                </div>
+                <div class="grid-item glass-card">
+                    <span>💖</span>
+                    <p>갤러리</p>
+                </div>
+                <div class="grid-item glass-card">
+                    <span>🧪</span>
+                    <p>기타</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>
