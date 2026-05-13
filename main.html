@@ -12,8 +12,8 @@
             --main-purple: #9d00ff;
             --dark-bg: #050508;
             --panel-bg: rgba(15, 15, 25, 0.9);
-            --bubble-me: rgba(255, 126, 185, 0.15);
-            --bubble-other: rgba(255, 255, 255, 0.05);
+            --bubble-me: rgba(255, 126, 185, 0.25);
+            --bubble-other: rgba(255, 255, 255, 0.1);
             --accent-blue: #00f3ff;
             --font-main: 'GmarketSansBold', sans-serif;
             --font-light: 'GmarketSansLight', sans-serif;
@@ -33,8 +33,16 @@
             min-height: 100vh; overflow: hidden;
         }
 
+        #system-log-bg {
+            position: fixed; bottom: 15px; left: 15px;
+            font-family: 'Courier New', monospace; font-size: 10px;
+            color: var(--main-pink); opacity: 0.4;
+            pointer-events: none; z-index: 1; line-height: 1.4;
+        }
+
         .terminal-frame {
-            width: 85vw; height: 80vh; max-width: 1000px;
+            width: 90vw; height: 85vh; /* 높이 확장 */
+            max-width: 1100px;
             position: relative; z-index: 10;
             filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));
             animation: terminalScanOpen 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
@@ -43,13 +51,13 @@
         .terminal-frame::before {
             content: "INTEGRATED TERMINAL";
             position: absolute; top: -35px; left: 0;
-            width: 220px; height: 40px;
+            width: 200px; height: 40px;
             background: var(--panel-bg);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-bottom: none;
             border-radius: 15px 15px 0 0;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.7rem; letter-spacing: 1px; color: var(--accent-blue);
+            font-size: 0.65rem; color: var(--accent-blue);
             backdrop-filter: blur(25px);
         }
 
@@ -68,98 +76,71 @@
         }
 
         .sidebar {
-            width: 240px; border-right: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex; flex-direction: column; padding: 40px; background: rgba(0, 0, 0, 0.2);
+            width: 220px; border-right: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex; flex-direction: column; padding: 30px; background: rgba(0, 0, 0, 0.2);
         }
 
-        #session-icon {
-            width:60px; height:60px; margin-bottom:20px; 
-            border-radius:15px; display:flex; align-items:center; 
-            justify-content:center; font-size:1.5rem;
-        }
+        #session-icon { width:55px; height:55px; margin-bottom:15px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
 
-        #system-log-container {
-            margin-top: auto; padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            font-family: 'Courier New', monospace; font-size: 9px;
-            color: var(--accent-blue); opacity: 0.6;
-            max-height: 100px; overflow: hidden;
-        }
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 30px 40px; overflow: hidden; }
+        .system-board { flex: 1; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+        .board-header { font-size: 0.65rem; color: var(--main-pink); margin-bottom: 10px; opacity: 0.7; }
 
-        .main-content { flex: 1; display: flex; flex-direction: column; padding: 40px; overflow: hidden; position: relative; }
-
-        .system-board { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-        .board-header {
-            font-size: 0.65rem; color: var(--main-pink); margin-bottom: 15px;
-            letter-spacing: 1px; opacity: 0.8;
-        }
-
+        /* --- 채팅 로그 영역 확대 --- */
         .post-list { 
-            list-style: none; padding: 0 10px; margin: 0; overflow-y: auto; 
-            display: flex; flex-direction: column; gap: 20px;
+            flex: 1; /* 가질 수 있는 최대 높이 할당 */
+            list-style: none; padding: 10px; margin: 0; overflow-y: auto; 
+            display: flex; flex-direction: column; gap: 15px;
             scroll-behavior: smooth;
-            padding-bottom: 80px; /* 입력창과 겹치지 않게 넉넉한 하단 여백 */
         }
 
-        /* 메시지 아이템 개별 박스 */
         .post-item {
-            max-width: 75%; padding: 12px 18px; position: relative;
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            max-width: 75%; padding: 12px 16px; position: relative;
+            animation: popIn 0.3s ease-out both;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .post-item.other {
-            align-self: flex-start; 
-            background: rgba(255, 255, 255, 0.05);
+            align-self: flex-start; background: var(--bubble-other);
             border: 1px solid rgba(255, 255, 255, 0.1); 
-            border-radius: 2px 15px 15px 15px;
+            border-radius: 0 15px 15px 15px;
+        }
+        .post-item.other::after {
+            content: ''; position: absolute; left: -8px; top: 0;
+            border-right: 8px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 8px solid transparent;
         }
 
         .post-item.me {
-            align-self: flex-end; 
-            background: rgba(255, 126, 185, 0.12);
+            align-self: flex-end; background: var(--bubble-me);
             border: 1px solid rgba(255, 126, 185, 0.3); 
-            border-radius: 15px 2px 15px 15px;
-            text-align: left;
+            border-radius: 15px 0 15px 15px;
+        }
+        .post-item.me::after {
+            content: ''; position: absolute; right: -8px; top: 0;
+            border-left: 8px solid rgba(255, 126, 185, 0.2);
+            border-bottom: 8px solid transparent;
         }
 
-        .post-sender { font-size: 0.65rem; opacity: 0.6; margin-bottom: 6px; font-weight: bold; }
-        .other .post-sender { color: var(--accent-blue); }
-        .me .post-sender { color: var(--main-pink); text-align: right; }
+        .post-sender { font-size: 0.65rem; font-weight: bold; margin-bottom: 4px; color: var(--accent-blue); }
+        .me .post-sender { text-align: right; color: var(--main-pink); }
+        .post-text { font-family: var(--font-light); font-size: 0.9rem; color: #eee; line-height: 1.4; word-break: break-all; }
+        .post-info { display: flex; justify-content: flex-end; margin-top: 5px; font-size: 0.6rem; color: rgba(255, 255, 255, 0.3); }
+        .other .post-info { justify-content: flex-start; }
 
-        .post-text { 
-            font-family: var(--font-light); font-size: 0.95rem; 
-            color: #fff; line-height: 1.6; word-break: break-all;
-        }
-        
-        .post-info {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-top: 8px; font-size: 0.6rem; color: rgba(255, 255, 255, 0.3);
-        }
-        .me .post-info { flex-direction: row-reverse; }
-
-        .input-area { 
-            display: flex; gap: 10px; margin-top: 20px; 
-            background: var(--panel-bg); padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
+        /* --- 하단 입력 영역 간격 조정 --- */
+        .input-area { display: flex; gap: 10px; margin-top: 15px; padding-bottom: 5px; }
         #comment-input {
             flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px; padding: 15px; color: #fff; font-family: var(--font-light); outline: none;
+            border-radius: 12px; padding: 12px; color: #fff; font-family: var(--font-light); outline: none;
         }
-        #comment-input:focus { border-color: var(--main-pink); background: rgba(255, 255, 255, 0.08); }
-        
         .save-btn {
             background: linear-gradient(135deg, var(--main-pink), var(--main-purple));
-            border: none; color: #fff; padding: 0 25px; border-radius: 15px;
-            cursor: pointer; font-family: var(--font-main); font-size: 0.8rem;
-            transition: transform 0.2s ease;
+            border: none; color: #fff; padding: 0 20px; border-radius: 12px;
+            cursor: pointer; font-family: var(--font-main); font-size: 0.75rem;
         }
-        .save-btn:active { transform: scale(0.95); }
 
-        .disconnect-btn { margin-top: 20px; font-size: 0.7rem; color: rgba(255,255,255,0.2); cursor: pointer; text-align: right; }
+        .disconnect-btn { margin-top: 10px; font-size: 0.65rem; color: rgba(255,255,255,0.2); cursor: pointer; text-align: right; }
         .post-list::-webkit-scrollbar { width: 4px; }
         .post-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
@@ -171,39 +152,38 @@
             transition: opacity 0.5s ease;
         }
 
-        @keyframes popIn { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.98) translateY(5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     </style>
 </head>
 <body>
 
+    <div id="system-log-bg"></div>
     <div id="boot-loader"><div id="loader-text">> INITIALIZING_SECURE_CONNECTION...</div></div>
 
     <div class="terminal-frame">
         <div class="content-wrapper">
             <aside class="sidebar">
                 <div id="session-icon"></div>
-                <h3 id="session-name" style="margin: 0; font-size: 1rem;"></h3>
-                <p id="session-status" style="font-size: 0.6rem; color: var(--accent-blue); margin-bottom:30px;">STATUS: ONLINE</p>
-                <div style="font-size: 0.7rem; color:rgba(255,255,255,0.4); line-height:2;">
+                <h3 id="session-name" style="margin: 0; font-size: 0.9rem;"></h3>
+                <p id="session-status" style="font-size: 0.6rem; color: var(--accent-blue); margin-bottom:20px;">STATUS: ONLINE</p>
+                <div style="font-size: 0.65rem; color:rgba(255,255,255,0.3); line-height:2.2;">
                     > DASHBOARD<br>
                     > STORAGE<br>
                     > NETWORK
                 </div>
-                <div id="system-log-container"></div>
             </aside>
 
             <main class="main-content">
-                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px;">
                     <div>
-                        <div id="current-date" style="font-size: 0.7rem; color: var(--accent-blue);">DATE</div>
-                        <div id="current-time" style="font-size: 1.8rem; font-weight: bold;">00:00:00</div>
+                        <div id="current-date" style="font-size: 0.65rem; color: var(--accent-blue);">DATE</div>
+                        <div id="current-time" style="font-size: 1.5rem; font-weight: bold;">00:00:00</div>
                     </div>
-                    <div id="post-count" style="font-size: 0.7rem; opacity: 0.5;">MEMORIES: 00</div>
+                    <div id="post-count" style="font-size: 0.65rem; opacity: 0.5;">MEMORIES: 00</div>
                 </div>
 
                 <section class="system-board">
                     <div class="board-header">> CONNECTION_ESTABLISHED // DATA_STREAM_READY</div>
-                    
                     <ul class="post-list" id="post-list"></ul>
                     
                     <div class="input-area">
@@ -239,15 +219,15 @@
         if (!session) { location.href = 'index.html'; }
 
         function createLogLine() {
-            const logContainer = document.getElementById('system-log-container');
-            if (!logContainer) return;
-            const lines = ["SYNC_OK", "ENCRYPT_04", "HEARTBEAT_STABLE", "NODE_ACTIVE", "DATA_STREAM_ON"];
+            const logBg = document.getElementById('system-log-bg');
+            if(!logBg) return;
+            const lines = ["SYNC_SUCCESS", "ENCRYPT_OP_04", "NYA_PROTOCOL_ACT", "HEARTBEAT_STABLE", "PACKET_RECV_" + Math.floor(Math.random() * 999)];
             const div = document.createElement('div');
             div.innerText = `> ${lines[Math.floor(Math.random() * lines.length)]}`;
-            logContainer.appendChild(div);
-            if (logContainer.childNodes.length > 5) logContainer.removeChild(logContainer.firstChild);
+            logBg.appendChild(div);
+            if (logBg.childNodes.length > 6) logBg.removeChild(logBg.firstChild);
         }
-        setInterval(createLogLine, 16000);
+        setInterval(createLogLine, 12000);
 
         window.addEventListener('load', () => {
             const iconBox = document.getElementById('session-icon');
@@ -304,14 +284,11 @@
                 li.innerHTML = `
                     <div class="post-sender">${post.senderName}</div>
                     <div class="post-text">${post.content}</div>
-                    <div class="post-info">
-                        <span>${post.time}</span>
-                    </div>
+                    <div class="post-info"><span>${post.time}</span></div>
                 `;
                 postList.appendChild(li);
             });
-            // 렌더링 후 스크롤을 맨 아래로 보냄
-            setTimeout(() => { postList.scrollTop = postList.scrollHeight; }, 50);
+            postList.scrollTop = postList.scrollHeight;
         }
 
         commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
