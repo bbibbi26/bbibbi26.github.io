@@ -278,7 +278,7 @@
         let session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
-        // --- 수정된 실시간 프로필 업데이트 로직 ---
+        // --- 수정된 실시간 프로필 동기화 로직 ---
         function updateProfile() {
             const nameVal = document.getElementById('edit-name').value.trim();
             const iconVal = document.getElementById('edit-icon').value.trim();
@@ -286,10 +286,12 @@
             if(nameVal) session.name = nameVal;
             if(iconVal) session.icon = iconVal;
             
-            // 1. 현재 세션 업데이트 (로컬 유지용)
+            // 1. 로컬 스토리지 업데이트
             localStorage.setItem('nya_current_session', JSON.stringify(session));
+            const userTypeKey = (session.type === 'me') ? 'nya_me_session' : 'nya_other_session';
+            localStorage.setItem(userTypeKey, JSON.stringify(session));
             
-            // 2. Firebase 데이터베이스 업데이트 (다른 기기 동기화 핵심)
+            // 2. Firebase 실시간 DB에 내 프로필 정보 저장 (다른 기기 동기화용)
             database.ref('user_profiles/' + session.type).set({
                 name: session.name,
                 icon: session.icon
@@ -302,9 +304,7 @@
             const iconBox = document.getElementById('session-icon');
             const nameBox = document.getElementById('session-name');
             if(!iconBox || !nameBox) return;
-            
             nameBox.innerText = session.name || "Unknown";
-            
             const isImage = session.icon && (session.icon.startsWith('http') || session.icon.startsWith('data:image'));
             if (isImage) {
                 iconBox.innerHTML = `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://via.placeholder.com/55?text=?';">`;
@@ -313,7 +313,7 @@
             }
         }
 
-        // --- 이미지 파일 처리 로직 ---
+        // --- 이미지 파일 처리 로직 (Base64) ---
         function handleDrop(e) {
             e.preventDefault();
             const files = e.dataTransfer.files;
@@ -442,7 +442,7 @@
             document.getElementById('edit-icon').value = session.icon || '';
             renderProfile();
 
-            // Firebase에서 실시간으로 내 프로필 감시 (다른 기기에서 변경 시 반영)
+            // Firebase에서 내 프로필 실시간 감시 (다른 기기 변경 대응)
             database.ref('user_profiles/' + session.type).on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -482,6 +482,7 @@
             commentInput.value = '';
         }
 
+        // --- 개선된 이미지/텍스트 통합 렌더링 로직 ---
         function renderComments(data) {
             postList.innerHTML = '';
             if (!data) return;
@@ -493,15 +494,14 @@
                 const isMe = post.senderType === session.type;
                 li.className = `post-item ${isMe ? 'me' : 'other'}`;
                 
-                let displayContent = post.content;
-                const imgRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i;
-                const base64Regex = /^data:image\/(png|jpeg|webp);base64,/;
+                let displayContent = "";
+                const isBase64 = post.content.startsWith('data:image/');
+                const isUrl = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i.test(post.content);
 
-                if (imgRegex.test(post.content)) {
-                    const url = post.content.match(imgRegex)[0];
-                    displayContent = `${post.content.replace(url, '')}<img src="${url}" alt="Image">`;
-                } else if (base64Regex.test(post.content)) {
-                    displayContent = `<img src="${post.content}" alt="Sent Image">`;
+                if (isBase64 || isUrl) {
+                    displayContent = `<img src="${post.content}" alt="Sent Image" style="max-width:100%; border-radius:10px; margin-top:8px; display:block; cursor:pointer;" onclick="window.open(this.src)">`;
+                } else {
+                    displayContent = post.content;
                 }
 
                 li.innerHTML = `
