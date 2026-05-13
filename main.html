@@ -12,6 +12,7 @@
             --main-purple: #9d00ff;
             --dark-bg: #050508;
             --panel-bg: rgba(15, 15, 25, 0.9);
+            --bubble-bg: rgba(255, 255, 255, 0.05);
             --accent-blue: #00f3ff;
             --font-main: 'GmarketSansBold', sans-serif;
             --font-light: 'GmarketSansLight', sans-serif;
@@ -26,11 +27,104 @@
                 linear-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.4) 1px, transparent 1px);
             background-size: 100% 100%, 100% 100%, 100% 100%, 40px 40px, 40px 40px;
-            color: #fff;
-            font-family: var(--font-main);
+            color: #fff; font-family: var(--font-main);
             margin: 0; display: flex; justify-content: center; align-items: center;
             min-height: 100vh; overflow: hidden;
         }
+
+        /* --- [파일 폴더 모양 메인 프레임] --- */
+        .terminal-frame {
+            width: 85vw; height: 80vh; max-width: 1000px;
+            position: relative; z-index: 10;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));
+            animation: terminalScanOpen 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+        }
+
+        /* 파일 탭 부분 */
+        .terminal-frame::before {
+            content: "INTEGRATED TERMINAL";
+            position: absolute; top: -35px; left: 0;
+            width: 220px; height: 40px;
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: none;
+            border-radius: 15px 15px 0 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; letter-spacing: 1px; color: var(--accent-blue);
+            backdrop-filter: blur(25px);
+        }
+
+        .content-wrapper {
+            width: 100%; height: 100%;
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0 30px 30px 30px; /* 탭 제외 부분 둥글게 */
+            backdrop-filter: blur(25px);
+            display: flex; overflow: hidden;
+        }
+
+        @keyframes terminalScanOpen {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .sidebar {
+            width: 240px; border-right: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex; flex-direction: column; padding: 40px; background: rgba(0, 0, 0, 0.2);
+        }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 40px; overflow: hidden; }
+
+        /* --- [심플 말풍선 게시판] --- */
+        .system-board {
+            flex: 1; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .input-area { display: flex; gap: 10px; margin-bottom: 25px; }
+        #comment-input {
+            flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px; padding: 15px; color: #fff; font-family: var(--font-light); outline: none;
+            transition: 0.3s;
+        }
+        #comment-input:focus { border-color: var(--main-pink); background: rgba(255, 255, 255, 0.08); }
+        
+        .save-btn {
+            background: linear-gradient(135deg, var(--main-pink), var(--main-purple));
+            border: none; color: #fff; padding: 0 25px; border-radius: 15px;
+            cursor: pointer; font-family: var(--font-main); font-size: 0.8rem;
+        }
+
+        .post-list { 
+            list-style: none; padding: 5px; margin: 0; overflow-y: auto; 
+            display: flex; flex-direction: column; gap: 12px;
+        }
+
+        /* 심플 말풍선 스타일 */
+        .post-item {
+            align-self: flex-start;
+            max-width: 80%;
+            background: var(--bubble-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px 18px 18px 18px; /* 왼쪽 위만 각진 형태 */
+            padding: 12px 18px;
+            position: relative;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        .post-text { font-family: var(--font-light); font-size: 0.9rem; color: #eee; line-height: 1.5; }
+        
+        .post-info {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 8px; font-size: 0.65rem; color: rgba(255, 255, 255, 0.3);
+        }
+        .del-btn { cursor: pointer; color: var(--main-pink); opacity: 0.5; margin-left: 10px; }
+        .del-btn:hover { opacity: 1; }
+
+        .disconnect-btn { margin-top: 20px; font-size: 0.7rem; color: rgba(255,255,255,0.2); cursor: pointer; text-align: right; }
+        .post-list::-webkit-scrollbar { width: 4px; }
+        .post-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
         #boot-loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -39,270 +133,109 @@
             font-family: 'Courier New', monospace; color: var(--main-pink);
             transition: opacity 0.5s ease;
         }
-
-        .ambient-log-layer {
-            position: fixed; bottom: 30px; left: 30px; width: 400px;
-            height: auto; pointer-events: none; z-index: 1;
-            font-family: 'Courier New', monospace; font-size: 0.75rem;
-            color: var(--main-pink); opacity: 0.4; display: flex;
-            flex-direction: column; gap: 5px;
-        }
-
-        .terminal-frame {
-            width: 85vw; height: 85vh; max-width: 1100px;
-            background: var(--panel-bg);
-            border: 1px solid rgba(255, 126, 185, 0.3);
-            border-radius: 60px 20px 60px 20px;
-            backdrop-filter: blur(25px);
-            display: flex; position: relative; z-index: 10;
-            box-shadow: 0 20px 60px rgba(255, 126, 185, 0.2);
-            overflow: hidden;
-            animation: terminalScanOpen 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
-        }
-
-        @keyframes terminalScanOpen {
-            0% { transform: scaleY(0); opacity: 0; }
-            40% { transform: scaleY(0.005); opacity: 1; background: var(--main-pink); }
-            100% { transform: scaleY(1); opacity: 1; }
-        }
-
-        .sidebar {
-            width: 260px; border-right: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex; flex-direction: column; padding: 40px; background: rgba(0, 0, 0, 0.3);
-        }
-
-        .profile-hex {
-            width: 70px; height: 70px; margin: 0 auto 15px;
-            background: linear-gradient(135deg, var(--main-pink), var(--main-purple));
-            border-radius: 20px 8px; display: flex; justify-content: center; align-items: center; font-size: 2rem;
-        }
-
-        .nav-menu { list-style: none; padding: 0; margin-top: 20px; flex-grow: 1; }
-        .nav-item {
-            padding: 12px; margin-bottom: 5px; border-radius: 10px 15px;
-            cursor: pointer; font-family: var(--font-light); color: rgba(255, 255, 255, 0.4); font-size: 0.85rem;
-        }
-        .nav-item.active { color: var(--main-pink); background: rgba(255, 126, 185, 0.1); }
-
-        .main-content { flex: 1; display: flex; flex-direction: column; padding: 40px; overflow: hidden; justify-content: flex-start; }
-
-        /* --- [게시판 디자인] --- */
-        .system-board {
-            height: 65%;
-            background: rgba(0, 0, 0, 0.2); 
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 25px; 
-            display: flex; 
-            flex-direction: column;
-            margin-bottom: 20px;
-            animation: fadeInBoard 1s ease-out 1.2s both;
-        }
-
-        .board-header { 
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--main-pink); padding-bottom: 10px; margin-bottom: 15px;
-        }
-        
-        .input-area { display: flex; gap: 10px; margin-bottom: 20px; }
-        #comment-input {
-            flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 12px; color: #fff; font-family: var(--font-light); outline: none;
-        }
-        #comment-input:focus { border-color: var(--main-pink); }
-        
-        .save-btn {
-            background: var(--main-pink); border: none; color: #fff; padding: 0 20px;
-            border-radius: 12px;
-            cursor: pointer; font-family: var(--font-main); transition: 0.3s;
-        }
-        .save-btn:hover { background: var(--main-purple); transform: scale(1.05); }
-
-        .post-list { list-style: none; padding: 10px; margin: 0; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 15px; }
-
-        /* --- [말풍선 스타일 수정본] --- */
-        .post-item {
-            position: relative;
-            align-self: flex-start;
-            max-width: 85%;
-            padding: 12px 18px;
-            background: rgba(0, 243, 255, 0.05); /* 투명한 연하늘 배경 */
-            border: 1px solid rgba(0, 243, 255, 0.3); /* 연하늘 테두리 */
-            border-radius: 15px;
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
-            animation: slideIn 0.3s ease-out;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 말풍선 꼬리 */
-        .post-item::before {
-            content: '';
-            position: absolute;
-            left: -8px;
-            top: 15px;
-            width: 0; height: 0;
-            border-top: 8px solid transparent;
-            border-bottom: 8px solid transparent;
-            border-right: 8px solid rgba(0, 243, 255, 0.3);
-        }
-
-        .post-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-            font-size: 0.65rem;
-        }
-
-        .post-user { color: var(--accent-blue); letter-spacing: 1px; }
-        .post-text { font-family: var(--font-light); font-size: 0.9rem; color: #fff; line-height: 1.4; }
-        
-        .post-footer {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-top: 8px;
-            gap: 10px;
-        }
-
-        .post-date { font-size: 0.7rem; color: rgba(255, 255, 255, 0.3); }
-        .del-btn { color: #ff4d4d; cursor: pointer; font-size: 0.7rem; opacity: 0.5; transition: 0.2s; }
-        .del-btn:hover { opacity: 1; text-shadow: 0 0 5px #ff4d4d; }
-
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-15px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes fadeInBoard { from { opacity: 0; } to { opacity: 1; } }
-
-        .disconnect-btn { margin-top: auto; font-size: 0.75rem; color: rgba(255,255,255,0.2); cursor: pointer; text-align: right; }
-        .post-list::-webkit-scrollbar { width: 4px; }
-        .post-list::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="boot-loader"><div id="loader-text">> AUTHENTICATING...</div></div>
-    <div class="ambient-log-layer" id="ambient-logs"></div>
+    <div id="boot-loader"><div id="loader-text">> INITIALIZING_FILE_SYSTEM...</div></div>
 
     <div class="terminal-frame">
-        <aside class="sidebar">
-            <div class="profile-hex">🐱</div>
-            <div style="text-align: center;">
-                <h3 style="margin: 0; font-size: 1.1rem;">냥냥펀치</h3>
-                <p style="font-size: 0.6rem; color: var(--accent-blue); letter-spacing: 1px;">ADMIN_UNIT_01</p>
-            </div>
-            <ul class="nav-menu">
-                <li class="nav-item active">DASHBOARD</li>
-                <li class="nav-item">WARDROBE</li>
-                <li class="nav-item">MESSAGES</li>
-            </ul>
-        </aside>
-
-        <main class="main-content">
-            <div class="top-info" style="margin-bottom: 20px;">
-                <div>
-                    <div id="current-date" style="font-size: 0.8rem; color: var(--accent-blue);">DATE</div>
-                    <div id="current-time" style="font-size: 2rem; font-weight: bold; color: #fff;">00:00:00</div>
+        <div class="content-wrapper">
+            <aside class="sidebar">
+                <div class="profile-hex" style="width:60px; height:60px; margin-bottom:20px; background:linear-gradient(135deg, var(--main-pink), var(--main-purple)); border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">🐱</div>
+                <h3 style="margin: 0; font-size: 1rem;">ADMIN_UNIT</h3>
+                <p style="font-size: 0.6rem; color: var(--accent-blue); margin-bottom:30px;">STATUS: ONLINE</p>
+                <div style="font-size: 0.7rem; color:rgba(255,255,255,0.4); line-height:2;">
+                    > DASHBOARD<br>
+                    > STORAGE<br>
+                    > NETWORK
                 </div>
-                <h2 style="color: var(--main-pink); margin: 0; letter-spacing: 2px;">CORE_SYSTEM</h2>
-            </div>
+            </aside>
 
-            <section class="system-board">
-                <div class="board-header">
-                    <strong>SYSTEM_COMMENTS</strong>
-                    <span id="post-count" style="font-size: 0.7rem; color: var(--accent-blue);">POSTS: 0</span>
-                </div>
-                
-                <div class="input-area">
-                    <input type="text" id="comment-input" placeholder="새로운 코멘트를 입력하세요..." maxlength="50">
-                    <button class="save-btn" onclick="saveComment()">SAVE</button>
+            <main class="main-content">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px;">
+                    <div>
+                        <div id="current-date" style="font-size: 0.7rem; color: var(--accent-blue);">2026.05.13</div>
+                        <div id="current-time" style="font-size: 1.8rem; font-weight: bold;">00:00:00</div>
+                    </div>
+                    <div id="post-count" style="font-size: 0.7rem; opacity: 0.5;">MEMORIES: 00</div>
                 </div>
 
-                <ul class="post-list" id="post-list"></ul>
-            </section>
+                <section class="system-board">
+                    <ul class="post-list" id="post-list">
+                        </ul>
+                    
+                    <div style="flex:1;"></div> <div class="input-area">
+                        <input type="text" id="comment-input" placeholder="여기에 기록을 남겨주세요..." maxlength="50">
+                        <button class="save-btn" onclick="saveComment()">SAVE</button>
+                    </div>
+                </section>
 
-            <div class="disconnect-btn" onclick="location.href='index.html'">TERMINATE_SESSION >></div>
-        </main>
+                <div class="disconnect-btn">TERMINATE_SESSION_</div>
+            </main>
+        </div>
     </div>
 
     <script>
+        // 부팅 연출
         window.addEventListener('load', () => {
             setTimeout(() => {
-                document.getElementById('loader-text').innerHTML = "> ACCESS GRANTED.";
-                document.getElementById('loader-text').style.color = "var(--accent-blue)";
-                setTimeout(() => {
-                    document.getElementById('boot-loader').style.opacity = "0";
-                    setTimeout(() => document.getElementById('boot-loader').remove(), 500);
-                }, 400);
-            }, 600);
-            loadComments();
+                document.getElementById('boot-loader').style.opacity = "0";
+                setTimeout(() => document.getElementById('boot-loader').remove(), 500);
+            }, 800);
+            renderComments();
         });
 
         const commentInput = document.getElementById('comment-input');
         const postList = document.getElementById('post-list');
-        const postCount = document.getElementById('post-count');
 
         function saveComment() {
             const text = commentInput.value.trim();
             if (!text) return;
-            const newPost = { id: Date.now(), content: text, date: new Date().toLocaleDateString('ko-KR') };
-            const comments = JSON.parse(localStorage.getItem('nya_comments') || '[]');
-            comments.unshift(newPost);
-            localStorage.setItem('nya_comments', JSON.stringify(comments));
+            const newPost = { id: Date.now(), content: text, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
+            const comments = JSON.parse(localStorage.getItem('nya_posts') || '[]');
+            comments.push(newPost); // 최신글이 아래로 쌓이게 (채팅 느낌)
+            localStorage.setItem('nya_posts', JSON.stringify(comments));
             commentInput.value = '';
             renderComments();
+            // 스크롤 아래로 고정
+            postList.scrollTop = postList.scrollHeight;
         }
 
-        // --- [렌더링 함수 수정: 말풍선 구조] ---
         function renderComments() {
-            const comments = JSON.parse(localStorage.getItem('nya_comments') || '[]');
+            const comments = JSON.parse(localStorage.getItem('nya_posts') || '[]');
             postList.innerHTML = '';
-            postCount.innerText = `POSTS: ${String(comments.length).padStart(2, '0')}`;
+            document.getElementById('post-count').innerText = `MEMORIES: ${String(comments.length).padStart(2, '0')}`;
             
             comments.forEach(post => {
                 const li = document.createElement('li');
                 li.className = 'post-item';
                 li.innerHTML = `
-                    <div class="post-header">
-                        <span class="post-user">ADMIN_UNIT_01</span>
-                    </div>
                     <div class="post-text">${post.content}</div>
-                    <div class="post-footer">
-                        <span class="post-date">${post.date}</span>
-                        <span class="del-btn" onclick="deleteComment(${post.id})">🗑️</span>
+                    <div class="post-info">
+                        <span>${post.time}</span>
+                        <span class="del-btn" onclick="deleteComment(${post.id})">DELETE</span>
                     </div>
                 `;
                 postList.appendChild(li);
             });
+            postList.scrollTop = postList.scrollHeight;
         }
 
         function deleteComment(id) {
-            let comments = JSON.parse(localStorage.getItem('nya_comments') || '[]');
+            let comments = JSON.parse(localStorage.getItem('nya_posts') || '[]');
             comments = comments.filter(c => c.id !== id);
-            localStorage.setItem('nya_comments', JSON.stringify(comments));
+            localStorage.setItem('nya_posts', JSON.stringify(comments));
             renderComments();
         }
 
-        function loadComments() { renderComments(); }
         commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
 
         function updateClock() {
             const now = new Date();
             document.getElementById('current-time').textContent = now.toLocaleTimeString('en-GB');
-            document.getElementById('current-date').textContent = now.toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
         }
         setInterval(updateClock, 1000); updateClock();
-
-        const logLayer = document.getElementById('ambient-logs');
-        function addLog() {
-            const logs = ["SYNCING...", "ENCRYPTED", "STABLE", "BACKUP_OK"];
-            const line = document.createElement('div');
-            line.className = 'log-line';
-            line.textContent = `[${new Date().toLocaleTimeString()}] ${logs[Math.floor(Math.random()*logs.length)]}`;
-            logLayer.appendChild(line);
-            if(logLayer.childNodes.length > 5) logLayer.removeChild(logLayer.firstChild);
-        }
-        setInterval(addLog, 30000); addLog();
     </script>
 </body>
 </html>
