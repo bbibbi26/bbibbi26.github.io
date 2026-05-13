@@ -11,7 +11,7 @@
             --main-pink: #ff7eb9;
             --main-purple: #9d00ff;
             --dark-bg: #050508;
-            --panel-bg: rgba(15, 15, 25, 0.8);
+            --panel-bg: rgba(15, 15, 25, 0.85);
             --accent-blue: #00f3ff;
             --font-main: 'GmarketSansBold', sans-serif;
             --font-light: 'GmarketSansLight', sans-serif;
@@ -41,11 +41,11 @@
             max-width: 1200px;
             background: var(--panel-bg);
             border: 1px solid rgba(255, 126, 185, 0.3);
-            border-radius: 60px 20px 60px 20px; /* 기존 곡률 계승 */
+            border-radius: 60px 20px 60px 20px;
             backdrop-filter: blur(25px);
             display: flex;
             position: relative;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(157, 0, 255, 0.1);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(157, 0, 255, 0.1);
             overflow: hidden;
             animation: terminalOpen 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -55,7 +55,7 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* 상단 네온 라인 인디케이터 */
+        /* 상단 네온 라인 */
         .terminal-frame::before {
             content: '';
             position: absolute;
@@ -65,63 +65,39 @@
             z-index: 10;
         }
 
-        /* --- 왼쪽 사이드 바 (구분선으로 분리) --- */
+        /* --- 왼쪽 사이드바 --- */
         .sidebar {
             width: 300px;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             flex-direction: column;
             padding: 40px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.3);
         }
 
-        .profile-area {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
+        .profile-area { text-align: center; margin-bottom: 40px; }
         .profile-hex {
-            width: 100px; height: 100px;
+            width: 90px; height: 90px;
             margin: 0 auto 20px;
             background: linear-gradient(135deg, var(--main-pink), var(--main-purple));
-            border-radius: 30px 10px;
+            border-radius: 25px 10px;
             display: flex; justify-content: center; align-items: center;
-            font-size: 3rem;
-            box-shadow: 0 0 20px rgba(255, 126, 185, 0.4);
+            font-size: 2.5rem;
+            box-shadow: 0 0 20px rgba(255, 126, 185, 0.3);
         }
 
-        .user-info h3 { margin: 0; font-size: 1.4rem; letter-spacing: 1px; }
-        .user-info p { font-family: var(--font-light); font-size: 0.75rem; color: var(--accent-blue); margin: 5px 0; }
-
-        .nav-menu {
-            list-style: none; padding: 0; margin: 0;
-            flex-grow: 1;
-        }
-
+        .nav-menu { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
         .nav-item {
-            padding: 15px 20px;
-            margin-bottom: 10px;
+            padding: 15px;
+            margin-bottom: 8px;
             border-radius: 10px 20px;
             cursor: pointer;
             font-family: var(--font-light);
             transition: 0.3s;
-            color: rgba(255, 255, 255, 0.6);
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            color: rgba(255, 255, 255, 0.5);
+            display: flex; gap: 12px;
         }
-
-        .nav-item:hover {
-            background: rgba(255, 126, 185, 0.1);
-            color: var(--main-pink);
-            transform: translateX(5px);
-        }
-
-        .nav-item.active {
-            background: linear-gradient(90deg, rgba(157, 0, 255, 0.2), transparent);
-            border-left: 3px solid var(--main-purple);
-            color: #fff;
-        }
+        .nav-item:hover, .nav-item.active { background: rgba(255, 126, 185, 0.1); color: var(--main-pink); }
 
         /* --- 오른쪽 메인 콘텐츠 영역 --- */
         .main-content {
@@ -129,98 +105,83 @@
             display: flex;
             flex-direction: column;
             padding: 50px;
-            overflow-y: auto;
-        }
-
-        .header-banner {
-            margin-bottom: 40px;
+            overflow: hidden;
         }
 
         .header-banner h2 { 
             font-size: 2.8rem; margin: 0; 
             background: linear-gradient(90deg, #fff, var(--main-pink));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .system-status {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .status-tag {
-            padding: 5px 15px;
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            border-radius: 20px;
-            font-size: 0.7rem;
-            color: var(--accent-blue);
-            font-family: var(--font-light);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
         /* 그리드 메뉴 */
         .action-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
+            gap: 20px;
+            margin-top: 30px;
         }
-
         .action-card {
-            height: 160px;
+            height: 140px;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 30px 10px;
+            border-radius: 25px 10px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-left: 30px;
+            padding-left: 25px;
             cursor: pointer;
             transition: 0.3s;
-            position: relative;
         }
+        .action-card:hover { border-color: var(--main-pink); background: rgba(255, 126, 185, 0.05); }
 
-        .action-card:hover {
-            background: rgba(255, 255, 255, 0.07);
-            border-color: var(--main-pink);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .action-card i { font-size: 2.5rem; margin-bottom: 10px; }
-        .action-card span { font-size: 1.1rem; letter-spacing: 1px; }
-
-        /* 카드 내부 장식 */
-        .action-card::after {
-            content: '>>';
-            position: absolute;
-            right: 30px;
-            bottom: 30px;
-            font-size: 0.8rem;
-            color: var(--main-pink);
-            opacity: 0.3;
-        }
-
-        /* 로그아웃 섹션 */
-        .footer-info {
+        /* --- [NEW] 시스템 로그 모니터 창 --- */
+        .system-monitor {
             margin-top: auto;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(157, 0, 255, 0.2);
+            border-radius: 20px 5px;
+            padding: 20px;
+            font-family: 'Courier New', Courier, monospace; /* 터미널 폰트 느낌 */
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 20px;
+        }
+
+        .time-display {
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            flex-direction: column;
+            justify-content: center;
         }
 
-        .disconnect-btn {
-            font-family: var(--font-light);
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.3);
-            cursor: pointer;
+        #current-date { font-size: 0.9rem; color: var(--main-pink); margin-bottom: 5px; }
+        #current-time { font-size: 2.2rem; color: #fff; font-weight: bold; text-shadow: 0 0 10px var(--main-pink); }
+
+        .log-display {
+            font-size: 0.75rem;
+            color: var(--accent-blue);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
 
+        .log-line {
+            opacity: 0.7;
+            white-space: nowrap;
+            animation: fadeInLog 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeInLog {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 0.7; transform: translateX(0); }
+        }
+
+        .disconnect-btn { margin-top: 20px; font-family: var(--font-light); font-size: 0.8rem; color: rgba(255,255,255,0.3); cursor: pointer; text-align: right; }
         .disconnect-btn:hover { color: var(--main-pink); }
 
-        /* 스크롤바 디자인 */
-        .main-content::-webkit-scrollbar { width: 5px; }
-        .main-content::-webkit-scrollbar-thumb { background: var(--main-purple); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -231,64 +192,92 @@
                 <div class="profile-hex">🐱</div>
                 <div class="user-info">
                     <h3>섹시코테</h3>
-                    <p>AUTH_LEVEL: ADMIN</p>
-                    <p>UNIT: NYA-PPI_01</p>
+                    <p style="color: var(--accent-blue); font-size: 0.7rem;">AUTH: ROOT_ADMIN</p>
                 </div>
             </div>
-
             <ul class="nav-menu">
-                <li class="nav-item active"><span>📂</span> 대시보드</li>
-                <li class="nav-item"><span>🎀</span> 스타일 아카이브</li>
-                <li class="nav-item"><span>💌</span> 보안 메시지</li>
-                <li class="nav-item"><span>⚙️</span> 시스템 제어</li>
+                <li class="nav-item active"><span>📂</span> DASHBOARD</li>
+                <li class="nav-item"><span>🎀</span> WARDROBE</li>
+                <li class="nav-item"><span>💌</span> MESSAGES</li>
+                <li class="nav-item"><span>⚙️</span> CONTROL</li>
             </ul>
-
-            <div class="disconnect-btn" onclick="location.href='index.html'">
-                &gt; TERMINATE_SESSION
-            </div>
         </aside>
 
         <main class="main-content">
             <header class="header-banner">
-                <div class="system-status">
-                    <span class="status-tag">CORE: OPERATIONAL</span>
-                    <span class="status-tag">ENCRYPTION: ACTIVE</span>
-                </div>
+                <p style="color: var(--accent-blue); font-size: 0.7rem; letter-spacing: 2px;">SYSTEM_OPERATIONAL_0513</p>
                 <h2>CORE TERMINAL</h2>
-                <p style="font-family: var(--font-light); color: rgba(255,255,255,0.5); margin-top: 10px;">
-                    환영합니다. 시스템의 모든 모듈이 정상 가동 중입니다.
-                </p>
             </header>
 
             <div class="action-grid">
-                <div class="action-card">
-                    <i>📊</i>
-                    <span>분석 리포트</span>
-                </div>
-                <div class="action-card">
-                    <i>🎯</i>
-                    <span>훈련 시뮬레이션</span>
-                </div>
-                <div class="action-card">
-                    <i>🧬</i>
-                    <span>유전자 갤러리</span>
-                </div>
-                <div class="action-card">
-                    <i>🔒</i>
-                    <span>기밀 데이터베이스</span>
-                </div>
+                <div class="action-card"><i>📊</i><span>REPORT</span></div>
+                <div class="action-card"><i>🎯</i><span>TRAINING</span></div>
+                <div class="action-card"><i>🧬</i><span>GALLERY</span></div>
+                <div class="action-card"><i>🔒</i><span>VAULT</span></div>
             </div>
 
-            <div class="footer-info">
-                <p style="font-family: var(--font-light); font-size: 0.7rem; color: rgba(255,255,255,0.2);">
-                    © 2026 NYA-PPI INTEGRATED SYSTEM. ALL RIGHTS RESERVED.
-                </p>
-                <p style="font-family: var(--font-light); font-size: 0.7rem; color: var(--main-pink);">
-                    IP: 192.168.0.254
-                </p>
+            <div class="system-monitor">
+                <div class="time-display">
+                    <div id="current-date">0000.00.00</div>
+                    <div id="current-time">00:00:00</div>
+                </div>
+                <div class="log-display" id="log-container">
+                    </div>
             </div>
+
+            <div class="disconnect-btn" onclick="location.href='index.html'">&gt; TERMINATE_SESSION</div>
         </main>
     </div>
 
+    <script>
+        // 1. 실시간 시계 기능
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+
+            document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('current-date').textContent = `${year}.${month}.${day}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 2. 실시간 가짜 시스템 로그 생성 기능
+        const logMessages = [
+            "[INFO] System core integrity check: 100%",
+            "[SEC] Encrypted handshake established...",
+            "[SYS] Nya-Ppi module loaded in 12ms",
+            "[NET] Receiving data packets from unit_01",
+            "[DB] Vault access authorized by admin",
+            "[WARN] High cuteness levels detected!",
+            "[SYS] Memory optimization complete",
+            "[LOG] Punch schedule synchronized",
+            "[SEC] Firewall active: No intrusions detected",
+            "[SYS] Background particles rendering at 60fps"
+        ];
+
+        const logContainer = document.getElementById('log-container');
+
+        function addLog() {
+            const msg = logMessages[Math.floor(Math.random() * logMessages.length)];
+            const timePrefix = new Date().toLocaleTimeString();
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+            logLine.textContent = `> ${timePrefix} ${msg}`;
+            
+            logContainer.appendChild(logLine);
+
+            // 로그가 너무 많아지면 오래된 것부터 제거 (최대 7줄)
+            if (logContainer.childNodes.length > 7) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+        setInterval(addLog, 2000); // 2초마다 로그 추가
+        addLog();
+    </script>
 </body>
 </html>
