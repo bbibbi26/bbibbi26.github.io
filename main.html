@@ -107,6 +107,86 @@
         }
         .setting-input:focus { border-color: var(--main-pink); }
 
+        /* --- 화살 디자인 시작 --- */
+        .music-section { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
+        
+        .cupid-arrow-track {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 40px;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        /* 화살 깃털 (재생/정지 버튼) */
+        .arrow-feather {
+            font-size: 1.4rem;
+            cursor: pointer;
+            z-index: 5;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+            user-select: none;
+        }
+        .arrow-feather:hover { transform: scale(1.2); filter: drop-shadow(0 0 8px var(--main-pink)); }
+
+        /* 화살대 (프로그레스 바) */
+        .arrow-body {
+            flex: 1;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            position: relative;
+            margin: 0 -5px; /* 버튼들과 겹치게 배치 */
+            z-index: 1;
+        }
+        .arrow-progress {
+            position: absolute;
+            left: 0; top: 0; height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--main-pink));
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* 이동하는 하트 (노브) */
+        .arrow-heart-node {
+            position: absolute;
+            top: 50%;
+            left: 0%;
+            transform: translate(-50%, -50%);
+            font-size: 1rem;
+            z-index: 10;
+            pointer-events: none;
+            transition: left 0.1s linear;
+        }
+        .beating { animation: heart-pulse 0.8s infinite; }
+
+        /* 화살촉 */
+        .arrow-head {
+            font-size: 1.2rem;
+            z-index: 5;
+            color: var(--main-pink);
+            filter: drop-shadow(0 0 5px var(--main-pink));
+            user-select: none;
+        }
+
+        @keyframes heart-pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.3); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        /* --- 화살 디자인 끝 --- */
+
+        .volume-container { display: flex; flex-direction: column; gap: 6px; }
+        .volume-label { font-size: 0.55rem; color: rgba(255, 255, 255, 0.4); display: flex; justify-content: space-between; }
+        #volume-range {
+            -webkit-appearance: none; width: 100%; height: 2px; background: rgba(0, 243, 255, 0.2);
+            outline: none; cursor: pointer;
+        }
+        #volume-range::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 10px; height: 10px; background: var(--main-pink);
+            border-radius: 50%; box-shadow: 0 0 5px var(--main-pink);
+        }
+
         .main-content { flex: 1; display: flex; flex-direction: column; padding: 30px 40px; overflow: hidden; }
         .system-board { flex: 1; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
         .board-header { font-size: 0.65rem; color: var(--main-pink); margin-bottom: 10px; opacity: 0.7; }
@@ -148,63 +228,6 @@
         }
         .post-item.me:hover .delete-btn { opacity: 1; }
         .delete-btn:hover { background: var(--main-pink); color: #fff; }
-
-        /* --- 큐피트 화살 재생기 디자인 --- */
-        .music-section { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
-        
-        .arrow-container {
-            display: flex; align-items: center; justify-content: space-between;
-            width: 100%; height: 40px; position: relative; margin-bottom: 10px;
-        }
-
-        /* 화살 깃털 (재생 버튼) */
-        .arrow-feather {
-            cursor: pointer; font-size: 1.2rem; filter: drop-shadow(0 0 5px var(--accent-blue));
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2;
-        }
-        .arrow-feather:hover { transform: scale(1.2) rotate(-10deg); color: var(--main-pink); }
-
-        /* 화살대 (재생 바) */
-        .arrow-shaft {
-            flex: 1; height: 2px; background: rgba(255, 255, 255, 0.1);
-            margin: 0 10px; position: relative; border-radius: 2px;
-        }
-        .shaft-progress {
-            position: absolute; left: 0; top: 0; height: 100%;
-            background: linear-gradient(90deg, var(--accent-blue), var(--main-pink));
-            width: 0%; border-radius: 2px;
-        }
-
-        /* 화살촉 하트 (노브) */
-        .arrow-heart-knob {
-            position: absolute; top: 50%; left: 0%; transform: translate(-50%, -50%);
-            font-size: 0.9rem; cursor: pointer; transition: left 0.1s linear;
-            filter: drop-shadow(0 0 8px var(--main-pink)); z-index: 3;
-        }
-        .arrow-heart-knob.beating { animation: heartBeat 0.8s infinite; }
-
-        /* 화살촉 (고정 아이콘) */
-        .arrow-tip {
-            font-size: 1.1rem; color: var(--main-pink);
-            filter: drop-shadow(0 0 5px var(--main-pink)); margin-left: 5px;
-        }
-
-        @keyframes heartBeat {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.3); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
-
-        .volume-container { display: flex; flex-direction: column; gap: 6px; }
-        .volume-label { font-size: 0.55rem; color: rgba(255, 255, 255, 0.4); display: flex; justify-content: space-between; }
-        #volume-range {
-            -webkit-appearance: none; width: 100%; height: 2px; background: rgba(0, 243, 255, 0.2);
-            outline: none; cursor: pointer;
-        }
-        #volume-range::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 10px; height: 10px; background: var(--main-pink);
-            border-radius: 50%; box-shadow: 0 0 5px var(--main-pink);
-        }
 
         .post-sender { font-size: 0.65rem; font-weight: bold; margin-bottom: 4px; color: var(--accent-blue); }
         .me .post-sender { text-align: right; color: var(--main-pink); }
@@ -264,14 +287,15 @@
                 </div>
 
                 <div class="music-section">
-                    <div class="arrow-container">
+                    <div class="cupid-arrow-track">
                         <div class="arrow-feather" onclick="toggleMusic()" id="music-btn">🏹</div>
-                        <div class="arrow-shaft" id="progress-bar">
-                            <div class="shaft-progress" id="shaft-fill"></div>
-                            <div class="arrow-heart-knob" id="heart-knob">💘</div>
+                        <div class="arrow-body">
+                            <div class="arrow-progress" id="arrow-progress"></div>
+                            <div class="arrow-heart-node" id="arrow-heart">💘</div>
                         </div>
-                        <div class="arrow-tip">🎯</div>
+                        <div class="arrow-head">🎯</div>
                     </div>
+
                     <div class="volume-container">
                         <div class="volume-label"><span>VOL</span><span id="vol-value">30%</span></div>
                         <input type="range" id="volume-range" min="0" max="100" value="30" oninput="changeVolume(this.value)">
@@ -405,43 +429,41 @@
             });
         }
 
-        // --- 음악 제어 및 큐피트 화살 애니메이션 로직 ---
+        /* --- 음악 및 화살 동기화 로직 --- */
         const bgm = new Audio('bgm.mp3');
         bgm.loop = true;
         bgm.volume = 0.3;
         let isPlaying = false;
-        let progressAnim;
 
         function toggleMusic() {
             const btn = document.getElementById('music-btn');
-            const knob = document.getElementById('heart-knob');
+            const heart = document.getElementById('arrow-heart');
             
             if (!isPlaying) {
                 bgm.play().catch(() => console.log("Interaction required"));
-                btn.style.color = "var(--main-pink)";
-                knob.classList.add('beating');
+                btn.style.filter = "drop-shadow(0 0 10px var(--main-pink))";
+                heart.classList.add('beating');
                 isPlaying = true;
-                updateProgressBar();
+                requestAnimationFrame(syncArrow);
             } else {
                 bgm.pause();
-                btn.style.color = "var(--accent-blue)";
-                knob.classList.remove('beating');
+                btn.style.filter = "none";
+                heart.classList.remove('beating');
                 isPlaying = false;
-                cancelAnimationFrame(progressAnim);
             }
         }
 
-        function updateProgressBar() {
+        function syncArrow() {
             if (!isPlaying) return;
-            const shaftFill = document.getElementById('shaft-fill');
-            const knob = document.getElementById('heart-knob');
+            const progress = document.getElementById('arrow-progress');
+            const heart = document.getElementById('arrow-heart');
             
             if (bgm.duration) {
-                const percent = (bgm.currentTime / bgm.duration) * 100;
-                shaftFill.style.width = `${percent}%`;
-                knob.style.left = `${percent}%`;
+                const current = (bgm.currentTime / bgm.duration) * 100;
+                progress.style.width = current + "%";
+                heart.style.left = current + "%";
             }
-            progressAnim = requestAnimationFrame(updateProgressBar);
+            requestAnimationFrame(syncArrow);
         }
 
         function changeVolume(val) {
