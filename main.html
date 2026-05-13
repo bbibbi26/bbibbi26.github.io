@@ -33,6 +33,15 @@
             min-height: 100vh; overflow: hidden;
         }
 
+        /* 시스템 로그 배경 스타일 */
+        #system-log-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1; opacity: 0.4;
+            font-family: 'Courier New', monospace; font-size: 10px;
+            color: var(--main-pink); overflow: hidden; line-height: 1.2;
+            padding: 20px; box-sizing: border-box;
+        }
+
         .terminal-frame {
             width: 85vw; height: 80vh; max-width: 1000px;
             position: relative; z-index: 10;
@@ -79,7 +88,6 @@
         }
 
         .main-content { flex: 1; display: flex; flex-direction: column; padding: 40px; overflow: hidden; }
-
         .system-board { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
         .post-list { 
@@ -143,6 +151,8 @@
 </head>
 <body>
 
+    <div id="system-log-bg"></div>
+
     <div id="boot-loader"><div id="loader-text">> INITIALIZING_SECURE_CONNECTION...</div></div>
 
     <div class="terminal-frame">
@@ -185,7 +195,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <script>
-        // 1. Firebase 설정 (올려주신 콘솔 정보 적용)
         const firebaseConfig = {
             apiKey: "AIzaSyDi9JQLtpp4KaF5mGkf0aApv_fcQP2PpD0",
             authDomain: "nya-ppi.firebaseapp.com",
@@ -193,7 +202,6 @@
             storageBucket: "nya-ppi.firebasestorage.app",
             messagingSenderId: "27439633492",
             appId: "1:27439633492:web:1cd43fd32322f6bc62c9c1",
-            // 데이터베이스 주소 (일반적인 프로젝트 형식)
             databaseURL: "https://nya-ppi-default-rtdb.firebaseio.com/" 
         };
 
@@ -201,11 +209,26 @@
         const database = firebase.database();
         const chatRef = database.ref('nya_chat_history');
 
-        // 2. 세션 데이터 확인
         const session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
-        // 3. 초기화
+        function createLogLine() {
+            const logBg = document.getElementById('system-log-bg');
+            const lines = [
+                "FETCHING_DATA_FROM_CLOUD...", "SYNC_SUCCESSFUL", "ENCRYPTING_SESSION...",
+                "NYA_PROTOCOL_ACTIVE", "HEARTBEAT_STABLE", "NODE_CONNECTED: " + Math.random().toString(16).substr(2, 8),
+                "LATENCY: " + Math.floor(Math.random() * 50) + "ms", "MEMORY_USAGE: " + (Math.random() * 100).toFixed(2) + "%"
+            ];
+            const p = document.createElement('div');
+            p.innerText = `> ${lines[Math.floor(Math.random() * lines.length)]}`;
+            logBg.appendChild(p);
+            if (logBg.childNodes.length > 50) logBg.removeChild(logBg.firstChild);
+            logBg.scrollTop = logBg.scrollHeight;
+        }
+        
+        // 🔥 주기를 16초(16000ms)로 수정했습니다.
+        setInterval(createLogLine, 16000);
+
         window.addEventListener('load', () => {
             const iconBox = document.getElementById('session-icon');
             iconBox.innerText = session.icon;
@@ -222,7 +245,6 @@
                 }
             }, 800);
 
-            // 🔥 서버 데이터 실시간 감지 시작
             chatRef.on('value', (snapshot) => {
                 renderComments(snapshot.val());
             });
@@ -231,7 +253,6 @@
         const commentInput = document.getElementById('comment-input');
         const postList = document.getElementById('post-list');
 
-        // 4. 저장 (Firebase 전송)
         function saveComment() {
             const text = commentInput.value.trim();
             if (!text) return;
@@ -248,7 +269,6 @@
             commentInput.value = '';
         }
 
-        // 5. 렌더링
         function renderComments(data) {
             postList.innerHTML = '';
             if (!data) return;
