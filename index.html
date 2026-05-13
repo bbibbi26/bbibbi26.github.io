@@ -106,7 +106,6 @@
         }
         .user-option:hover { transform: translateY(-5px); border-color: var(--main-pink); background: var(--soft-pink); }
         
-        /* 아바타 이미지 처리 스타일 추가 */
         .user-avatar { 
             width: 50px; height: 50px; font-size: 2.5rem; margin-bottom: 10px; 
             display: flex; align-items: center; justify-content: center; 
@@ -155,20 +154,39 @@
         </div>
     </div>
 
-    <script>
-        // --- 수정된 부분: 저장된 정보를 화면에 반영하는 로직 ---
-        function loadProfiles() {
-            const savedMe = JSON.parse(localStorage.getItem('nya_me_session'));
-            const savedOther = JSON.parse(localStorage.getItem('nya_other_session'));
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
-            if (savedMe) {
-                document.getElementById('name-me').innerText = savedMe.name;
-                renderIcon('icon-me', savedMe.icon);
-            }
-            if (savedOther) {
-                document.getElementById('name-other').innerText = savedOther.name;
-                renderIcon('icon-other', savedOther.icon);
-            }
+    <script>
+        // --- Firebase 설정 ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDi9JQLtpp4KaF5mGkf0aApv_fcQP2PpD0",
+            authDomain: "nya-ppi.firebaseapp.com",
+            projectId: "nya-ppi",
+            storageBucket: "nya-ppi.firebasestorage.app",
+            messagingSenderId: "27439633492",
+            appId: "1:27439633492:web:1cd43fd32322f6bc62c9c1",
+            databaseURL: "https://nya-ppi-default-rtdb.firebaseio.com/" 
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // --- Firebase에서 실시간으로 프로필을 불러오는 로직 (loadProfiles 대체) ---
+        function syncProfiles() {
+            database.ref('user_profiles').on('value', (snapshot) => {
+                const profiles = snapshot.val();
+                if (profiles) {
+                    if (profiles.me) {
+                        document.getElementById('name-me').innerText = profiles.me.name;
+                        renderIcon('icon-me', profiles.me.icon);
+                    }
+                    if (profiles.other) {
+                        document.getElementById('name-other').innerText = profiles.other.name;
+                        renderIcon('icon-other', profiles.other.icon);
+                    }
+                }
+            });
         }
 
         function renderIcon(elementId, iconData) {
@@ -181,8 +199,8 @@
             }
         }
 
-        // 페이지 로드 시 프로필 업데이트 실행
-        loadProfiles();
+        // 초기 동기화 실행
+        syncProfiles();
 
         const messages = ["섹시코테의 머리칼을 빗어주는 중...", "환상의 옷장 정리중...", "엉킨 꼬리털 풀어내는 중...", "놀 준비 완료.", "접속중..."];
         let progress = 0;
@@ -235,23 +253,22 @@
             }
         }
 
-        // --- 수정된 부분: 유저 선택 시 저장된 최신 정보를 사용 ---
+        // --- 수정된 부분: Firebase 최신 데이터를 가져와서 세션 생성 ---
         function selectUser(type) {
-            let sessionData;
-            if (type === 'me') {
-                const savedMe = JSON.parse(localStorage.getItem('nya_me_session'));
-                sessionData = savedMe || { type: 'me', name: 'USER_NYA', icon: '🐰' };
-            } else {
-                const savedOther = JSON.parse(localStorage.getItem('nya_other_session'));
-                sessionData = savedOther || { type: 'other', name: 'ADMIN_UNIT', icon: '🐱' };
-            }
+            database.ref('user_profiles/' + type).once('value').then((snapshot) => {
+                const data = snapshot.val();
+                // 데이터가 있으면 그걸 쓰고, 없으면 원본의 기본값을 사용
+                const sessionData = data ? { type, ...data } : 
+                                   (type === 'me' ? { type: 'me', name: 'USER_NYA', icon: '🐰' } : 
+                                                    { type: 'other', name: 'ADMIN_UNIT', icon: '🐱' });
 
-            localStorage.setItem('nya_current_session', JSON.stringify(sessionData));
-            
-            document.body.classList.add('fade-out');
-            setTimeout(() => {
-                location.href = "main.html";
-            }, 600);
+                localStorage.setItem('nya_current_session', JSON.stringify(sessionData));
+                
+                document.body.classList.add('fade-out');
+                setTimeout(() => {
+                    location.href = "main.html";
+                }, 600);
+            });
         }
 
         document.getElementById('passcode').addEventListener('keypress', function (e) {
