@@ -3,12 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYSTEM ACCESS: CHARACTER DB</title>
+    <title>TERMINAL_ACCESS_V4.0</title>
     <style>
+        :root {
+            --neon-red: #ff003c;
+            --neon-blue: #00f3ff;
+            --bg-black: #0a0a0a;
+        }
+
         body {
-            background-color: #050505;
-            color: #00ff41; /* 매트릭스/사이버 룩 그린 */
-            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-black);
+            background-image: 
+                radial-gradient(circle at 50% 50%, #1a0505 0%, #0a0a0a 100%),
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 100%, 100% 4px, 4px 100%;
+            color: white;
+            font-family: 'Share Tech Mono', monospace;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -17,108 +28,134 @@
             overflow: hidden;
         }
 
-        /* 배경에 미세한 줄무늬 효과 */
-        body::before {
-            content: "";
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-        }
-
-        .login-card {
-            background: rgba(0, 20, 20, 0.8);
-            padding: 40px;
-            border: 2px solid #00ff41;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2), inset 0 0 10px rgba(0, 255, 65, 0.2);
-            text-align: center;
-            width: 350px;
+        /* 메인 로그인 박스 */
+        .login-frame {
             position: relative;
+            width: 400px;
+            padding: 40px;
+            background: rgba(20, 0, 0, 0.6);
+            border: 1px solid var(--neon-red);
+            box-shadow: 0 0 15px rgba(255, 0, 60, 0.3);
+            text-align: center;
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 90% 100%, 0 100%); /* 오른쪽 아래 모서리 깎임 */
         }
 
-        /* 모서리 장식 */
-        .login-card::after {
-            content: "SECURE ACCESS";
+        /* 상단 장식바 */
+        .top-bar {
             position: absolute;
-            top: -10px;
-            left: 10px;
-            background: #00ff41;
-            color: #000;
-            font-size: 10px;
-            padding: 2px 5px;
-            font-weight: bold;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--neon-red);
+            box-shadow: 0 0 10px var(--neon-red);
         }
 
-        h2 {
+        h1 {
+            font-size: 1.5rem;
+            letter-spacing: 4px;
+            color: var(--neon-red);
             text-transform: uppercase;
-            letter-spacing: 5px;
             margin-bottom: 30px;
-            text-shadow: 2px 2px #ff0055; /* 사이버펑크 특유의 색수차 효과 */
+            text-shadow: 0 0 5px var(--neon-red);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
         }
 
         input {
-            background: #000;
-            border: 1px solid #00ff41;
-            color: #00ff41;
-            padding: 12px;
-            width: 80%;
-            margin-bottom: 20px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #444;
+            padding: 15px;
+            color: var(--neon-blue);
+            font-size: 1.2rem;
+            box-sizing: border-box;
             outline: none;
-            font-size: 16px;
+            transition: 0.3s;
             text-align: center;
+            letter-spacing: 2px;
         }
 
         input:focus {
-            box-shadow: 0 0 10px #00ff41;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
         }
 
         button {
+            width: 100%;
+            padding: 15px;
             background: transparent;
-            border: 2px solid #ff0055;
-            color: #ff0055;
-            padding: 10px 30px;
-            font-size: 18px;
+            border: 1px solid var(--neon-red);
+            color: var(--neon-red);
+            font-size: 1rem;
             font-weight: bold;
-            cursor: pointer;
             text-transform: uppercase;
+            cursor: pointer;
             transition: 0.3s;
-            position: relative;
+            letter-spacing: 3px;
         }
 
         button:hover {
-            background: #ff0055;
-            color: #fff;
-            box-shadow: 0 0 20px #ff0055;
+            background: var(--neon-red);
+            color: black;
+            box-shadow: 0 0 20px var(--neon-red);
         }
 
-        .status-text {
-            font-size: 10px;
-            margin-top: 15px;
-            color: rgba(0, 255, 65, 0.5);
+        .deco-text {
+            font-size: 0.7rem;
+            color: #555;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* 지직거리는 효과 애니메이션 */
+        .glitch {
+            animation: glitch 2s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
         }
     </style>
     <script>
-        function checkAccess() {
-            const pw = document.getElementById("pw").value;
-            if(pw === "1234") { // 비밀번호 설정
-                alert("ACCESS GRANTED. LOADING DATA...");
+        function accessCheck() {
+            const code = document.getElementById('passcode').value;
+            if(code === "1234") {
+                alert("IDENTITY VERIFIED. ACCESSING DATABASE...");
                 location.href = "main.html";
             } else {
-                alert("ACCESS DENIED. WRONG PASSCODE.");
+                const frame = document.querySelector('.login-frame');
+                frame.style.borderColor = "#ff00ff";
+                alert("CRITICAL ERROR: INVALID PASSCODE");
             }
         }
     </script>
 </head>
 <body>
 
-    <div class="login-card">
-        <h2>냥뿅</h2>
-        <input type="password" id="pw" placeholder="ENTER PASSCODE">
-        <br>
-        <button onclick="checkAccess()">System Login</button>
-        <div class="status-text">ENCRYPTION: AES-256 ACTIVE</div>
+    <div class="login-frame">
+        <div class="top-bar"></div>
+        <h1 class="glitch">User Auth</h1>
+        
+        <div class="input-group">
+            <input type="password" id="passcode" placeholder="[ PASSCODE ]">
+        </div>
+        
+        <button onclick="accessCheck()">Initialize Login</button>
+
+        <div class="deco-text">
+            <span>ST-4.0 // ENCRYPTION</span>
+            <span>NODE_ID: BBIBBI_01</span>
+        </div>
     </div>
 
 </body>
