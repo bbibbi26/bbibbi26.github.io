@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TERMINAL_ACCESS_V4.0</title>
-    <style>
+    <title>냥냐/삐용</title> <style>
         :root {
             --neon-red: #ff003c;
             --neon-blue: #00f3ff;
@@ -19,7 +18,7 @@
                 linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
             background-size: 100% 100%, 100% 4px, 4px 100%;
             color: white;
-            font-family: 'Share Tech Mono', monospace;
+            font-family: 'Share Tech Mono', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -28,36 +27,43 @@
             overflow: hidden;
         }
 
-        /* 메인 로그인 박스 */
         .login-frame {
             position: relative;
             width: 400px;
             padding: 40px;
-            background: rgba(20, 0, 0, 0.6);
+            background: rgba(20, 0, 0, 0.7);
             border: 1px solid var(--neon-red);
-            box-shadow: 0 0 15px rgba(255, 0, 60, 0.3);
+            box-shadow: 0 0 20px rgba(255, 0, 60, 0.4);
             text-align: center;
-            clip-path: polygon(0 0, 100% 0, 100% 90%, 90% 100%, 0 100%); /* 오른쪽 아래 모서리 깎임 */
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%);
         }
 
-        /* 상단 장식바 */
         .top-bar {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 5px;
+            height: 4px;
             background: var(--neon-red);
-            box-shadow: 0 0 10px var(--neon-red);
+            box-shadow: 0 0 15px var(--neon-red);
         }
 
         h1 {
-            font-size: 1.5rem;
-            letter-spacing: 4px;
+            font-size: 2.5rem; /* 크기를 조금 키웠어요 */
+            letter-spacing: 10px;
             color: var(--neon-red);
             text-transform: uppercase;
-            margin-bottom: 30px;
-            text-shadow: 0 0 5px var(--neon-red);
+            margin-bottom: 35px;
+            text-shadow: 0 0 10px var(--neon-red), 2px 2px #000;
+            animation: glitch 3s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: skew(0deg); }
+            1% { transform: skew(10deg); opacity: 0.8; }
+            2% { transform: skew(-10deg); opacity: 1; }
+            3% { transform: skew(0deg); }
+            100% { transform: skew(0deg); }
         }
 
         .input-group {
@@ -67,8 +73,8 @@
 
         input {
             width: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #444;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #555;
             padding: 15px;
             color: var(--neon-blue);
             font-size: 1.2rem;
@@ -76,12 +82,11 @@
             outline: none;
             transition: 0.3s;
             text-align: center;
-            letter-spacing: 2px;
         }
 
         input:focus {
             border-color: var(--neon-blue);
-            box-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
         }
 
         button {
@@ -92,50 +97,33 @@
             color: var(--neon-red);
             font-size: 1rem;
             font-weight: bold;
-            text-transform: uppercase;
             cursor: pointer;
             transition: 0.3s;
-            letter-spacing: 3px;
+            letter-spacing: 5px;
         }
 
         button:hover {
             background: var(--neon-red);
             color: black;
-            box-shadow: 0 0 20px var(--neon-red);
+            box-shadow: 0 0 25px var(--neon-red);
         }
 
-        .deco-text {
+        .status {
             font-size: 0.7rem;
-            color: #555;
-            margin-top: 20px;
+            color: #444;
+            margin-top: 25px;
             display: flex;
             justify-content: space-between;
-        }
-
-        /* 지직거리는 효과 애니메이션 */
-        .glitch {
-            animation: glitch 2s infinite;
-        }
-
-        @keyframes glitch {
-            0% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-            100% { transform: translate(0); }
         }
     </style>
     <script>
         function accessCheck() {
             const code = document.getElementById('passcode').value;
             if(code === "1234") {
-                alert("IDENTITY VERIFIED. ACCESSING DATABASE...");
+                alert("접속 허가됨. 데이터를 불러옵니다...");
                 location.href = "main.html";
             } else {
-                const frame = document.querySelector('.login-frame');
-                frame.style.borderColor = "#ff00ff";
-                alert("CRITICAL ERROR: INVALID PASSCODE");
+                alert("접근 거부: 비밀번호가 일치하지 않습니다.");
             }
         }
     </script>
@@ -144,17 +132,15 @@
 
     <div class="login-frame">
         <div class="top-bar"></div>
-        <h1 class="glitch">User Auth</h1>
-        
-        <div class="input-group">
+        <h1>냥뿅</h1> <div class="input-group">
             <input type="password" id="passcode" placeholder="[ PASSCODE ]">
         </div>
         
-        <button onclick="accessCheck()">Initialize Login</button>
+        <button onclick="accessCheck()">INITIALIZE LOGIN</button>
 
-        <div class="deco-text">
-            <span>ST-4.0 // ENCRYPTION</span>
-            <span>NODE_ID: BBIBBI_01</span>
+        <div class="status">
+            <span>NYANG-PONG SYSTEM v1.0</span>
+            <span>SECURE_LINK: ACTIVE</span>
         </div>
     </div>
 
