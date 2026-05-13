@@ -187,98 +187,100 @@
         </div>
     </div>
 
-    <script>
-        // 1. 세션 정보 불러오기
-        const session = JSON.parse(localStorage.getItem('nya_current_session'));
-        if (!session) { location.href = 'index.html'; }
+   <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
-        // 2. 초기화 및 실시간 리스너 추가
-        window.addEventListener('load', () => {
-            const iconBox = document.getElementById('session-icon');
-            iconBox.innerText = session.icon;
-            iconBox.style.background = (session.type === 'me') ? 
-                'linear-gradient(135deg, var(--main-pink), var(--main-purple))' : 
-                'linear-gradient(135deg, #00c6ff, #0072ff)';
-            document.getElementById('session-name').innerText = session.name;
+<script>
+    // 1. Firebase 설정 (본인의 Config로 교체하세요!)
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        databaseURL: "YOUR_DATABASE_URL",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
 
-            setTimeout(() => {
-                document.getElementById('boot-loader').style.opacity = "0";
-                setTimeout(() => document.getElementById('boot-loader').remove(), 500);
-            }, 800);
-            renderComments();
+    // Firebase 초기화
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const chatRef = database.ref('nya_chat_history');
+
+    // 2. 세션 확인
+    const session = JSON.parse(localStorage.getItem('nya_current_session'));
+    if (!session) { location.href = 'index.html'; }
+
+    // 3. 페이지 초기 설정
+    window.addEventListener('load', () => {
+        document.getElementById('session-icon').innerText = session.icon;
+        document.getElementById('session-name').innerText = session.name;
+        
+        setTimeout(() => {
+            document.getElementById('boot-loader').style.opacity = "0";
+            setTimeout(() => document.getElementById('boot-loader').remove(), 500);
+        }, 800);
+
+        // 🔥 [실시간 핵심] 데이터가 변경될 때마다 실행됨
+        chatRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            renderComments(data);
         });
+    });
 
-        // ✨ 실시간 동기화 핵심: 다른 창에서 데이터가 변하면 즉시 리렌더링
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'nya_chat_history') {
-                renderComments();
-            }
+    const commentInput = document.getElementById('comment-input');
+    const postList = document.getElementById('post-list');
+
+    // 4. 메시지 저장 (서버로 전송)
+    function saveComment() {
+        const text = commentInput.value.trim();
+        if (!text) return;
+
+        const newPost = {
+            id: Date.now(),
+            senderType: session.type,
+            senderName: session.name,
+            content: text,
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+        };
+
+        // LocalStorage가 아닌 Firebase 서버에 푸시
+        chatRef.push(newPost);
+        commentInput.value = '';
+    }
+
+    // 5. 메시지 렌더링
+    function renderComments(data) {
+        postList.innerHTML = '';
+        if (!data) return;
+
+        // Firebase의 객체 데이터를 배열로 변환하여 출력
+        const comments = Object.values(data);
+        document.getElementById('post-count').innerText = `MEMORIES: ${String(comments.length).padStart(2, '0')}`;
+
+        comments.forEach(post => {
+            const li = document.createElement('li');
+            const alignClass = (post.senderType === session.type) ? 'me' : 'other';
+            
+            li.className = `post-item ${alignClass}`;
+            li.innerHTML = `
+                <div class="post-sender">${post.senderName}</div>
+                <div class="post-text">${post.content}</div>
+                <div class="post-info">
+                    <span>${post.time}</span>
+                </div>
+            `;
+            postList.appendChild(li);
         });
+        postList.scrollTop = postList.scrollHeight;
+    }
 
-        const commentInput = document.getElementById('comment-input');
-        const postList = document.getElementById('post-list');
-
-        // 3. 코멘트 저장
-        function saveComment() {
-            const text = commentInput.value.trim();
-            if (!text) return;
-
-            const newPost = { 
-                id: Date.now(), 
-                senderType: session.type, 
-                senderName: session.name,
-                content: text, 
-                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
-            };
-
-            const comments = JSON.parse(localStorage.getItem('nya_chat_history') || '[]');
-            comments.push(newPost); 
-            localStorage.setItem('nya_chat_history', JSON.stringify(comments));
-            
-            commentInput.value = '';
-            renderComments(); // 내 화면 업데이트
-        }
-
-        // 4. 코멘트 렌더링 (좌우 배치 로직)
-        function renderComments() {
-            const comments = JSON.parse(localStorage.getItem('nya_chat_history') || '[]');
-            postList.innerHTML = '';
-            document.getElementById('post-count').innerText = `MEMORIES: ${String(comments.length).padStart(2, '0')}`;
-            
-            comments.forEach(post => {
-                const li = document.createElement('li');
-                const alignClass = (post.senderType === session.type) ? 'me' : 'other';
-                
-                li.className = `post-item ${alignClass}`;
-                li.innerHTML = `
-                    <div class="post-sender">${post.senderName}</div>
-                    <div class="post-text">${post.content}</div>
-                    <div class="post-info">
-                        <span>${post.time}</span>
-                        <span class="del-btn" onclick="deleteComment(${post.id})">DELETE</span>
-                    </div>
-                `;
-                postList.appendChild(li);
-            });
-            postList.scrollTop = postList.scrollHeight;
-        }
-
-        function deleteComment(id) {
-            let comments = JSON.parse(localStorage.getItem('nya_chat_history') || '[]');
-            comments = comments.filter(c => c.id !== id);
-            localStorage.setItem('nya_chat_history', JSON.stringify(comments));
-            renderComments();
-        }
-
-        commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
-
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('current-time').textContent = now.toLocaleTimeString('en-GB');
-            document.getElementById('current-date').textContent = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-        }
-        setInterval(updateClock, 1000); 
-        updateClock();
-    </script>
-</body>
-</html>
+    // 엔터키 및 시계 로직 (기존과 동일)
+    commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('current-time').textContent = now.toLocaleTimeString('en-GB');
+        document.getElementById('current-date').textContent = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    setInterval(updateClock, 1000); updateClock();
+</script>
