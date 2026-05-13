@@ -33,7 +33,6 @@
             min-height: 100vh; overflow: hidden;
         }
 
-        /* --- [파일 폴더 모양 메인 프레임] --- */
         .terminal-frame {
             width: 85vw; height: 80vh; max-width: 1000px;
             position: relative; z-index: 10;
@@ -81,42 +80,31 @@
 
         .main-content { flex: 1; display: flex; flex-direction: column; padding: 40px; overflow: hidden; }
 
-        /* --- [채팅 리스트 & 말풍선] --- */
-        .system-board {
-            flex: 1; display: flex; flex-direction: column; overflow: hidden;
-        }
+        .system-board { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
         .post-list { 
             list-style: none; padding: 5px; margin: 0; overflow-y: auto; 
             display: flex; flex-direction: column; gap: 12px;
+            scroll-behavior: smooth;
         }
 
         .post-item {
-            max-width: 75%;
-            padding: 12px 18px;
-            position: relative;
+            max-width: 75%; padding: 12px 18px; position: relative;
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
         }
 
-        /* 왼쪽 배치 (상대방) */
         .post-item.other {
-            align-self: flex-start;
-            background: var(--bubble-other);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 4px 18px 18px 18px;
+            align-self: flex-start; background: var(--bubble-other);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px 18px 18px 18px;
         }
 
-        /* 오른쪽 배치 (나) */
         .post-item.me {
-            align-self: flex-end;
-            background: var(--bubble-me);
-            border: 1px solid rgba(255, 126, 185, 0.3);
-            border-radius: 18px 4px 18px 18px;
+            align-self: flex-end; background: var(--bubble-me);
+            border: 1px solid rgba(255, 126, 185, 0.3); border-radius: 18px 4px 18px 18px;
         }
 
         .post-sender { font-size: 0.6rem; opacity: 0.5; margin-bottom: 4px; }
         .me .post-sender { text-align: right; }
-
         .post-text { font-family: var(--font-light); font-size: 0.9rem; color: #eee; line-height: 1.5; }
         
         .post-info {
@@ -128,7 +116,6 @@
         .del-btn { cursor: pointer; color: var(--main-pink); opacity: 0.5; margin: 0 10px; }
         .del-btn:hover { opacity: 1; }
 
-        /* --- [입력 영역 레이아웃] --- */
         .input-area { display: flex; gap: 10px; margin-top: 25px; }
         #comment-input {
             flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
@@ -185,8 +172,7 @@
                 </div>
 
                 <section class="system-board">
-                    <ul class="post-list" id="post-list">
-                        </ul>
+                    <ul class="post-list" id="post-list"></ul>
                     
                     <div style="flex:1;"></div> 
 
@@ -202,16 +188,12 @@
     </div>
 
     <script>
-        // 1. 세션 정보 불러오기 (index.html 호환)
+        // 1. 세션 정보 불러오기
         const session = JSON.parse(localStorage.getItem('nya_current_session'));
-        if (!session) {
-            // 세션 정보 없으면 다시 로그인 페이지로
-            location.href = 'index.html';
-        }
+        if (!session) { location.href = 'index.html'; }
 
-        // 2. 부팅 연출 및 초기화
+        // 2. 초기화 및 실시간 리스너 추가
         window.addEventListener('load', () => {
-            // 사이드바 프로필 세팅
             const iconBox = document.getElementById('session-icon');
             iconBox.innerText = session.icon;
             iconBox.style.background = (session.type === 'me') ? 
@@ -226,6 +208,13 @@
             renderComments();
         });
 
+        // ✨ 실시간 동기화 핵심: 다른 창에서 데이터가 변하면 즉시 리렌더링
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'nya_chat_history') {
+                renderComments();
+            }
+        });
+
         const commentInput = document.getElementById('comment-input');
         const postList = document.getElementById('post-list');
 
@@ -236,7 +225,7 @@
 
             const newPost = { 
                 id: Date.now(), 
-                senderType: session.type, // 내가 보낸건지 구분용
+                senderType: session.type, 
                 senderName: session.name,
                 content: text, 
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
@@ -247,10 +236,10 @@
             localStorage.setItem('nya_chat_history', JSON.stringify(comments));
             
             commentInput.value = '';
-            renderComments();
+            renderComments(); // 내 화면 업데이트
         }
 
-        // 4. 코멘트 렌더링 (좌우 배치 로직 포함)
+        // 4. 코멘트 렌더링 (좌우 배치 로직)
         function renderComments() {
             const comments = JSON.parse(localStorage.getItem('nya_chat_history') || '[]');
             postList.innerHTML = '';
@@ -258,7 +247,6 @@
             
             comments.forEach(post => {
                 const li = document.createElement('li');
-                // 현재 로그인한 사람과 메시지 보낸 사람이 같으면 'me'(오른쪽), 다르면 'other'(왼쪽)
                 const alignClass = (post.senderType === session.type) ? 'me' : 'other';
                 
                 li.className = `post-item ${alignClass}`;
@@ -272,7 +260,6 @@
                 `;
                 postList.appendChild(li);
             });
-            // 스크롤 항상 최하단
             postList.scrollTop = postList.scrollHeight;
         }
 
@@ -283,10 +270,8 @@
             renderComments();
         }
 
-        // 엔터키 지원
         commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
 
-        // 시계 및 날짜 업데이트
         function updateClock() {
             const now = new Date();
             document.getElementById('current-time').textContent = now.toLocaleTimeString('en-GB');
