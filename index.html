@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>냥냐/삐용</title>
-    <!-- Gmarket Sans 폰트 불러오기 -->
     <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
     
     <style>
@@ -13,7 +12,7 @@
             --soft-pink: #ffe4f1;
             --cyber-white: #ffffff;
             --accent-blue: #70d6ff;
-            /* 폰트 설정: 기본은 Medium, 아주 얇은 곳은 Light 사용 */
+            /* 폰트 설정: 메인 요소를 Bold로 변경 */
             --font-main: 'GmarketSansBold', sans-serif;
             --font-light: 'GmarketSansLight', sans-serif;
         }
@@ -26,7 +25,6 @@
                 linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
             background-size: 100% 100%, 30px 30px, 30px 30px;
             color: var(--main-pink);
-            /* 전체 폰트 적용 */
             font-family: var(--font-main);
             display: flex;
             justify-content: center;
@@ -64,7 +62,7 @@
         }
 
         .loading-text {
-            /* 로딩 텍스트는 조금 더 얇게 설정 */
+            /* 로딩 텍스트는 가독성을 위해 Light 유지 */
             font-family: var(--font-light);
             font-size: 0.9rem;
             letter-spacing: 1px;
@@ -96,7 +94,6 @@
 
         h1 {
             font-size: 3rem; 
-            font-weight: normal; /* Gmarket Sans 자체 두께 사용 */
             margin-bottom: 40px;
             letter-spacing: 8px; 
             color: var(--main-pink); 
@@ -117,8 +114,7 @@
             padding: 15px; color: var(--main-pink); font-size: 1.1rem;
             text-align: center; outline: none; box-sizing: border-box;
             border-bottom: 4px solid var(--main-pink);
-            /* 입력창 폰트 적용 */
-            font-family: var(--font-main);
+            font-family: var(--font-main); /* Bold 적용 */
         }
 
         button {
@@ -126,8 +122,7 @@
             border: none; color: #fff; font-size: 1.1rem;
             letter-spacing: 5px; cursor: pointer; transition: 0.3s;
             clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
-            /* 버튼 폰트 적용 */
-            font-family: var(--font-main);
+            font-family: var(--font-main); /* Bold 적용 */
         }
 
         button:hover { background: #ff50a0; box-shadow: 0 0 20px rgba(255, 126, 185, 0.6); }
@@ -139,7 +134,6 @@
             display: flex; 
             justify-content: space-between; 
             opacity: 0.7;
-            /* 하단 정보는 얇은 폰트 적용 */
             font-family: var(--font-light);
         }
     </style>
@@ -209,7 +203,7 @@
                 alert("ACCESS GRANTED.");
                 location.href = "main.html";
             } else {
-                alert("DENIED: INCORRECT PASSCODE.");
+                alert("DENIED.");
             }
         }
     </script>
