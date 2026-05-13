@@ -216,4 +216,36 @@
             "CHECKING CORE TEMPERATURE... NORMAL",
             "ENCRYPTED PACKETS RECEIVED FROM SECTOR-7",
             "NYA-PPI PROTOCOL VERSION 4.0 ACTIVE",
-            "IDLE THREAD
+            "IDLE THREADS PURGED SUCCESSFULLY",
+            "SECURITY FIREWALL: NO INTRUSIONS",
+            "NEURAL LINK STABILITY: 98.4%",
+            "CATNIP-LEVEL RESOURCE OPTIMIZED",
+            "PUNCH_LOG_BACKUP COMPLETED",
+            "AMBIENT PARTICLES SYNCED WITH GRID",
+            "HEARTBEAT SIGNAL DETECTED"
+        ];
+
+        const logLayer = document.getElementById('ambient-logs');
+
+        function addAmbientLog() {
+            const msg = logMessages[Math.floor(Math.random() * logMessages.length)];
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+            logLine.textContent = `[${time}] ${msg}`;
+            
+            logLayer.appendChild(logLine);
+
+            // 여백이 너무 차지하지 않게 최대 5줄 유지
+            if (logLayer.childNodes.length > 5) {
+                logLayer.removeChild(logLayer.firstChild);
+            }
+        }
+
+        // 30초(30000ms)마다 로그 생성
+        setInterval(addAmbientLog, 30000); 
+        addAmbientLog(); // 초기 실행
+    </script>
+</body>
+</html>
