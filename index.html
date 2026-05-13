@@ -6,22 +6,22 @@
     <title>냥냐/삐용</title>
     <style>
         :root {
-            --neon-blue: #00f3ff;
-            --neon-purple: #bc00ff;
-            --bg-dark: #050508;
-            --glow-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+            --main-pink: #ff7eb9;
+            --soft-pink: #ffe4f1;
+            --cyber-white: #ffffff;
+            --accent-blue: #70d6ff; /* 대비를 위한 포인트 컬러 */
         }
 
         body {
-            background-color: var(--bg-dark);
-            /* 배경 노이즈 및 스캔라인 효과 */
+            background-color: var(--soft-pink);
+            /* 밝은 배경에도 사이버틱한 패턴 추가 */
             background-image: 
-                radial-gradient(circle at 50% 50%, #10002b 0%, #050508 100%),
-                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
-                linear-gradient(90deg, rgba(0, 243, 255, 0.03), rgba(188, 0, 255, 0.03));
-            background-size: 100% 100%, 100% 4px, 4px 100%;
-            color: #fff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                radial-gradient(circle at 50% 50%, #ffffff 0%, #ffe4f1 100%),
+                linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            color: var(--main-pink);
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -30,17 +30,18 @@
             overflow: hidden;
         }
 
-        /* 메인 프레임: 각진 디자인 (오른쪽 아래 절삭) */
+        /* 메인 프레임: 밝은 화이트 배경에 핑크 네온 테두리 */
         .login-frame {
             position: relative;
             width: 380px;
             padding: 50px 40px;
-            background: rgba(10, 10, 20, 0.8);
-            border: 1px solid var(--neon-blue);
-            box-shadow: 0 0 25px rgba(0, 243, 255, 0.2), inset 0 0 15px rgba(188, 0, 255, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--main-pink);
+            box-shadow: 0 0 20px rgba(255, 126, 185, 0.3);
             text-align: center;
+            /* 사이버펑크 특유의 각진 모서리 */
             clip-path: polygon(0 0, 100% 0, 100% 88%, 88% 100%, 0 100%);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
         }
 
         /* 상단 네온 바 */
@@ -49,125 +50,108 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
-            box-shadow: 0 0 15px var(--neon-blue);
+            height: 5px;
+            background: linear-gradient(90deg, var(--main-pink), var(--accent-blue));
         }
 
         h1 {
             font-size: 3rem;
             font-weight: 900;
             margin-bottom: 40px;
-            letter-spacing: 8px;
+            letter-spacing: 10px;
+            color: var(--main-pink);
             text-transform: uppercase;
-            color: #fff;
-            /* 블루와 퍼플이 섞인 글리치 효과 */
+            /* 핑크 & 화이트 글리치 효과 */
             text-shadow: 
-                -2px -2px 0 var(--neon-blue),
-                2px 2px 0 var(--neon-purple);
-            animation: glitch-anim 4s infinite;
+                2px 2px 0px #fff,
+                -2px -2px 0px var(--accent-blue);
+            animation: glitch-anim 3s infinite;
         }
 
         @keyframes glitch-anim {
-            0% { text-shadow: -2px -2px 0 var(--neon-blue), 2px 2px 0 var(--neon-purple); }
-            1% { text-shadow: 3px 1px 0 var(--neon-blue), -3px -1px 0 var(--neon-purple); transform: skew(2deg); }
-            2% { text-shadow: -2px -2px 0 var(--neon-blue), 2px 2px 0 var(--neon-purple); transform: skew(0deg); }
-            100% { text-shadow: -2px -2px 0 var(--neon-blue), 2px 2px 0 var(--neon-purple); }
-        }
-
-        .input-box {
-            margin-bottom: 30px;
+            0% { transform: none; opacity: 1; }
+            7% { transform: skew(-0.5deg, -0.9deg); opacity: 0.75; }
+            10% { transform: none; opacity: 1; }
+            27% { transform: none; opacity: 1; }
+            30% { transform: skew(0.8deg, -0.1deg); opacity: 0.75; }
+            35% { transform: none; opacity: 1; }
+            100% { transform: none; opacity: 1; }
         }
 
         input {
             width: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid #333;
+            background: #fff;
+            border: 1px solid var(--main-pink);
             padding: 15px;
-            color: var(--neon-blue);
+            color: var(--main-pink);
             font-size: 1.1rem;
             text-align: center;
             outline: none;
             transition: 0.3s;
             box-sizing: border-box;
-            border-left: 4px solid var(--neon-blue);
+            border-bottom: 4px solid var(--main-pink);
         }
 
         input:focus {
-            border-color: var(--neon-purple);
-            border-left: 4px solid var(--neon-purple);
-            box-shadow: 0 0 15px rgba(188, 0, 255, 0.3);
+            background: var(--soft-pink);
+            box-shadow: 0 0 15px rgba(255, 126, 185, 0.4);
         }
 
         button {
             width: 100%;
+            margin-top: 20px;
             padding: 15px;
-            background: transparent;
-            border: 1px solid var(--neon-purple);
-            color: var(--neon-purple);
+            background: var(--main-pink);
+            border: none;
+            color: #fff;
             font-size: 1.1rem;
             font-weight: bold;
-            letter-spacing: 4px;
+            letter-spacing: 5px;
             cursor: pointer;
-            transition: 0.4s;
-            position: relative;
-            overflow: hidden;
+            transition: 0.3s;
+            clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
         }
 
         button:hover {
-            background: var(--neon-purple);
-            color: #000;
-            box-shadow: 0 0 30px var(--neon-purple);
+            background: #ff50a0;
+            box-shadow: 0 0 20px rgba(255, 126, 185, 0.6);
+            transform: translateY(-2px);
         }
 
         .footer-info {
             margin-top: 30px;
-            font-size: 0.7rem;
-            color: #444;
+            font-size: 0.75rem;
+            color: var(--main-pink);
             display: flex;
             justify-content: space-between;
-            letter-spacing: 1px;
-        }
-
-        /* 배경 데코레이션 레이어 */
-        .bg-grid {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: linear-gradient(rgba(188, 0, 255, 0.05) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(188, 0, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: -1;
+            opacity: 0.7;
         }
     </style>
     <script>
         function validateAccess() {
             const pass = document.getElementById('passcode').value;
             if(pass === "1234") {
-                alert("IDENTITY CONFIRMED. REDIRECTING...");
+                alert("ACCESS GRANTED.");
                 location.href = "main.html";
             } else {
-                alert("ACCESS DENIED: UNKNOWN SIGNATURE");
+                alert("DENIED.");
             }
         }
     </script>
 </head>
 <body>
 
-    <div class="bg-grid"></div>
-
     <div class="login-frame">
         <div class="top-accent"></div>
         <h1>냥뿅</h1>
         
-        <div class="input-box">
-            <input type="password" id="passcode" placeholder="ENTER PASSCODE">
-        </div>
+        <input type="password" id="passcode" placeholder="PASSCODE_REQUIRED">
         
-        <button onclick="validateAccess()">SYSTEM LOGIN</button>
+        <button onclick="validateAccess()">ENTER SYSTEM</button>
 
         <div class="footer-info">
-            <span>PROJECT: NYA-PPI</span>
-            <span>STATUS: ENCRYPTED</span>
+            <span>UNIT: NYA-PPI</span>
+            <span>SECURE_MODE</span>
         </div>
     </div>
 
