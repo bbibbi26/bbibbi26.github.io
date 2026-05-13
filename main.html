@@ -12,7 +12,8 @@
             --main-purple: #9d00ff;
             --dark-bg: #050508;
             --panel-bg: rgba(15, 15, 25, 0.9);
-            --bubble-bg: rgba(255, 255, 255, 0.05);
+            --bubble-me: rgba(255, 126, 185, 0.15); /* 내 말풍선 */
+            --bubble-other: rgba(255, 255, 255, 0.05); /* 상대 말풍선 */
             --accent-blue: #00f3ff;
             --font-main: 'GmarketSansBold', sans-serif;
             --font-light: 'GmarketSansLight', sans-serif;
@@ -40,7 +41,6 @@
             animation: terminalScanOpen 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
         }
 
-        /* 파일 탭 부분 */
         .terminal-frame::before {
             content: "INTEGRATED TERMINAL";
             position: absolute; top: -35px; left: 0;
@@ -58,7 +58,7 @@
             width: 100%; height: 100%;
             background: var(--panel-bg);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 0 30px 30px 30px; /* 탭 제외 부분 둥글게 */
+            border-radius: 0 30px 30px 30px;
             backdrop-filter: blur(25px);
             display: flex; overflow: hidden;
         }
@@ -73,14 +73,63 @@
             display: flex; flex-direction: column; padding: 40px; background: rgba(0, 0, 0, 0.2);
         }
 
+        #session-icon {
+            width:60px; height:60px; margin-bottom:20px; 
+            border-radius:15px; display:flex; align-items:center; 
+            justify-content:center; font-size:1.5rem;
+        }
+
         .main-content { flex: 1; display: flex; flex-direction: column; padding: 40px; overflow: hidden; }
 
-        /* --- [심플 말풍선 게시판] --- */
+        /* --- [채팅 리스트 & 말풍선] --- */
         .system-board {
             flex: 1; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        .input-area { display: flex; gap: 10px; margin-bottom: 25px; }
+        .post-list { 
+            list-style: none; padding: 5px; margin: 0; overflow-y: auto; 
+            display: flex; flex-direction: column; gap: 12px;
+        }
+
+        .post-item {
+            max-width: 75%;
+            padding: 12px 18px;
+            position: relative;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        /* 왼쪽 배치 (상대방) */
+        .post-item.other {
+            align-self: flex-start;
+            background: var(--bubble-other);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px 18px 18px 18px;
+        }
+
+        /* 오른쪽 배치 (나) */
+        .post-item.me {
+            align-self: flex-end;
+            background: var(--bubble-me);
+            border: 1px solid rgba(255, 126, 185, 0.3);
+            border-radius: 18px 4px 18px 18px;
+        }
+
+        .post-sender { font-size: 0.6rem; opacity: 0.5; margin-bottom: 4px; }
+        .me .post-sender { text-align: right; }
+
+        .post-text { font-family: var(--font-light); font-size: 0.9rem; color: #eee; line-height: 1.5; }
+        
+        .post-info {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 8px; font-size: 0.65rem; color: rgba(255, 255, 255, 0.3);
+        }
+        .me .post-info { flex-direction: row-reverse; }
+
+        .del-btn { cursor: pointer; color: var(--main-pink); opacity: 0.5; margin: 0 10px; }
+        .del-btn:hover { opacity: 1; }
+
+        /* --- [입력 영역 레이아웃] --- */
+        .input-area { display: flex; gap: 10px; margin-top: 25px; }
         #comment-input {
             flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 15px; padding: 15px; color: #fff; font-family: var(--font-light); outline: none;
@@ -94,34 +143,6 @@
             cursor: pointer; font-family: var(--font-main); font-size: 0.8rem;
         }
 
-        .post-list { 
-            list-style: none; padding: 5px; margin: 0; overflow-y: auto; 
-            display: flex; flex-direction: column; gap: 12px;
-        }
-
-        /* 심플 말풍선 스타일 */
-        .post-item {
-            align-self: flex-start;
-            max-width: 80%;
-            background: var(--bubble-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 4px 18px 18px 18px; /* 왼쪽 위만 각진 형태 */
-            padding: 12px 18px;
-            position: relative;
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-        }
-
-        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-        .post-text { font-family: var(--font-light); font-size: 0.9rem; color: #eee; line-height: 1.5; }
-        
-        .post-info {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-top: 8px; font-size: 0.65rem; color: rgba(255, 255, 255, 0.3);
-        }
-        .del-btn { cursor: pointer; color: var(--main-pink); opacity: 0.5; margin-left: 10px; }
-        .del-btn:hover { opacity: 1; }
-
         .disconnect-btn { margin-top: 20px; font-size: 0.7rem; color: rgba(255,255,255,0.2); cursor: pointer; text-align: right; }
         .post-list::-webkit-scrollbar { width: 4px; }
         .post-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -133,18 +154,20 @@
             font-family: 'Courier New', monospace; color: var(--main-pink);
             transition: opacity 0.5s ease;
         }
+
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
 
-    <div id="boot-loader"><div id="loader-text">> INITIALIZING_FILE_SYSTEM...</div></div>
+    <div id="boot-loader"><div id="loader-text">> INITIALIZING_SECURE_SESSION...</div></div>
 
     <div class="terminal-frame">
         <div class="content-wrapper">
             <aside class="sidebar">
-                <div class="profile-hex" style="width:60px; height:60px; margin-bottom:20px; background:linear-gradient(135deg, var(--main-pink), var(--main-purple)); border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">🐱</div>
-                <h3 style="margin: 0; font-size: 1rem;">ADMIN_UNIT</h3>
-                <p style="font-size: 0.6rem; color: var(--accent-blue); margin-bottom:30px;">STATUS: ONLINE</p>
+                <div id="session-icon"></div>
+                <h3 id="session-name" style="margin: 0; font-size: 1rem;"></h3>
+                <p id="session-status" style="font-size: 0.6rem; color: var(--accent-blue); margin-bottom:30px;">STATUS: ONLINE</p>
                 <div style="font-size: 0.7rem; color:rgba(255,255,255,0.4); line-height:2;">
                     > DASHBOARD<br>
                     > STORAGE<br>
@@ -155,7 +178,7 @@
             <main class="main-content">
                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px;">
                     <div>
-                        <div id="current-date" style="font-size: 0.7rem; color: var(--accent-blue);">2026.05.13</div>
+                        <div id="current-date" style="font-size: 0.7rem; color: var(--accent-blue);">DATE</div>
                         <div id="current-time" style="font-size: 1.8rem; font-weight: bold;">00:00:00</div>
                     </div>
                     <div id="post-count" style="font-size: 0.7rem; opacity: 0.5;">MEMORIES: 00</div>
@@ -165,20 +188,37 @@
                     <ul class="post-list" id="post-list">
                         </ul>
                     
-                    <div style="flex:1;"></div> <div class="input-area">
+                    <div style="flex:1;"></div> 
+
+                    <div class="input-area">
                         <input type="text" id="comment-input" placeholder="여기에 기록을 남겨주세요..." maxlength="50">
                         <button class="save-btn" onclick="saveComment()">SAVE</button>
                     </div>
                 </section>
 
-                <div class="disconnect-btn">TERMINATE_SESSION_</div>
+                <div class="disconnect-btn" onclick="location.href='index.html'">TERMINATE_SESSION_</div>
             </main>
         </div>
     </div>
 
     <script>
-        // 부팅 연출
+        // 1. 세션 정보 불러오기 (index.html 호환)
+        const session = JSON.parse(localStorage.getItem('nya_current_session'));
+        if (!session) {
+            // 세션 정보 없으면 다시 로그인 페이지로
+            location.href = 'index.html';
+        }
+
+        // 2. 부팅 연출 및 초기화
         window.addEventListener('load', () => {
+            // 사이드바 프로필 세팅
+            const iconBox = document.getElementById('session-icon');
+            iconBox.innerText = session.icon;
+            iconBox.style.background = (session.type === 'me') ? 
+                'linear-gradient(135deg, var(--main-pink), var(--main-purple))' : 
+                'linear-gradient(135deg, #00c6ff, #0072ff)';
+            document.getElementById('session-name').innerText = session.name;
+
             setTimeout(() => {
                 document.getElementById('boot-loader').style.opacity = "0";
                 setTimeout(() => document.getElementById('boot-loader').remove(), 500);
@@ -189,28 +229,41 @@
         const commentInput = document.getElementById('comment-input');
         const postList = document.getElementById('post-list');
 
+        // 3. 코멘트 저장
         function saveComment() {
             const text = commentInput.value.trim();
             if (!text) return;
-            const newPost = { id: Date.now(), content: text, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
-            const comments = JSON.parse(localStorage.getItem('nya_posts') || '[]');
-            comments.push(newPost); // 최신글이 아래로 쌓이게 (채팅 느낌)
-            localStorage.setItem('nya_posts', JSON.stringify(comments));
+
+            const newPost = { 
+                id: Date.now(), 
+                senderType: session.type, // 내가 보낸건지 구분용
+                senderName: session.name,
+                content: text, 
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+            };
+
+            const comments = JSON.parse(localStorage.getItem('nya_chat_history') || '[]');
+            comments.push(newPost); 
+            localStorage.setItem('nya_chat_history', JSON.stringify(comments));
+            
             commentInput.value = '';
             renderComments();
-            // 스크롤 아래로 고정
-            postList.scrollTop = postList.scrollHeight;
         }
 
+        // 4. 코멘트 렌더링 (좌우 배치 로직 포함)
         function renderComments() {
-            const comments = JSON.parse(localStorage.getItem('nya_posts') || '[]');
+            const comments = JSON.parse(localStorage.getItem('nya_chat_history') || '[]');
             postList.innerHTML = '';
             document.getElementById('post-count').innerText = `MEMORIES: ${String(comments.length).padStart(2, '0')}`;
             
             comments.forEach(post => {
                 const li = document.createElement('li');
-                li.className = 'post-item';
+                // 현재 로그인한 사람과 메시지 보낸 사람이 같으면 'me'(오른쪽), 다르면 'other'(왼쪽)
+                const alignClass = (post.senderType === session.type) ? 'me' : 'other';
+                
+                li.className = `post-item ${alignClass}`;
                 li.innerHTML = `
+                    <div class="post-sender">${post.senderName}</div>
                     <div class="post-text">${post.content}</div>
                     <div class="post-info">
                         <span>${post.time}</span>
@@ -219,23 +272,28 @@
                 `;
                 postList.appendChild(li);
             });
+            // 스크롤 항상 최하단
             postList.scrollTop = postList.scrollHeight;
         }
 
         function deleteComment(id) {
-            let comments = JSON.parse(localStorage.getItem('nya_posts') || '[]');
+            let comments = JSON.parse(localStorage.getItem('nya_chat_history') || '[]');
             comments = comments.filter(c => c.id !== id);
-            localStorage.setItem('nya_posts', JSON.stringify(comments));
+            localStorage.setItem('nya_chat_history', JSON.stringify(comments));
             renderComments();
         }
 
+        // 엔터키 지원
         commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
 
+        // 시계 및 날짜 업데이트
         function updateClock() {
             const now = new Date();
             document.getElementById('current-time').textContent = now.toLocaleTimeString('en-GB');
+            document.getElementById('current-date').textContent = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
         }
-        setInterval(updateClock, 1000); updateClock();
+        setInterval(updateClock, 1000); 
+        updateClock();
     </script>
 </body>
 </html>
