@@ -41,7 +41,7 @@
         }
 
         .terminal-frame {
-            width: 90vw; height: 85vh; /* 높이 확장 */
+            width: 90vw; height: 85vh;
             max-width: 1100px;
             position: relative; z-index: 10;
             filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));
@@ -82,7 +82,16 @@
 
         #session-icon { width:55px; height:55px; margin-bottom:15px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
 
-        /* [추가] 메뉴 아이템 스타일 */
+        /* 사용자 이름 클릭 스타일 추가 */
+        #session-name {
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        #session-name:hover {
+            color: var(--accent-blue);
+            text-shadow: 0 0 5px var(--accent-blue);
+        }
+
         .menu-item {
             cursor: pointer;
             transition: 0.2s;
@@ -99,9 +108,8 @@
         .system-board { flex: 1; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
         .board-header { font-size: 0.65rem; color: var(--main-pink); margin-bottom: 10px; opacity: 0.7; }
 
-        /* --- 채팅 로그 영역 확대 --- */
         .post-list { 
-            flex: 1; /* 가질 수 있는 최대 높이 할당 */
+            flex: 1;
             list-style: none; padding: 10px; margin: 0; overflow-y: auto; 
             display: flex; flex-direction: column; gap: 15px;
             scroll-behavior: smooth;
@@ -135,7 +143,6 @@
             border-bottom: 8px solid transparent;
         }
 
-        /* [추가] 삭제 버튼 스타일 */
         .delete-btn {
             position: absolute; top: -5px; right: -5px;
             width: 18px; height: 18px; background: #050508;
@@ -146,7 +153,6 @@
         .post-item.me:hover .delete-btn { opacity: 1; }
         .delete-btn:hover { background: var(--main-pink); color: #fff; }
 
-        /* [추가] 음악 컨트롤 스타일 */
         .music-section { margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; }
         .music-ctrl {
             font-size: 0.65rem; color: var(--accent-blue); cursor: pointer;
@@ -171,7 +177,6 @@
         .post-info { display: flex; justify-content: flex-end; margin-top: 5px; font-size: 0.6rem; color: rgba(255, 255, 255, 0.3); }
         .other .post-info { justify-content: flex-start; }
 
-        /* --- 하단 입력 영역 간격 조정 --- */
         .input-area { display: flex; gap: 10px; margin-top: 15px; padding-bottom: 5px; }
         #comment-input {
             flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
@@ -207,7 +212,7 @@
         <div class="content-wrapper">
             <aside class="sidebar">
                 <div id="session-icon"></div>
-                <h3 id="session-name" style="margin: 0; font-size: 0.9rem;"></h3>
+                <h3 id="session-name" onclick="changeNickname()" style="margin: 0; font-size: 0.9rem;"></h3>
                 <p id="session-status" style="font-size: 0.6rem; color: var(--accent-blue); margin-bottom:20px;">STATUS: ONLINE</p>
                 <div style="font-size: 0.65rem; color:rgba(255,255,255,0.3); line-height:2.2;">
                     <div class="menu-item" onclick="handleMenu('DASHBOARD')">> DASHBOARD</div><br>
@@ -265,10 +270,27 @@
         const database = firebase.database();
         const chatRef = database.ref('nya_chat_history');
 
-        const session = JSON.parse(localStorage.getItem('nya_current_session'));
+        let session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
-        // [배경음악 설정]
+        // [추가] 닉네임 변경 함수
+        function changeNickname() {
+            const newName = prompt("새로운 사용자 이름을 입력하세요:", session.name);
+            if (newName && newName.trim() !== "") {
+                session.name = newName.trim();
+                localStorage.setItem('nya_current_session', JSON.stringify(session));
+                document.getElementById('session-name').innerText = session.name;
+                
+                // 시스템 로그 기록
+                const logBg = document.getElementById('system-log-bg');
+                const div = document.createElement('div');
+                div.style.color = "var(--main-pink)";
+                div.innerText = `> USER_RENAME: ${newName.toUpperCase()}... SUCCESS`;
+                logBg.appendChild(div);
+                if (logBg.childNodes.length > 6) logBg.removeChild(logBg.firstChild);
+            }
+        }
+
         const bgm = new Audio('bgm.mp3');
         bgm.loop = true;
         bgm.volume = 0.3;
@@ -296,11 +318,8 @@
             document.getElementById('vol-value').innerText = val + "%";
         }
 
-        // [추가] 메뉴 클릭 핸들러
         function handleMenu(type) {
-            playSystemSound(); // 클릭 효과음
-            
-            // 시스템 로그에 기록 남기기
+            playSystemSound();
             const logBg = document.getElementById('system-log-bg');
             const div = document.createElement('div');
             div.style.color = "var(--accent-blue)";
@@ -308,14 +327,9 @@
             logBg.appendChild(div);
             if (logBg.childNodes.length > 6) logBg.removeChild(logBg.firstChild);
 
-            if(type === 'DASHBOARD') {
-                alert("DASHBOARD: 시스템 통합 상태가 양호합니다.");
-            } else if(type === 'STORAGE') {
-                const count = document.getElementById('post-count').innerText;
-                alert(`STORAGE: ${count} 항목이 데이터베이스에 안전하게 보관 중입니다.`);
-            } else if(type === 'NETWORK') {
-                alert("NETWORK: Firebase 실시간 연결이 활성화되어 있습니다.");
-            }
+            if(type === 'DASHBOARD') { alert("DASHBOARD: 시스템 통합 상태가 양호합니다."); }
+            else if(type === 'STORAGE') { alert(`STORAGE: ${document.getElementById('post-count').innerText} 항목 보관 중.`); }
+            else if(type === 'NETWORK') { alert("NETWORK: Firebase 실시간 연결 활성화."); }
         }
 
         let lastMessageKey = null;
@@ -325,15 +339,12 @@
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
-
                 oscillator.type = 'sine';
                 oscillator.frequency.setValueAtTime(850, audioCtx.currentTime);
                 gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
-
                 oscillator.start();
                 oscillator.stop(audioCtx.currentTime + 0.1);
             } catch (e) { console.log("Sound interaction required"); }
@@ -342,7 +353,7 @@
         function createLogLine() {
             const logBg = document.getElementById('system-log-bg');
             if(!logBg) return;
-            const lines = ["SYNC_SUCCESS", "ENCRYPT_OP_04", "NYA_PROTOCOL_ACT", "HEARTBEAT_STABLE", "PACKET_RECV_" + Math.floor(Math.random() * 999)];
+            const lines = ["SYNC_SUCCESS", "ENCRYPT_OP_04", "HEARTBEAT_STABLE", "PACKET_RECV_" + Math.floor(Math.random() * 999)];
             const div = document.createElement('div');
             div.innerText = `> ${lines[Math.floor(Math.random() * lines.length)]}`;
             logBg.appendChild(div);
@@ -371,9 +382,7 @@
                 if (data) {
                     const keys = Object.keys(data);
                     const latestKey = keys[keys.length - 1];
-                    if (lastMessageKey && lastMessageKey !== latestKey) {
-                        playSystemSound();
-                    }
+                    if (lastMessageKey && lastMessageKey !== latestKey) { playSystemSound(); }
                     lastMessageKey = latestKey;
                 }
                 renderComments(data);
@@ -386,7 +395,6 @@
         function saveComment() {
             const text = commentInput.value.trim();
             if (!text) return;
-
             const newPost = {
                 id: Date.now(),
                 senderType: session.type,
@@ -394,7 +402,6 @@
                 content: text,
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             };
-
             chatRef.push(newPost);
             commentInput.value = '';
         }
@@ -402,16 +409,12 @@
         function renderComments(data) {
             postList.innerHTML = '';
             if (!data) return;
-
             const entries = Object.entries(data);
             document.getElementById('post-count').innerText = `MEMORIES: ${String(entries.length).padStart(2, '0')}`;
-
             entries.forEach(([key, post]) => {
                 const li = document.createElement('li');
                 const isMe = post.senderType === session.type;
-                const alignClass = isMe ? 'me' : 'other';
-                
-                li.className = `post-item ${alignClass}`;
+                li.className = `post-item ${isMe ? 'me' : 'other'}`;
                 li.innerHTML = `
                     ${isMe ? `<div class="delete-btn" onclick="deleteMessage('${key}')">✕</div>` : ''}
                     <div class="post-sender">${post.senderName}</div>
@@ -424,18 +427,14 @@
         }
 
         function deleteMessage(key) {
-            if (confirm("이 기록을 파기하시겠습니까?")) {
-                database.ref('nya_chat_history/' + key).remove();
-            }
+            if (confirm("이 기록을 파기하시겠습니까?")) { database.ref('nya_chat_history/' + key).remove(); }
         }
 
         commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
         function updateClock() {
             const now = new Date();
-            const timeEl = document.getElementById('current-time');
-            const dateEl = document.getElementById('current-date');
-            if(timeEl) timeEl.textContent = now.toLocaleTimeString('en-GB');
-            if(dateEl) dateEl.textContent = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('en-GB');
+            document.getElementById('current-date').textContent = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
         }
         setInterval(updateClock, 1000); updateClock();
     </script>
