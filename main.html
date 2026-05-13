@@ -82,7 +82,6 @@
 
         #session-icon { width:55px; height:55px; margin-bottom:15px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
 
-        /* 사용자 이름 클릭 스타일 추가 */
         #session-name {
             cursor: pointer;
             transition: 0.3s;
@@ -273,7 +272,6 @@
         let session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
-        // [추가] 닉네임 변경 함수
         function changeNickname() {
             const newName = prompt("새로운 사용자 이름을 입력하세요:", session.name);
             if (newName && newName.trim() !== "") {
@@ -281,7 +279,6 @@
                 localStorage.setItem('nya_current_session', JSON.stringify(session));
                 document.getElementById('session-name').innerText = session.name;
                 
-                // 시스템 로그 기록
                 const logBg = document.getElementById('system-log-bg');
                 const div = document.createElement('div');
                 div.style.color = "var(--main-pink)";
@@ -377,7 +374,8 @@
                 }
             }, 800);
 
-            chatRef.on('value', (snapshot) => {
+            // [수정 포인트] limitToLast(30) 적용: 최신 30개 데이터만 리슨
+            chatRef.limitToLast(30).on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     const keys = Object.keys(data);
@@ -410,7 +408,10 @@
             postList.innerHTML = '';
             if (!data) return;
             const entries = Object.entries(data);
+            
+            // UI 카운트는 현재 보여지는 개수 혹은 전체 개수를 상황에 맞게 표시
             document.getElementById('post-count').innerText = `MEMORIES: ${String(entries.length).padStart(2, '0')}`;
+            
             entries.forEach(([key, post]) => {
                 const li = document.createElement('li');
                 const isMe = post.senderType === session.type;
