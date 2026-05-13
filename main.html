@@ -278,12 +278,22 @@
         let session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
+        // --- 수정된 프로필 업데이트 로직 ---
         function updateProfile() {
             const nameVal = document.getElementById('edit-name').value.trim();
             const iconVal = document.getElementById('edit-icon').value.trim();
+            
             if(nameVal) session.name = nameVal;
             if(iconVal) session.icon = iconVal;
+            
+            // 1. 현재 세션 업데이트 (브라우저 유지)
             localStorage.setItem('nya_current_session', JSON.stringify(session));
+            
+            // 2. 전체 유저 데이터 세트 업데이트 (로그인 화면 복구용)
+            // 'me' 또는 'other' 타입에 맞는 원본 세션 데이터도 함께 갱신합니다.
+            const userTypeKey = (session.type === 'me') ? 'nya_me_session' : 'nya_other_session';
+            localStorage.setItem(userTypeKey, JSON.stringify(session));
+            
             renderProfile();
         }
 
@@ -324,7 +334,7 @@
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800; // 성능을 위해 최대 너비 제한
+                    const MAX_WIDTH = 800; 
                     let width = img.width;
                     let height = img.height;
                     if (width > MAX_WIDTH) {
@@ -335,7 +345,7 @@
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    const compressedData = canvas.toDataURL('image/jpeg', 0.7); // 압축 전송
+                    const compressedData = canvas.toDataURL('image/jpeg', 0.7); 
                     sendDirectMessage(compressedData);
                 };
                 img.src = e.target.result;
@@ -353,7 +363,6 @@
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             });
         }
-        // ------------------------------------------
 
         const bgm = new Audio('bgm.mp3');
         bgm.loop = true;
