@@ -34,124 +34,104 @@
             overflow: hidden;
         }
 
-        /* --- [MODIFIED] 배경 여백 로그창 --- */
-        .ambient-log-layer {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            width: 400px;
-            height: auto;
-            pointer-events: none; /* 클릭 방해 금지 */
-            z-index: 1;
-            font-family: 'Courier New', monospace;
-            font-size: 0.75rem;
-            color: var(--main-pink);
-            opacity: 0.4; /* 배경처럼 은은하게 */
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
+        /* --- [NEW] 부팅 로더 레이어 --- */
+        #boot-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #050508; z-index: 9999; display: flex;
+            justify-content: center; align-items: center;
+            font-family: 'Courier New', monospace; color: var(--main-pink);
+            transition: opacity 0.5s ease;
         }
 
-        .log-line {
-            animation: logFadeIn 1s ease-out forwards;
-            white-space: nowrap;
-            text-shadow: 0 0 5px var(--main-pink);
+        /* --- 배경 여백 로그창 --- */
+        .ambient-log-layer {
+            position: fixed; bottom: 30px; left: 30px; width: 400px;
+            height: auto; pointer-events: none; z-index: 1;
+            font-family: 'Courier New', monospace; font-size: 0.75rem;
+            color: var(--main-pink); opacity: 0.4; display: flex;
+            flex-direction: column; gap: 5px;
         }
+
+        .log-line { animation: logFadeIn 1s ease-out forwards; white-space: nowrap; text-shadow: 0 0 5px var(--main-pink); }
 
         @keyframes logFadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- 메인 터미널 박스 --- */
+        /* --- [MODIFIED] 메인 터미널 박스 애니메이션 --- */
         .terminal-frame {
-            width: 85vw;
-            height: 80vh;
-            max-width: 1100px;
+            width: 85vw; height: 80vh; max-width: 1100px;
             background: var(--panel-bg);
             border: 1px solid rgba(255, 126, 185, 0.3);
             border-radius: 60px 20px 60px 20px;
             backdrop-filter: blur(25px);
-            display: flex;
-            position: relative;
-            z-index: 10; /* 로그보다 위에 위치 */
+            display: flex; position: relative; z-index: 10;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
             overflow: hidden;
+            
+            /* 스캔라인 부팅 애니메이션 */
+            transform-origin: center;
+            animation: terminalScanOpen 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+        }
+
+        @keyframes terminalScanOpen {
+            0% { transform: scaleY(0); opacity: 0; }
+            40% { transform: scaleY(0.005); opacity: 1; background: var(--main-pink); }
+            100% { transform: scaleY(1); opacity: 1; }
         }
 
         .terminal-frame::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 3px;
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
             background: linear-gradient(90deg, transparent, var(--main-pink), var(--main-purple), transparent);
             box-shadow: 0 0 15px var(--main-pink);
         }
 
         /* 사이드바 */
         .sidebar {
-            width: 280px;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            flex-direction: column;
-            padding: 40px;
-            background: rgba(0, 0, 0, 0.3);
+            width: 280px; border-right: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex; flex-direction: column; padding: 40px; background: rgba(0, 0, 0, 0.3);
         }
 
         .profile-hex {
-            width: 80px; height: 80px;
-            margin: 0 auto 20px;
+            width: 80px; height: 80px; margin: 0 auto 20px;
             background: linear-gradient(135deg, var(--main-pink), var(--main-purple));
-            border-radius: 25px 10px;
-            display: flex; justify-content: center; align-items: center;
+            border-radius: 25px 10px; display: flex; justify-content: center; align-items: center;
             font-size: 2.5rem;
         }
 
         .nav-menu { list-style: none; padding: 0; margin-top: 30px; flex-grow: 1; }
         .nav-item {
-            padding: 15px;
-            margin-bottom: 8px;
-            border-radius: 10px 20px;
-            cursor: pointer;
-            font-family: var(--font-light);
-            color: rgba(255, 255, 255, 0.4);
-            transition: 0.3s;
+            padding: 15px; margin-bottom: 8px; border-radius: 10px 20px;
+            cursor: pointer; font-family: var(--font-light); color: rgba(255, 255, 255, 0.4); transition: 0.3s;
         }
         .nav-item:hover, .nav-item.active { color: var(--main-pink); background: rgba(255, 126, 185, 0.1); }
 
         /* 메인 콘텐츠 */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 50px;
-        }
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 50px; }
 
-        .top-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 40px;
-        }
-
+        .top-info { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
         #current-time { font-size: 2.5rem; font-weight: bold; text-shadow: 0 0 10px var(--main-pink); }
         #current-date { font-size: 1rem; color: var(--accent-blue); opacity: 0.8; }
 
-        .action-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+        /* 제목 글리치 효과 */
+        .glitch-title {
+            margin: 0; letter-spacing: 2px; color: var(--main-pink);
+            animation: titleGlitch 1s steps(5) 1.2s both;
         }
+
+        @keyframes titleGlitch {
+            0% { clip-path: inset(50% 0 50% 0); }
+            20% { clip-path: inset(20% 0 80% 0); transform: translateX(-5px); }
+            40% { clip-path: inset(80% 0 10% 0); transform: translateX(5px); }
+            60% { clip-path: inset(0% 0 0% 0); }
+        }
+
+        .action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
         .action-card {
-            height: 150px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 30px 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding-left: 30px;
-            cursor: pointer;
-            transition: 0.3s;
+            height: 150px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px 10px; display: flex; flex-direction: column; justify-content: center;
+            padding-left: 30px; cursor: pointer; transition: 0.3s;
         }
         .action-card:hover { border-color: var(--main-pink); transform: translateY(-3px); }
 
@@ -161,6 +141,10 @@
     </style>
 </head>
 <body>
+
+    <div id="boot-loader">
+        <div id="loader-text">> AUTHENTICATING...</div>
+    </div>
 
     <div class="ambient-log-layer" id="ambient-logs">
         <div class="log-line">>> SYSTEM READY. INITIALIZING AMBIENT LOGS...</div>
@@ -187,7 +171,7 @@
                     <div id="current-date">LOADING...</div>
                     <div id="current-time">00:00:00</div>
                 </div>
-                <h2 style="margin: 0; letter-spacing: 2px; color: var(--main-pink);">CORE TERMINAL</h2>
+                <h2 class="glitch-title">CORE TERMINAL</h2>
             </div>
 
             <div class="action-grid">
@@ -202,6 +186,22 @@
     </div>
 
     <script>
+        // 부팅 로더 제어
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('boot-loader');
+            const text = document.getElementById('loader-text');
+            
+            setTimeout(() => {
+                text.innerHTML = "> ACCESS GRANTED.";
+                text.style.color = "var(--accent-blue)";
+                
+                setTimeout(() => {
+                    loader.style.opacity = "0";
+                    setTimeout(() => loader.remove(), 500);
+                }, 400);
+            }, 600);
+        });
+
         // 1. 실시간 시계
         function updateClock() {
             const now = new Date();
@@ -237,15 +237,13 @@
             
             logLayer.appendChild(logLine);
 
-            // 여백이 너무 차지하지 않게 최대 5줄 유지
             if (logLayer.childNodes.length > 5) {
                 logLayer.removeChild(logLayer.firstChild);
             }
         }
 
-        // 30초(30000ms)마다 로그 생성
         setInterval(addAmbientLog, 30000); 
-        addAmbientLog(); // 초기 실행
+        addAmbientLog();
     </script>
 </body>
 </html>
