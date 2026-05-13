@@ -86,12 +86,29 @@
 
         .main-content { flex: 1; display: flex; flex-direction: column; padding: 40px; overflow: hidden; }
 
-        /* --- [게시판 디자인] --- */
-        .system-board {
-            flex: 1; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px 5px; padding: 25px; display: flex; flex-direction: column;
-            animation: fadeInBoard 1s ease-out 1.2s both;
-        }
+      /* --- [게시판 디자인 수정] --- */
+.system-board {
+    /* flex: 1 대신 고정 높이 비율 설정 (60% 정도 사용) */
+    height: 60%; 
+    background: rgba(0, 0, 0, 0.2); 
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 25px 5px; 
+    padding: 25px; 
+    display: flex; 
+    flex-direction: column;
+    margin-bottom: 40px; /* 아래 남는 공간 확보 */
+    animation: fadeInBoard 1s ease-out 1.2s both;
+}
+
+/* 아래 여백에 추가적인 요소가 들어갈 자리를 시각적으로 확인하기 위한 마진 확보 */
+.main-content { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    padding: 40px; 
+    overflow: hidden; 
+    justify-content: flex-start; /* 위쪽부터 정렬 */
+}
 
         .board-header { 
             display: flex; justify-content: space-between; align-items: center;
