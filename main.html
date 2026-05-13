@@ -107,30 +107,30 @@
         }
         .setting-input:focus { border-color: var(--main-pink); }
 
-        /* --- [디자인 수정 시작] 뮤직 플레이어 화살 디자인 --- */
+        /* --- [디자인 수정] 뮤직 플레이어 화살 디자인 시스템 --- */
         .music-section { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
 
         .arrow-player {
             display: flex; align-items: center; width: 100%; height: 50px; position: relative; margin-bottom: 10px;
         }
 
-        /* 깔끔한 세모 화살 깃털 (재생/정지) */
+        /* 화살 깃털 (재생/정지 버튼): 크기를 더 줄이고 조화로운 세모로 수정 */
         .arrow-vane {
-            width: 24px; height: 24px; background: var(--accent-blue);
+            width: 18px; height: 18px; background: var(--accent-blue);
             clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
             cursor: pointer; transition: 0.3s; z-index: 10;
         }
         .arrow-vane.playing {
             background: var(--main-pink);
-            clip-path: polygon(10% 0%, 40% 0%, 40% 100%, 10% 100%, 60% 0%, 90% 0%, 90% 100%, 60% 100%);
+            clip-path: polygon(15% 0%, 40% 0%, 40% 100%, 15% 100%, 60% 0%, 85% 0%, 85% 100%, 60% 100%);
             filter: drop-shadow(0 0 8px var(--main-pink));
         }
 
-        /* 화살대 및 진행도 */
+        /* 화살대 */
         .arrow-shaft-container {
-            flex: 1; height: 30px; display: flex; align-items: center; cursor: pointer; position: relative; margin: 0 4px;
+            flex: 1; height: 30px; display: flex; align-items: center; cursor: pointer; position: relative; margin: 0 5px;
         }
-        .arrow-shaft-bg { width: 100%; height: 2px; background: rgba(255, 255, 255, 0.1); position: relative; }
+        .arrow-shaft-bg { width: 100%; height: 1.5px; background: rgba(255, 255, 255, 0.15); position: relative; }
         .arrow-shaft-fill { 
             height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-blue), var(--main-pink)); 
             position: relative; transition: width 0.1s linear; 
@@ -138,32 +138,32 @@
 
         /* 진행도 노브 (작은 원형) */
         .arrow-circle-knob {
-            width: 8px; height: 8px; background: #fff; border-radius: 50%;
-            position: absolute; right: -4px; top: 50%;
+            width: 6px; height: 6px; background: #fff; border-radius: 50%;
+            position: absolute; right: -3px; top: 50%;
             transform: translateY(-50%);
-            box-shadow: 0 0 10px var(--main-pink);
+            box-shadow: 0 0 8px var(--main-pink);
         }
 
-        /* 90도 누운 하트 화살촉 */
+        /* 화살촉: 왼쪽으로 90도 기울인 하트 (날카로운 촉 모양) */
         .arrow-point-heart {
-            width: 14px; height: 14px; background: var(--main-pink);
-            transform: rotate(135deg); /* 90도 누운 하트 각도 */
-            position: relative; flex-shrink: 0; margin-left: 5px;
-            filter: drop-shadow(2px -2px 5px var(--main-pink));
+            width: 12px; height: 12px; background: var(--main-pink);
+            transform: rotate(-45deg); /* 왼쪽으로 90도 기운 하트 각도 (표준 하트 45도 기준) */
+            position: relative; flex-shrink: 0; margin-left: 2px;
+            filter: drop-shadow(0 0 5px var(--main-pink));
         }
         .arrow-point-heart::before, .arrow-point-heart::after {
-            content: ''; width: 14px; height: 14px; background: var(--main-pink); border-radius: 50%; position: absolute;
+            content: ''; width: 12px; height: 12px; background: var(--main-pink); border-radius: 50%; position: absolute;
         }
-        .arrow-point-heart::before { left: -7px; top: 0; }
-        .arrow-point-heart::after { left: 0; top: -7px; }
+        .arrow-point-heart::before { left: -6px; top: 0; }
+        .arrow-point-heart::after { left: 0; top: -6px; }
 
         .beating .arrow-point-heart { animation: point-pulse 0.8s infinite; }
         @keyframes point-pulse {
-            0% { scale: 1; }
-            50% { scale: 1.2; }
-            100% { scale: 1; }
+            0% { transform: rotate(-45deg) scale(1); }
+            50% { transform: rotate(-45deg) scale(1.2); }
+            100% { transform: rotate(-45deg) scale(1); }
         }
-        /* --- [디자인 수정 끝] --- */
+        /* --- 디자인 수정 끝 --- */
 
         .volume-container { display: flex; flex-direction: column; gap: 6px; }
         .volume-label { font-size: 0.55rem; color: rgba(255, 255, 255, 0.4); display: flex; justify-content: space-between; }
@@ -172,7 +172,7 @@
             outline: none; cursor: pointer;
         }
         #volume-range::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 100px; width: 10px; height: 10px; background: var(--main-pink);
+            -webkit-appearance: none; width: 10px; height: 10px; background: var(--main-pink);
             border-radius: 50%; box-shadow: 0 0 5px var(--main-pink);
         }
 
