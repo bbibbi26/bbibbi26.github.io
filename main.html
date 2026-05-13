@@ -33,15 +33,6 @@
             min-height: 100vh; overflow: hidden;
         }
 
-        /* 시스템 로그 배경 스타일 */
-        #system-log-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 1; opacity: 0.4;
-            font-family: 'Courier New', monospace; font-size: 10px;
-            color: var(--main-pink); overflow: hidden; line-height: 1.2;
-            padding: 20px; box-sizing: border-box;
-        }
-
         .terminal-frame {
             width: 85vw; height: 80vh; max-width: 1000px;
             position: relative; z-index: 10;
@@ -87,13 +78,31 @@
             justify-content:center; font-size:1.5rem;
         }
 
+        /* --- [수정] 사이드바 하단 로그 영역 --- */
+        #system-log-container {
+            margin-top: auto; padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Courier New', monospace; font-size: 9px;
+            color: var(--accent-blue); opacity: 0.6;
+            max-height: 100px; overflow: hidden;
+        }
+
         .main-content { flex: 1; display: flex; flex-direction: column; padding: 40px; overflow: hidden; }
+
         .system-board { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- [복구] 상단 상태 문구 --- */
+        .board-header {
+            font-size: 0.65rem; color: var(--main-pink); margin-bottom: 15px;
+            letter-spacing: 1px; opacity: 0.8;
+        }
 
         .post-list { 
             list-style: none; padding: 5px; margin: 0; overflow-y: auto; 
             display: flex; flex-direction: column; gap: 12px;
             scroll-behavior: smooth;
+            /* --- [추가] 하단 여백 확보 --- */
+            padding-bottom: 40px; 
         }
 
         .post-item {
@@ -121,7 +130,11 @@
         }
         .me .post-info { flex-direction: row-reverse; }
 
-        .input-area { display: flex; gap: 10px; margin-top: 25px; }
+        .input-area { 
+            display: flex; gap: 10px; margin-top: 10px; 
+            background: var(--panel-bg); padding-top: 15px;
+        }
+        
         #comment-input {
             flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 15px; padding: 15px; color: #fff; font-family: var(--font-light); outline: none;
@@ -151,8 +164,6 @@
 </head>
 <body>
 
-    <div id="system-log-bg"></div>
-
     <div id="boot-loader"><div id="loader-text">> INITIALIZING_SECURE_CONNECTION...</div></div>
 
     <div class="terminal-frame">
@@ -166,6 +177,7 @@
                     > STORAGE<br>
                     > NETWORK
                 </div>
+                <div id="system-log-container"></div>
             </aside>
 
             <main class="main-content">
@@ -178,8 +190,10 @@
                 </div>
 
                 <section class="system-board">
+                    <div class="board-header">> CONNECTION_ESTABLISHED // DATA_STREAM_READY</div>
+                    
                     <ul class="post-list" id="post-list"></ul>
-                    <div style="flex:1;"></div> 
+                    
                     <div class="input-area">
                         <input type="text" id="comment-input" placeholder="여기에 기록을 남겨주세요..." maxlength="50">
                         <button class="save-btn" onclick="saveComment()">SAVE</button>
@@ -212,21 +226,19 @@
         const session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
+        // --- [수정] 사이드바 로그 생성 로직 (16초 주기) ---
         function createLogLine() {
-            const logBg = document.getElementById('system-log-bg');
+            const logContainer = document.getElementById('system-log-container');
             const lines = [
-                "FETCHING_DATA_FROM_CLOUD...", "SYNC_SUCCESSFUL", "ENCRYPTING_SESSION...",
-                "NYA_PROTOCOL_ACTIVE", "HEARTBEAT_STABLE", "NODE_CONNECTED: " + Math.random().toString(16).substr(2, 8),
-                "LATENCY: " + Math.floor(Math.random() * 50) + "ms", "MEMORY_USAGE: " + (Math.random() * 100).toFixed(2) + "%"
+                "SYNC_SUCCESS", "ENCRYPT_OP_04", "NYA_PROTOCOL_ACT", "HEARTBEAT_STABLE", 
+                "NODE_CONN_" + Math.random().toString(16).substr(2, 4).toUpperCase(),
+                "PING_" + Math.floor(Math.random() * 50) + "ms"
             ];
-            const p = document.createElement('div');
-            p.innerText = `> ${lines[Math.floor(Math.random() * lines.length)]}`;
-            logBg.appendChild(p);
-            if (logBg.childNodes.length > 50) logBg.removeChild(logBg.firstChild);
-            logBg.scrollTop = logBg.scrollHeight;
+            const div = document.createElement('div');
+            div.innerText = `> ${lines[Math.floor(Math.random() * lines.length)]}`;
+            logContainer.appendChild(div);
+            if (logContainer.childNodes.length > 6) logContainer.removeChild(logContainer.firstChild);
         }
-        
-        // 🔥 주기를 16초(16000ms)로 수정했습니다.
         setInterval(createLogLine, 16000);
 
         window.addEventListener('load', () => {
