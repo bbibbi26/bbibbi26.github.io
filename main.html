@@ -278,7 +278,7 @@
         let session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
-        // --- 수정된 프로필 업데이트 로직 ---
+        // --- 수정된 실시간 프로필 업데이트 로직 ---
         function updateProfile() {
             const nameVal = document.getElementById('edit-name').value.trim();
             const iconVal = document.getElementById('edit-icon').value.trim();
@@ -286,13 +286,14 @@
             if(nameVal) session.name = nameVal;
             if(iconVal) session.icon = iconVal;
             
-            // 1. 현재 세션 업데이트 (브라우저 유지)
+            // 1. 현재 세션 업데이트 (로컬 유지용)
             localStorage.setItem('nya_current_session', JSON.stringify(session));
             
-            // 2. 전체 유저 데이터 세트 업데이트 (로그인 화면 복구용)
-            // 'me' 또는 'other' 타입에 맞는 원본 세션 데이터도 함께 갱신합니다.
-            const userTypeKey = (session.type === 'me') ? 'nya_me_session' : 'nya_other_session';
-            localStorage.setItem(userTypeKey, JSON.stringify(session));
+            // 2. Firebase 데이터베이스 업데이트 (다른 기기 동기화 핵심)
+            database.ref('user_profiles/' + session.type).set({
+                name: session.name,
+                icon: session.icon
+            });
             
             renderProfile();
         }
@@ -301,7 +302,9 @@
             const iconBox = document.getElementById('session-icon');
             const nameBox = document.getElementById('session-name');
             if(!iconBox || !nameBox) return;
+            
             nameBox.innerText = session.name || "Unknown";
+            
             const isImage = session.icon && (session.icon.startsWith('http') || session.icon.startsWith('data:image'));
             if (isImage) {
                 iconBox.innerHTML = `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://via.placeholder.com/55?text=?';">`;
@@ -310,7 +313,7 @@
             }
         }
 
-        // --- 이미지 파일 처리 로직 (방식 2: Base64) ---
+        // --- 이미지 파일 처리 로직 ---
         function handleDrop(e) {
             e.preventDefault();
             const files = e.dataTransfer.files;
@@ -438,6 +441,17 @@
             document.getElementById('edit-name').value = session.name;
             document.getElementById('edit-icon').value = session.icon || '';
             renderProfile();
+
+            // Firebase에서 실시간으로 내 프로필 감시 (다른 기기에서 변경 시 반영)
+            database.ref('user_profiles/' + session.type).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    session.name = data.name;
+                    session.icon = data.icon;
+                    localStorage.setItem('nya_current_session', JSON.stringify(session));
+                    renderProfile();
+                }
+            });
 
             setTimeout(() => {
                 const loader = document.getElementById('boot-loader');
