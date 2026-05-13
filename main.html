@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NYA-PPI / SYSTEM_HOME</title>
+    <title>NYA-PPI / INTEGRATED_TERMINAL</title>
     <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
     
     <style>
         :root {
             --main-pink: #ff7eb9;
             --main-purple: #9d00ff;
-            --dark-bg: #0d0d15;
+            --dark-bg: #050508;
+            --panel-bg: rgba(15, 15, 25, 0.8);
             --accent-blue: #00f3ff;
             --font-main: 'GmarketSansBold', sans-serif;
             --font-light: 'GmarketSansLight', sans-serif;
@@ -18,13 +19,11 @@
 
         body {
             background-color: var(--dark-bg);
-            /* 사이버펑크 느낌의 어두운 그라데이션 배경 */
             background-image: 
-                radial-gradient(circle at 20% 30%, rgba(157, 0, 255, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(255, 126, 185, 0.15) 0%, transparent 50%),
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+                radial-gradient(circle at 50% 50%, rgba(157, 0, 255, 0.1) 0%, transparent 80%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
             color: #fff;
             font-family: var(--font-main);
             margin: 0;
@@ -35,225 +34,193 @@
             overflow: hidden;
         }
 
-        /* --- 움직이는 광택 파티클 --- */
-        .glow-particle {
-            position: absolute;
-            width: 2px; height: 2px;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #fff, 0 0 20px var(--main-pink);
-            animation: float 5s infinite linear;
-            opacity: 0.5;
-            z-index: 0;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0) scale(1); opacity: 0; }
-            50% { opacity: 0.8; }
-            100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
-        }
-
-        /* --- 메인 컨테이너 --- */
-        .main-container {
-            width: 95%;
-            max-width: 1100px;
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 30px;
-            position: relative;
-            z-index: 10;
-            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- 사이버 글래스 카드 (곡선 디자인 계승) --- */
-        .cyber-card {
-            background: rgba(20, 20, 30, 0.7);
+        /* --- 거대한 통합 터미널 박스 --- */
+        .terminal-frame {
+            width: 90vw;
+            height: 85vh;
+            max-width: 1200px;
+            background: var(--panel-bg);
             border: 1px solid rgba(255, 126, 185, 0.3);
-            border-radius: 50px 15px 50px 15px;
-            backdrop-filter: blur(20px);
+            border-radius: 60px 20px 60px 20px; /* 기존 곡률 계승 */
+            backdrop-filter: blur(25px);
+            display: flex;
             position: relative;
-            box-shadow: 0 0 20px rgba(157, 0, 255, 0.1);
-            transition: 0.4s ease;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(157, 0, 255, 0.1);
             overflow: hidden;
+            animation: terminalOpen 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* 카드 모서리 네온 강조 */
-        .cyber-card::before {
+        @keyframes terminalOpen {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* 상단 네온 라인 인디케이터 */
+        .terminal-frame::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 4px;
-            background: linear-gradient(90deg, var(--main-pink), var(--main-purple));
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--main-pink), var(--main-purple), transparent);
             box-shadow: 0 0 15px var(--main-pink);
+            z-index: 10;
         }
 
-        .cyber-card:hover {
-            border-color: var(--main-pink);
-            transform: translateY(-5px);
-            box-shadow: 0 0 30px rgba(255, 126, 185, 0.2);
-        }
-
-        /* --- 사이드바 --- */
+        /* --- 왼쪽 사이드 바 (구분선으로 분리) --- */
         .sidebar {
-            padding: 50px 30px;
+            width: 300px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             flex-direction: column;
-            align-items: center;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-area {
             text-align: center;
+            margin-bottom: 40px;
         }
 
-        .profile-img {
-            width: 130px; height: 130px;
-            border-radius: 40px 10px 40px 10px;
-            background: linear-gradient(135deg, var(--main-purple), var(--main-pink));
-            padding: 4px;
-            margin-bottom: 25px;
-            box-shadow: 0 0 20px rgba(157, 0, 255, 0.4);
-        }
-        .profile-img div {
-            background: var(--dark-bg);
-            width: 100%; height: 100%;
-            border-radius: 36px 8px 36px 8px;
+        .profile-hex {
+            width: 100px; height: 100px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--main-pink), var(--main-purple));
+            border-radius: 30px 10px;
             display: flex; justify-content: center; align-items: center;
-            font-size: 3.5rem;
+            font-size: 3rem;
+            box-shadow: 0 0 20px rgba(255, 126, 185, 0.4);
         }
 
-        .user-name { font-size: 1.8rem; letter-spacing: 2px; text-shadow: 0 0 10px var(--main-pink); }
-        .user-status { font-family: var(--font-light); font-size: 0.8rem; color: var(--accent-blue); margin-top: 10px; }
+        .user-info h3 { margin: 0; font-size: 1.4rem; letter-spacing: 1px; }
+        .user-info p { font-family: var(--font-light); font-size: 0.75rem; color: var(--accent-blue); margin: 5px 0; }
 
-        .menu-list { width: 100%; list-style: none; padding: 0; margin: 40px 0; }
-        .menu-item {
-            padding: 15px;
-            margin-bottom: 12px;
-            border-radius: 12px 25px;
+        .nav-menu {
+            list-style: none; padding: 0; margin: 0;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 10px 20px;
             cursor: pointer;
-            transition: 0.3s;
             font-family: var(--font-light);
-            border: 1px solid transparent;
-            color: rgba(255,255,255,0.7);
-        }
-        .menu-item:hover {
-            background: rgba(255, 126, 185, 0.1);
-            border-color: var(--main-pink);
-            color: #fff;
-            padding-left: 25px;
-        }
-
-        /* --- 메인 콘텐츠 --- */
-        .content-area {
-            display: grid;
-            grid-template-rows: auto 1fr;
-            gap: 30px;
-        }
-
-        .top-banner {
-            padding: 50px;
+            transition: 0.3s;
+            color: rgba(255, 255, 255, 0.6);
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 15px;
         }
-        .top-banner h2 { font-size: 2.5rem; margin: 0; letter-spacing: 4px; color: var(--main-pink); }
 
-        .grid-menu {
+        .nav-item:hover {
+            background: rgba(255, 126, 185, 0.1);
+            color: var(--main-pink);
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(157, 0, 255, 0.2), transparent);
+            border-left: 3px solid var(--main-purple);
+            color: #fff;
+        }
+
+        /* --- 오른쪽 메인 콘텐츠 영역 --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 50px;
+            overflow-y: auto;
+        }
+
+        .header-banner {
+            margin-bottom: 40px;
+        }
+
+        .header-banner h2 { 
+            font-size: 2.8rem; margin: 0; 
+            background: linear-gradient(90deg, #fff, var(--main-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .system-status {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .status-tag {
+            padding: 5px 15px;
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: var(--accent-blue);
+            font-family: var(--font-light);
+        }
+
+        /* 그리드 메뉴 */
+        .action-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: 25px;
         }
 
-        .grid-item {
-            height: 200px;
+        .action-card {
+            height: 160px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px 10px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-        .grid-item span { font-size: 3rem; margin-bottom: 15px; filter: drop-shadow(0 0 10px var(--main-purple)); }
-        .grid-item p { font-size: 1.2rem; letter-spacing: 2px; margin: 0; }
-
-        .logout-btn {
-            margin-top: auto;
-            color: rgba(255,255,255,0.4);
-            font-family: var(--font-light);
-            font-size: 0.9rem;
+            padding-left: 30px;
             cursor: pointer;
             transition: 0.3s;
+            position: relative;
         }
-        .logout-btn:hover { color: var(--main-pink); text-shadow: 0 0 10px var(--main-pink); }
 
-        @media (max-width: 900px) {
-            .main-container { grid-template-columns: 1fr; }
-            body { overflow-y: auto; padding: 40px 0; }
+        .action-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: var(--main-pink);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
+
+        .action-card i { font-size: 2.5rem; margin-bottom: 10px; }
+        .action-card span { font-size: 1.1rem; letter-spacing: 1px; }
+
+        /* 카드 내부 장식 */
+        .action-card::after {
+            content: '>>';
+            position: absolute;
+            right: 30px;
+            bottom: 30px;
+            font-size: 0.8rem;
+            color: var(--main-pink);
+            opacity: 0.3;
+        }
+
+        /* 로그아웃 섹션 */
+        .footer-info {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .disconnect-btn {
+            font-family: var(--font-light);
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .disconnect-btn:hover { color: var(--main-pink); }
+
+        /* 스크롤바 디자인 */
+        .main-content::-webkit-scrollbar { width: 5px; }
+        .main-content::-webkit-scrollbar-thumb { background: var(--main-purple); border-radius: 10px; }
     </style>
 </head>
 <body>
-
-    <script>
-        for (let i = 0; i < 30; i++) {
-            let p = document.createElement('div');
-            p.className = 'glow-particle';
-            p.style.left = Math.random() * 100 + 'vw';
-            p.style.top = Math.random() * 100 + 'vh';
-            p.style.animationDelay = Math.random() * 5 + 's';
-            p.style.animationDuration = (Math.random() * 5 + 5) + 's';
-            document.body.appendChild(p);
-        }
-    </script>
-
-    <div class="main-container">
-        <aside class="sidebar cyber-card">
-            <div class="profile-img">
-                <div>🐱</div>
-            </div>
-            <div class="user-name">섹시코테</div>
-            <div class="user-status">STATUS: ONLINE // UNIT: NYA-PPI</div>
-            
-            <ul class="menu-list">
-                <li class="menu-item">🎀 DATA WARDROBE</li>
-                <li class="menu-item">💌 NEON MESSAGES</li>
-                <li class="menu-item">⚙️ CORE SETTINGS</li>
-                <li class="menu-item">⭐ FAVORITE_DB</li>
-            </ul>
-
-            <div class="logout-btn" onclick="location.href='index.html'">&gt; DISCONNECT_SESSION</div>
-        </aside>
-
-        <main class="content-area">
-            <div class="top-banner cyber-card">
-                <div>
-                    <h2>WELCOME BACK</h2>
-                    <p style="font-family: var(--font-light); color: var(--accent-blue); margin-top: 10px;">
-                        SYSTEM_ID: 0513 // 오늘도 완벽한 하루 되세요.
-                    </p>
-                </div>
-                <div style="font-size: 4rem; opacity: 0.6;">⚡</div>
-            </div>
-
-            <div class="grid-menu">
-                <div class="grid-item cyber-card">
-                    <span>🐾</span>
-                    <p>냥냥 리포트</p>
-                </div>
-                <div class="grid-item cyber-card">
-                    <span>🥊</span>
-                    <p>펀치 스케줄</p>
-                </div>
-                <div class="grid-item cyber-card">
-                    <span>💖</span>
-                    <p>갤러리</p>
-                </div>
-                <div class="grid-item cyber-card">
-                    <span>🧪</span>
-                    <p>비밀 실험실</p>
-                </div>
-            </div>
-        </main>
-    </div>
-
-</body>
-</html>
