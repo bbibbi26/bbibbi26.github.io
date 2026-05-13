@@ -102,10 +102,18 @@
         .user-option {
             flex: 1; padding: 20px 10px; border: 2px solid var(--soft-pink); border-radius: 20px;
             cursor: pointer; transition: 0.3s; background: #fff;
+            display: flex; flex-direction: column; align-items: center; overflow: hidden;
         }
         .user-option:hover { transform: translateY(-5px); border-color: var(--main-pink); background: var(--soft-pink); }
-        .user-avatar { font-size: 2.5rem; margin-bottom: 10px; }
-        .user-name { font-size: 0.8rem; color: var(--main-pink); }
+        
+        /* 아바타 이미지 처리 스타일 추가 */
+        .user-avatar { 
+            width: 50px; height: 50px; font-size: 2.5rem; margin-bottom: 10px; 
+            display: flex; align-items: center; justify-content: center; 
+            overflow: hidden; border-radius: 12px;
+        }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-name { font-size: 0.8rem; color: var(--main-pink); max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         .footer-info { margin-top: 30px; font-size: 0.75rem; color: var(--main-pink); display: flex; justify-content: space-between; opacity: 0.7; font-family: var(--font-light); }
     </style>
@@ -133,13 +141,13 @@
     <div class="user-select-frame" id="user-select-content">
         <h1 style="font-size: 1.5rem; margin-bottom: 20px;">WHO ARE YOU?</h1>
         <div class="user-grid">
-            <div class="user-option" onclick="selectUser('other', 'ADMIN_UNIT', '🐱')">
-                <div class="user-avatar">🐱</div>
-                <div class="user-name">ADMIN</div>
+            <div class="user-option" onclick="selectUser('other')">
+                <div class="user-avatar" id="icon-other">🐱</div>
+                <div class="user-name" id="name-other">ADMIN</div>
             </div>
-            <div class="user-option" onclick="selectUser('me', 'USER_NYA', '🐰')">
-                <div class="user-avatar">🐰</div>
-                <div class="user-name">NYA_PPI</div>
+            <div class="user-option" onclick="selectUser('me')">
+                <div class="user-avatar" id="icon-me">🐰</div>
+                <div class="user-name" id="name-me">NYA_PPI</div>
             </div>
         </div>
         <div class="footer-info" style="justify-content: center;">
@@ -148,6 +156,34 @@
     </div>
 
     <script>
+        // --- 수정된 부분: 저장된 정보를 화면에 반영하는 로직 ---
+        function loadProfiles() {
+            const savedMe = JSON.parse(localStorage.getItem('nya_me_session'));
+            const savedOther = JSON.parse(localStorage.getItem('nya_other_session'));
+
+            if (savedMe) {
+                document.getElementById('name-me').innerText = savedMe.name;
+                renderIcon('icon-me', savedMe.icon);
+            }
+            if (savedOther) {
+                document.getElementById('name-other').innerText = savedOther.name;
+                renderIcon('icon-other', savedOther.icon);
+            }
+        }
+
+        function renderIcon(elementId, iconData) {
+            const container = document.getElementById(elementId);
+            const isImage = iconData.startsWith('http') || iconData.startsWith('data:image');
+            if (isImage) {
+                container.innerHTML = `<img src="${iconData}" onerror="this.src='https://via.placeholder.com/50?text=?';">`;
+            } else {
+                container.innerText = iconData;
+            }
+        }
+
+        // 페이지 로드 시 프로필 업데이트 실행
+        loadProfiles();
+
         const messages = ["섹시코테의 머리칼을 빗어주는 중...", "환상의 옷장 정리중...", "엉킨 꼬리털 풀어내는 중...", "놀 준비 완료.", "접속중..."];
         let progress = 0;
         const progressBar = document.getElementById('progress-bar');
@@ -183,7 +219,6 @@
                 btn.classList.add('access-granted');
                 
                 setTimeout(() => {
-                    // 로그인 프레임 숨기고 사용자 선택 프레임 보여주기
                     document.getElementById('login-content').style.display = 'none';
                     document.getElementById('user-select-content').style.display = 'block';
                 }, 600);
@@ -200,9 +235,17 @@
             }
         }
 
-        // 사용자 선택 후 이동 함수 (추가)
-        function selectUser(type, name, icon) {
-            const sessionData = { type, name, icon };
+        // --- 수정된 부분: 유저 선택 시 저장된 최신 정보를 사용 ---
+        function selectUser(type) {
+            let sessionData;
+            if (type === 'me') {
+                const savedMe = JSON.parse(localStorage.getItem('nya_me_session'));
+                sessionData = savedMe || { type: 'me', name: 'USER_NYA', icon: '🐰' };
+            } else {
+                const savedOther = JSON.parse(localStorage.getItem('nya_other_session'));
+                sessionData = savedOther || { type: 'other', name: 'ADMIN_UNIT', icon: '🐱' };
+            }
+
             localStorage.setItem('nya_current_session', JSON.stringify(sessionData));
             
             document.body.classList.add('fade-out');
