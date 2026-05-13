@@ -78,7 +78,6 @@
             justify-content:center; font-size:1.5rem;
         }
 
-        /* --- [수정] 사이드바 하단 로그 영역 --- */
         #system-log-container {
             margin-top: auto; padding-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -87,52 +86,63 @@
             max-height: 100px; overflow: hidden;
         }
 
-        .main-content { flex: 1; display: flex; flex-direction: column; padding: 40px; overflow: hidden; }
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 40px; overflow: hidden; position: relative; }
 
         .system-board { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* --- [복구] 상단 상태 문구 --- */
         .board-header {
             font-size: 0.65rem; color: var(--main-pink); margin-bottom: 15px;
             letter-spacing: 1px; opacity: 0.8;
         }
 
         .post-list { 
-            list-style: none; padding: 5px; margin: 0; overflow-y: auto; 
-            display: flex; flex-direction: column; gap: 12px;
+            list-style: none; padding: 0 10px; margin: 0; overflow-y: auto; 
+            display: flex; flex-direction: column; gap: 20px;
             scroll-behavior: smooth;
-            /* --- [추가] 하단 여백 확보 --- */
-            padding-bottom: 40px; 
+            padding-bottom: 80px; /* 입력창과 겹치지 않게 넉넉한 하단 여백 */
         }
 
+        /* 메시지 아이템 개별 박스 */
         .post-item {
             max-width: 75%; padding: 12px 18px; position: relative;
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .post-item.other {
-            align-self: flex-start; background: var(--bubble-other);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px 18px 18px 18px;
+            align-self: flex-start; 
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 2px 15px 15px 15px;
         }
 
         .post-item.me {
-            align-self: flex-end; background: var(--bubble-me);
-            border: 1px solid rgba(255, 126, 185, 0.3); border-radius: 18px 4px 18px 18px;
+            align-self: flex-end; 
+            background: rgba(255, 126, 185, 0.12);
+            border: 1px solid rgba(255, 126, 185, 0.3); 
+            border-radius: 15px 2px 15px 15px;
+            text-align: left;
         }
 
-        .post-sender { font-size: 0.6rem; opacity: 0.5; margin-bottom: 4px; }
-        .me .post-sender { text-align: right; }
-        .post-text { font-family: var(--font-light); font-size: 0.9rem; color: #eee; line-height: 1.5; }
+        .post-sender { font-size: 0.65rem; opacity: 0.6; margin-bottom: 6px; font-weight: bold; }
+        .other .post-sender { color: var(--accent-blue); }
+        .me .post-sender { color: var(--main-pink); text-align: right; }
+
+        .post-text { 
+            font-family: var(--font-light); font-size: 0.95rem; 
+            color: #fff; line-height: 1.6; word-break: break-all;
+        }
         
         .post-info {
             display: flex; justify-content: space-between; align-items: center;
-            margin-top: 8px; font-size: 0.65rem; color: rgba(255, 255, 255, 0.3);
+            margin-top: 8px; font-size: 0.6rem; color: rgba(255, 255, 255, 0.3);
         }
         .me .post-info { flex-direction: row-reverse; }
 
         .input-area { 
-            display: flex; gap: 10px; margin-top: 10px; 
-            background: var(--panel-bg); padding-top: 15px;
+            display: flex; gap: 10px; margin-top: 20px; 
+            background: var(--panel-bg); padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
         
         #comment-input {
@@ -145,7 +155,9 @@
             background: linear-gradient(135deg, var(--main-pink), var(--main-purple));
             border: none; color: #fff; padding: 0 25px; border-radius: 15px;
             cursor: pointer; font-family: var(--font-main); font-size: 0.8rem;
+            transition: transform 0.2s ease;
         }
+        .save-btn:active { transform: scale(0.95); }
 
         .disconnect-btn { margin-top: 20px; font-size: 0.7rem; color: rgba(255,255,255,0.2); cursor: pointer; text-align: right; }
         .post-list::-webkit-scrollbar { width: 4px; }
@@ -159,7 +171,7 @@
             transition: opacity 0.5s ease;
         }
 
-        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes popIn { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
     </style>
 </head>
 <body>
@@ -226,18 +238,14 @@
         const session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
-        // --- [수정] 사이드바 로그 생성 로직 (16초 주기) ---
         function createLogLine() {
             const logContainer = document.getElementById('system-log-container');
-            const lines = [
-                "SYNC_SUCCESS", "ENCRYPT_OP_04", "NYA_PROTOCOL_ACT", "HEARTBEAT_STABLE", 
-                "NODE_CONN_" + Math.random().toString(16).substr(2, 4).toUpperCase(),
-                "PING_" + Math.floor(Math.random() * 50) + "ms"
-            ];
+            if (!logContainer) return;
+            const lines = ["SYNC_OK", "ENCRYPT_04", "HEARTBEAT_STABLE", "NODE_ACTIVE", "DATA_STREAM_ON"];
             const div = document.createElement('div');
             div.innerText = `> ${lines[Math.floor(Math.random() * lines.length)]}`;
             logContainer.appendChild(div);
-            if (logContainer.childNodes.length > 6) logContainer.removeChild(logContainer.firstChild);
+            if (logContainer.childNodes.length > 5) logContainer.removeChild(logContainer.firstChild);
         }
         setInterval(createLogLine, 16000);
 
@@ -302,7 +310,8 @@
                 `;
                 postList.appendChild(li);
             });
-            postList.scrollTop = postList.scrollHeight;
+            // 렌더링 후 스크롤을 맨 아래로 보냄
+            setTimeout(() => { postList.scrollTop = postList.scrollHeight; }, 50);
         }
 
         commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
