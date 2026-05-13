@@ -25,66 +25,39 @@
             background-size: 100% 100%, 30px 30px, 30px 30px;
             color: var(--main-pink);
             font-family: var(--font-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; margin: 0; overflow: hidden;
         }
 
-        /* --- 로딩 화면 스타일 --- */
+        /* --- 로딩 화면 --- */
         #loading-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--soft-pink);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--soft-pink); z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 1s ease-out;
         }
+        .loader-box { width: 300px; text-align: left; }
+        .loader-bar { width: 0%; height: 4px; background: var(--main-pink); box-shadow: 0 0 15px var(--main-pink); margin: 15px 0; transition: width 0.5s; }
+        .loading-text { font-family: var(--font-light); font-size: 0.9rem; letter-spacing: 1px; margin-bottom: 5px; height: 20px; }
 
-        .loader-box {
-            width: 300px;
-            text-align: left;
-        }
-
-        .loader-bar {
-            width: 0%;
-            height: 4px;
-            background: var(--main-pink);
-            box-shadow: 0 0 15px var(--main-pink);
-            margin: 15px 0;
-            transition: width 0.5s;
-        }
-
-        .loading-text {
-            font-family: var(--font-light);
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-            height: 20px;
-        }
-
-        /* --- 로그인 프레임 (모서리 곡선 + 입체감 강화) --- */
+        /* --- 로그인 프레임 (자연스러운 테두리 그라데이션 적용) --- */
         .login-frame {
             display: none;
             position: relative;
             width: 380px;
             padding: 60px 40px;
-            background: rgba(255, 255, 255, 0.95);
             
-            /* 모서리 둥글게 (비대칭 곡선으로 세련미 추가) */
-            border: 2px solid rgba(255, 126, 185, 0.3);
+            /* [수정 포인트] 배경과 테두리를 하나로 합침 */
+            background-color: rgba(255, 255, 255, 0.95);
+            border: 3px solid transparent;
             border-radius: 50px 15px 50px 15px;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), 
+                              linear-gradient(90deg, var(--main-pink), var(--accent-blue));
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
             
-            /* 다중 그림자로 입체감 형성 (Neumorphism 스타일 가미) */
-            box-shadow: 
-                15px 15px 30px rgba(255, 126, 185, 0.2), 
-                -5px -5px 15px rgba(255, 255, 255, 0.8),
-                inset 2px 2px 5px rgba(255, 255, 255, 0.5);
+            box-shadow: 15px 15px 30px rgba(255, 126, 185, 0.15), 
+                        -5px -5px 15px rgba(255, 255, 255, 0.8);
             
             text-align: center;
             backdrop-filter: blur(15px);
@@ -93,79 +66,43 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        .top-accent {
-            position: absolute; 
-            top: 0; left: 0; width: 100%; height: 8px;
-            background: linear-gradient(90deg, var(--main-pink), var(--accent-blue));
-            border-radius: 50px 15px 0 0; /* 프레임 곡선에 맞춤 */
-        }
+        /* 기존 상단 줄은 투명하게 처리하여 부자연스러움 제거 */
+        .top-accent { display: none; }
 
         h1 {
-            font-size: 3rem; 
-            margin-bottom: 40px;
-            letter-spacing: 6px; 
-            color: var(--main-pink); 
-            text-transform: uppercase;
-            text-shadow: 2px 2px 0px #fff, 0px 4px 10px rgba(255, 126, 185, 0.2);
+            font-size: 3rem; margin-bottom: 40px; letter-spacing: 6px; 
+            color: var(--main-pink); text-transform: uppercase;
+            text-shadow: 2px 2px 0px #fff;
             animation: glitch-anim 3s infinite;
         }
 
         @keyframes glitch-anim {
             0% { transform: none; }
-            10% { transform: skew(1deg); opacity: 0.9; }
+            10% { transform: skew(1.2deg); opacity: 0.9; }
             20% { transform: none; }
             100% { transform: none; }
         }
 
-        /* --- 입력창 입체감 --- */
         input {
-            width: 100%; background: #fff; 
-            border: 2px solid var(--soft-pink);
-            border-radius: 15px;
-            padding: 15px; color: var(--main-pink); font-size: 1.1rem;
+            width: 100%; background: #fff; border: 2px solid var(--soft-pink);
+            border-radius: 15px; padding: 15px; color: var(--main-pink); font-size: 1.1rem;
             text-align: center; outline: none; box-sizing: border-box;
-            font-family: var(--font-main);
-            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.03); /* 안으로 살짝 파인 느낌 */
+            font-family: var(--font-main); box-shadow: inset 2px 2px 5px rgba(0,0,0,0.02);
             transition: 0.3s ease;
         }
+        input:focus { border-color: var(--main-pink); box-shadow: 0 0 10px rgba(255, 126, 185, 0.1); }
 
-        input:focus {
-            border-color: var(--main-pink);
-            box-shadow: 0 0 15px rgba(255, 126, 185, 0.15);
-            transform: translateY(-1px);
-        }
-
-        /* --- 버튼 입체감 --- */
         button {
-            width: 100%; margin-top: 25px; padding: 18px; 
-            background: var(--main-pink);
-            border: none; color: #fff; font-size: 1.2rem;
-            letter-spacing: 5px; cursor: pointer; 
-            border-radius: 15px 40px 15px 40px; /* 프레임 디자인 계승 */
-            font-family: var(--font-main);
+            width: 100%; margin-top: 25px; padding: 18px; background: var(--main-pink);
+            border: none; color: #fff; font-size: 1.2rem; letter-spacing: 5px; cursor: pointer; 
+            border-radius: 15px 40px 15px 40px; font-family: var(--font-main);
             transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 8px 20px rgba(255, 126, 185, 0.3);
         }
+        button:hover { background: #ff50a0; transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 25px rgba(255, 126, 185, 0.4); }
+        button:active { transform: translateY(0px) scale(0.98); }
 
-        button:hover { 
-            background: #ff50a0; 
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 12px 25px rgba(255, 126, 185, 0.4);
-        }
-
-        button:active {
-            transform: translateY(0px) scale(0.98);
-        }
-
-        .footer-info { 
-            margin-top: 30px; 
-            font-size: 0.75rem; 
-            color: var(--main-pink); 
-            display: flex; 
-            justify-content: space-between; 
-            opacity: 0.7;
-            font-family: var(--font-light);
-        }
+        .footer-info { margin-top: 30px; font-size: 0.75rem; color: var(--main-pink); display: flex; justify-content: space-between; opacity: 0.7; font-family: var(--font-light); }
     </style>
 </head>
 <body>
@@ -179,7 +116,6 @@
     </div>
 
     <div class="login-frame" id="login-content">
-        <div class="top-accent"></div>
         <h1>냥냥펀치</h1>
         <input type="password" id="passcode" placeholder="PASSCODE_REQUIRED">
         <button onclick="validateAccess()">ENTER SYSTEM</button>
@@ -190,14 +126,7 @@
     </div>
 
     <script>
-        const messages = [
-            "섹시코테의 머리칼을 빗어주는 중...",
-            "환상의 옷장 정리중...",
-            "엉킨 꼬리털 풀어내는 중...",
-            "놀 준비 완료.",
-            "접속중..."
-        ];
-        
+        const messages = ["섹시코테의 머리칼을 빗어주는 중...", "환상의 옷장 정리중...", "엉킨 꼬리털 풀어내는 중...", "놀 준비 완료.", "접속중..."];
         let progress = 0;
         const progressBar = document.getElementById('progress-bar');
         const percentText = document.getElementById('percent');
@@ -205,14 +134,9 @@
 
         const interval = setInterval(() => {
             progress += Math.floor(Math.random() * 15) + 5;
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(interval);
-                finishLoading();
-            }
+            if (progress >= 100) { progress = 100; clearInterval(interval); finishLoading(); }
             progressBar.style.width = progress + "%";
             percentText.innerText = progress + "%";
-            
             const msgIndex = Math.floor((progress / 100) * messages.length);
             if (messages[msgIndex]) statusMsg.innerText = messages[msgIndex];
         }, 400);
@@ -229,12 +153,8 @@
 
         function validateAccess() {
             const pass = document.getElementById('passcode').value;
-            if(pass === "1234") {
-                alert("ACCESS GRANTED.");
-                location.href = "main.html";
-            } else {
-                alert("DENIED: INCORRECT PASSCODE.");
-            }
+            if(pass === "1234") { alert("ACCESS GRANTED."); location.href = "main.html"; } 
+            else { alert("DENIED."); }
         }
     </script>
 </body>
