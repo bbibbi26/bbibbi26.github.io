@@ -170,7 +170,7 @@
         .post-sender { font-size: 0.65rem; font-weight: bold; margin-bottom: 4px; color: var(--accent-blue); }
         .me .post-sender { text-align: right; color: var(--main-pink); }
         .post-text { font-family: var(--font-light); font-size: 0.9rem; color: #eee; line-height: 1.4; word-break: break-all; }
-        .post-text img { max-width: 100%; border-radius: 10px; margin-top: 8px; display: block; }
+        .post-text img { max-width: 100%; border-radius: 10px; margin-top: 8px; display: block; border: 1px solid rgba(255,255,255,0.1); }
         .post-info { display: flex; justify-content: flex-end; margin-top: 5px; font-size: 0.6rem; color: rgba(255, 255, 255, 0.3); }
         .other .post-info { justify-content: flex-start; }
 
@@ -200,7 +200,7 @@
         @keyframes popIn { from { opacity: 0; transform: scale(0.98) translateY(5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     </style>
 </head>
-<body>
+<body ondragover="event.preventDefault()" ondrop="handleDrop(event)">
 
     <div id="system-log-bg"></div>
     <div id="boot-loader"><div id="loader-text">> INITIALIZING_SECURE_CONNECTION...</div></div>
@@ -247,7 +247,7 @@
                     <ul class="post-list" id="post-list"></ul>
                     
                     <div class="input-area">
-                        <input type="text" id="comment-input" placeholder="기록을 남겨주세요... (사진은 URL 입력)" maxlength="200">
+                        <input type="text" id="comment-input" placeholder="기록을 남기거나 파일을 끌어넣으세요..." maxlength="200" onpaste="handlePaste(event)">
                         <button class="save-btn" onclick="saveComment()">SAVE</button>
                     </div>
                 </section>
@@ -281,10 +281,8 @@
         function updateProfile() {
             const nameVal = document.getElementById('edit-name').value.trim();
             const iconVal = document.getElementById('edit-icon').value.trim();
-            
             if(nameVal) session.name = nameVal;
             if(iconVal) session.icon = iconVal;
-            
             localStorage.setItem('nya_current_session', JSON.stringify(session));
             renderProfile();
         }
@@ -292,18 +290,70 @@
         function renderProfile() {
             const iconBox = document.getElementById('session-icon');
             const nameBox = document.getElementById('session-name');
-            
             if(!iconBox || !nameBox) return;
-
             nameBox.innerText = session.name || "Unknown";
             const isImage = session.icon && (session.icon.startsWith('http') || session.icon.startsWith('data:image'));
-            
             if (isImage) {
                 iconBox.innerHTML = `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://via.placeholder.com/55?text=?';">`;
             } else {
                 iconBox.innerHTML = session.icon || '👤';
             }
         }
+
+        // --- 이미지 파일 처리 로직 (방식 2: Base64) ---
+        function handleDrop(e) {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            if (files && files[0]) processFile(files[0]);
+        }
+
+        function handlePaste(e) {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let item of items) {
+                if (item.type.indexOf("image") !== -1) {
+                    const blob = item.getAsFile();
+                    processFile(blob);
+                }
+            }
+        }
+
+        function processFile(file) {
+            if (!file.type.match('image.*')) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800; // 성능을 위해 최대 너비 제한
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressedData = canvas.toDataURL('image/jpeg', 0.7); // 압축 전송
+                    sendDirectMessage(compressedData);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function sendDirectMessage(content) {
+            const currentSession = JSON.parse(localStorage.getItem('nya_current_session')) || session;
+            chatRef.push({
+                id: Date.now(),
+                senderType: currentSession.type,
+                senderName: currentSession.name,
+                content: content,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            });
+        }
+        // ------------------------------------------
 
         const bgm = new Audio('bgm.mp3');
         bgm.loop = true;
@@ -405,14 +455,7 @@
         function saveComment() {
             const text = commentInput.value.trim();
             if (!text) return;
-            const currentSession = JSON.parse(localStorage.getItem('nya_current_session')) || session;
-            chatRef.push({
-                id: Date.now(),
-                senderType: currentSession.type,
-                senderName: currentSession.name,
-                content: text,
-                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-            });
+            sendDirectMessage(text);
             commentInput.value = '';
         }
 
@@ -429,9 +472,13 @@
                 
                 let displayContent = post.content;
                 const imgRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i;
+                const base64Regex = /^data:image\/(png|jpeg|webp);base64,/;
+
                 if (imgRegex.test(post.content)) {
                     const url = post.content.match(imgRegex)[0];
                     displayContent = `${post.content.replace(url, '')}<img src="${url}" alt="Image">`;
+                } else if (base64Regex.test(post.content)) {
+                    displayContent = `<img src="${post.content}" alt="Sent Image">`;
                 }
 
                 li.innerHTML = `
