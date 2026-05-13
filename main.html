@@ -96,7 +96,6 @@
             color: var(--accent-blue); text-shadow: 0 0 8px var(--accent-blue); transform: translateX(5px);
         }
 
-        /* [추가] 설정 패널 스타일 */
         .settings-panel {
             margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);
         }
@@ -279,7 +278,6 @@
         let session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
-        // UI 업데이트 및 데이터 저장 (팝업 제거 대응)
         function updateProfile() {
             const nameVal = document.getElementById('edit-name').value.trim();
             const iconVal = document.getElementById('edit-icon').value.trim();
@@ -295,9 +293,13 @@
             const iconBox = document.getElementById('session-icon');
             const nameBox = document.getElementById('session-name');
             
-            nameBox.innerText = session.name;
-            if (session.icon && (session.icon.startsWith('http') || session.icon.startsWith('data:image'))) {
-                iconBox.innerHTML = `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;">`;
+            if(!iconBox || !nameBox) return;
+
+            nameBox.innerText = session.name || "Unknown";
+            const isImage = session.icon && (session.icon.startsWith('http') || session.icon.startsWith('data:image'));
+            
+            if (isImage) {
+                iconBox.innerHTML = `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://via.placeholder.com/55?text=?';">`;
             } else {
                 iconBox.innerHTML = session.icon || '👤';
             }
@@ -374,7 +376,6 @@
                 'linear-gradient(135deg, var(--main-pink), var(--main-purple))' : 
                 'linear-gradient(135deg, #00c6ff, #0072ff)';
             
-            // 입력창 초기값 세팅
             document.getElementById('edit-name').value = session.name;
             document.getElementById('edit-icon').value = session.icon || '';
             renderProfile();
@@ -404,10 +405,11 @@
         function saveComment() {
             const text = commentInput.value.trim();
             if (!text) return;
+            const currentSession = JSON.parse(localStorage.getItem('nya_current_session')) || session;
             chatRef.push({
                 id: Date.now(),
-                senderType: session.type,
-                senderName: session.name,
+                senderType: currentSession.type,
+                senderName: currentSession.name,
                 content: text,
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             });
