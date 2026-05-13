@@ -5,6 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>냥냐/삐용</title>
     <style>
+        /* 1. 기본 마우스 커서 숨기기 및 전체 커서 설정 */
+html, body {
+    cursor: none; /* 기본 화살표를 숨깁니다 */
+}
+
+/* 2. 커스텀 커서 디자인 */
+#custom-cursor {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--main-pink);
+    border-radius: 50%; /* 동그란 모양 (각지게 하려면 0%) */
+    position: fixed;
+    pointer-events: none; /* 마우스 클릭 방해 금지 */
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 10px var(--main-pink);
+    transition: transform 0.1s ease-out;
+}
+
+/* 3. 가운데 점 추가 */
+#custom-cursor::after {
+    content: '';
+    width: 4px;
+    height: 4px;
+    background: var(--accent-blue);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
         :root {
             --main-pink: #ff7eb9;
             --soft-pink: #ffe4f1;
@@ -28,6 +59,7 @@
             margin: 0;
             overflow: hidden;
         }
+        <div id="custom-cursor"></div>
 
         /* --- 로딩 화면 스타일 --- */
         #loading-screen {
@@ -140,6 +172,17 @@
     </div>
 
     <script>
+        const cursor = document.getElementById('custom-cursor');
+document.addEventListener('mousemove', (e) => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+});
+
+// 버튼 위에 올라갔을 때 커서가 커지는 효과
+document.querySelectorAll('button, input').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.style.transform = 'translate(-50%, -50%) scale(1.5)');
+    el.addEventListener('mouseleave', () => cursor.style.transform = 'translate(-50%, -50%) scale(1)');
+});
         // --- 로딩 시뮬레이션 스크립트 ---
         const messages = [
             "CONNECTING TO NETWORK...",
