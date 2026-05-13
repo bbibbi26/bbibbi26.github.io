@@ -3,217 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>냥냐/삐용 - HOME</title>
-    <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
+    <title>냥냐/삐용 - PIXEL HOME</title>
+    <link href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.css" rel="stylesheet">
     
     <style>
         :root {
             --main-pink: #ff7eb9;
+            --dark-pink: #cc5a91; /* 픽셀 그림자용 */
             --soft-pink: #ffe4f1;
-            --cyber-white: #ffffff;
             --accent-blue: #70d6ff;
-            --font-main: 'GmarketSansBold', sans-serif;
-            --font-light: 'GmarketSansLight', sans-serif;
+            --cyber-white: #ffffff;
+            /* 전역 폰트 변경 */
+            --font-pixel: 'DungGeunMo', monospace;
         }
 
         body {
             background-color: var(--soft-pink);
+            /* 배경도 도트 패턴으로 변경 */
             background-image: 
-                radial-gradient(circle at 50% 50%, #ffffff 0%, #ffe4f1 100%),
-                linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
-            background-size: 100% 100%, 30px 30px, 30px 30px;
+                linear-gradient(45deg, #fff 25%, transparent 25%), 
+                linear-gradient(-45deg, #fff 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #fff 75%),
+                linear-gradient(-45deg, transparent 75%, #fff 75%);
+            background-size: 10px 10px;
+            background-position: 0 0, 0 5px, 5px 5px, 5px 0;
             color: var(--main-pink);
-            font-family: var(--font-main);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: var(--font-pixel);
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center; align-items: center;
             min-height: 100vh;
-            box-sizing: border-box;
+            image-rendering: pixelated; /* 이미지 안티앨리어싱 제거 */
         }
 
-        /* --- 메인 컨테이너 --- */
-        .main-container {
+        /* --- 도트 꽃가루 효과 --- */
+        #pixel-confetti-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+        }
+        .pixel-confetti {
+            position: absolute;
+            background: #fff;
+            animation: fall infinite linear;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+        @keyframes fall {
+            0% { top: -20px; opacity: 1; transform: translateX(0); }
+            100% { top: 100vh; opacity: 0; transform: translateX(20px); }
+        }
+
+        /* --- 공통 도트 카드 스타일 --- */
+        .pixel-card {
+            background: var(--cyber-white);
+            border: 4px solid var(--main-pink);
+            border-radius: 0; /* 곡선 제거 */
+            /* 도트 테두리 그라데이션 (픽셀 단위로 끊기게) */
+            border-image: conic-gradient(var(--main-pink) 25%, var(--accent-blue) 25% 50%, var(--main-pink) 50% 75%, var(--accent-blue) 75%) 4;
+            
+            /* 입체적인 픽셀 그림자 */
+            box-shadow: 8px 8px 0 var(--dark-pink);
+            
+            padding: 30px;
+            transition: all 0.2s steps(4); /* 애니메이션도 끊기듯 처리 */
+            position: relative; z-index: 1;
+        }
+
+        /* --- 전체 컨테이너 --- */
+        .main-wrapper {
             width: 100%;
             max-width: 1000px;
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 280px 1fr;
             gap: 25px;
-            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: pixelFadeIn 0.5s steps(5);
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
+        @keyframes pixelFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- 공통 카드 스타일 (로그인 박스 디자인 계승) --- */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            border: 3px solid transparent;
-            border-radius: 40px 15px 40px 15px;
-            background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), 
-                              linear-gradient(135deg, var(--main-pink), var(--accent-blue));
-            background-origin: border-box;
-            background-clip: padding-box, border-box;
-            box-shadow: 10px 10px 25px rgba(255, 126, 185, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            transition: 0.3s;
-        }
-
-        /* --- 사이드바: 프로필 영역 --- */
+        /* --- 사이드바 영역 --- */
         .sidebar {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
         }
 
-        .profile-img {
-            width: 120px;
-            height: 120px;
-            border-radius: 35px 10px 35px 10px;
+        /* 프로필도 픽셀 이미지처럼 처리 */
+        .profile-pixel {
+            width: 80px; height: 80px;
             background: var(--soft-pink);
+            border: 4px solid var(--main-pink);
             margin-bottom: 20px;
-            border: 3px solid var(--main-pink);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 3rem;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 2.5rem;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
         }
 
-        .user-name { font-size: 1.5rem; margin-bottom: 5px; }
-        .user-status { font-family: var(--font-light); font-size: 0.85rem; opacity: 0.8; margin-bottom: 20px; }
-
-        .menu-list { width: 100%; list-style: none; padding: 0; margin: 20px 0; }
+        .menu-list { width: 100%; list-style: none; padding: 0; margin-top: 30px; }
         .menu-item {
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 10px 20px;
+            padding: 15px;
+            margin-bottom: 12px;
+            background: var(--soft-pink);
+            color: var(--main-pink);
             cursor: pointer;
-            transition: 0.3s;
-            font-family: var(--font-light);
-            border-left: 4px solid transparent;
+            border: 2px solid transparent;
+            font-size: 0.95rem;
+            transition: 0.1s;
         }
         .menu-item:hover {
-            background: var(--soft-pink);
-            border-left: 4px solid var(--main-pink);
-            padding-left: 20px;
+            background: var(--main-pink);
+            color: #fff;
+            border: 2px solid var(--cyber-white);
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+            transform: scale(1.05);
         }
 
-        /* --- 메인 콘텐츠 영역 --- */
+        /* --- 콘텐츠 영역 --- */
         .content-area {
-            display: grid;
-            grid-template-rows: auto 1fr;
-            gap: 25px;
+            display: grid; grid-template-rows: auto 1fr; gap: 25px;
         }
 
         .top-banner {
             padding: 40px;
-            color: var(--main-pink);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
+            border-image: conic-gradient(var(--accent-blue) 25%, var(--main-pink) 25% 50%, var(--accent-blue) 50% 75%, var(--main-pink) 75%) 4;
         }
 
-        .top-banner h2 { font-size: 2.2rem; margin: 0; letter-spacing: 2px; }
+        .top-banner h2 { font-size: 2.5rem; margin: 0; letter-spacing: 2px; -webkit-text-stroke: 1px #fff; }
 
         .grid-menu {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
         }
 
         .grid-item {
-            height: 180px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 1.1rem;
-            position: relative;
-            overflow: hidden;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 30px; cursor: pointer;
         }
 
+        /* 도트 호버 효과: 입체적으로 돌출 */
         .grid-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(255, 126, 185, 0.2);
+            transform: translate(-4px, -4px);
+            box-shadow: 12px 12px 0 var(--dark-pink);
+            background-color: var(--soft-pink);
         }
 
-        .grid-item i { font-size: 2.5rem; margin-bottom: 15px; }
+        .grid-item i { font-size: 3rem; margin-bottom: 15px; display: block; image-rendering: pixelated; }
+        .grid-item span { font-size: 1.2rem; }
 
-        /* 하단 로그아웃 버튼 */
-        .logout-btn {
+        .logout-link {
             margin-top: auto;
-            padding: 10px 20px;
             font-size: 0.8rem;
-            color: var(--main-pink);
+            opacity: 0.7;
             cursor: pointer;
-            text-decoration: underline;
-            font-family: var(--font-light);
-            opacity: 0.6;
+            transition: 0.3s;
         }
-        .logout-btn:hover { opacity: 1; }
+        .logout-link:hover { opacity: 1; color: var(--accent-blue); text-decoration: underline; }
 
-        /* 반응형 모바일 */
-        @media (max-width: 850px) {
-            .main-container { grid-template-columns: 1fr; }
-            .sidebar { order: 2; }
-            .content-area { order: 1; }
+        /* 모바일 대응 */
+        @media (max-width: 800px) {
+            .main-wrapper { grid-template-columns: 1fr; }
+            .login-frame { width: 90%; }
         }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <aside class="sidebar glass-card">
-            <div class="profile-img">🐱</div>
-            <div class="user-name">섹시코테</div>
-            <div class="user-status">UNIT: NYA-PPI / STATUS: ONLINE</div>
+    <div id="pixel-confetti-container"></div>
+
+    <div class="main-wrapper">
+        <aside class="sidebar pixel-card">
+            <div class="profile-pixel">🐱</div>
+            <div style="font-size: 1.6rem;">섹시코테</div>
+            <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 5px;">UNIT: NYA-PPI #01</div>
             
             <ul class="menu-list">
-                <li class="menu-item">🎀 MY WARDROBE</li>
-                <li class="menu-item">💌 MESSAGES</li>
-                <li class="menu-item">⚙️ SYSTEM SETTINGS</li>
-                <li class="menu-item">⭐ FAVORITES</li>
+                <li class="menu-item">🎀 스타일 보관함</li>
+                <li class="menu-item">💌 냥냥 메시지</li>
+                <li class="menu-item">⚙️ 시스템 설정</li>
             </ul>
 
-            <div class="logout-btn" onclick="location.href='index.html'">LOGOUT SYSTEM</div>
+            <div class="logout-link" onclick="location.href='index.html'">LOGOUT_SESSION.EXE</div>
         </aside>
 
         <main class="content-area">
-            <div class="top-banner glass-card">
+            <div class="top-banner pixel-card">
                 <div>
-                    <h2>WELCOME BACK!</h2>
-                    <p style="font-family: var(--font-light); margin-top: 10px;">오늘도 냥냥한 하루 되세요.</p>
+                    <h2>WELCOME BACK</h2>
+                    <p style="opacity: 0.8; margin-top: 10px; font-size: 1rem;">시스템 가동 완료! 냥냥펀치 장전!</p>
                 </div>
-                <div style="font-size: 3rem; opacity: 0.5;">🥊</div>
+                <div style="font-size: 4rem;">🥊</div>
             </div>
 
             <div class="grid-menu">
-                <div class="grid-item glass-card">
-                    <span>🐾</span>
-                    <p>냥냥 리포트</p>
+                <div class="grid-item pixel-card">
+                    <i>🐾</i>
+                    <span>리포트</span>
                 </div>
-                <div class="grid-item glass-card">
-                    <span>🥊</span>
-                    <p>펀치 스케줄</p>
+                <div class="grid-item pixel-card">
+                    <i>🏋️</i>
+                    <span>트레이닝</span>
                 </div>
-                <div class="grid-item glass-card">
-                    <span>💖</span>
-                    <p>갤러리</p>
+                <div class="grid-item pixel-card">
+                    <i>🖼️</i>
+                    <span>갤러리</span>
                 </div>
-                <div class="grid-item glass-card">
-                    <span>🧪</span>
-                    <p>기타</p>
+                <div class="grid-item pixel-card">
+                    <i>🔐</i>
+                    <span>비밀공간</span>
                 </div>
             </div>
         </main>
     </div>
 
+    <script>
+        // 👾 도트 꽃가루 생성 함수
+        function createPixelConfetti() {
+            const container = document.getElementById('pixel-confetti-container');
+            if (!container) return;
+            const confetti = document.createElement('div');
+            confetti.classList.add('pixel-confetti');
+
+            // 랜덤한 위치, 각진 크기(5x5, 10x10 등), 속도 설정
+            confetti.style.left = Math.random() * 100 + 'vw'; 
+            const size = (Math.floor(Math.random() * 2) + 1) * 5; // 5 또는 10px
+            confetti.style.width = size + 'px'; 
+            confetti.style.height = size + 'px'; 
+            
+            // 핑크/블루 랜덤 색상
+            confetti.style.background = Math.random() > 0.5 ? '#ff7eb9' : '#70d6ff';
+            
+            confetti.style.animationDuration = Math.random() * 2 + 3 + 's'; 
+
+            container.appendChild(confetti);
+
+            setTimeout(() => { confetti.remove(); }, parseFloat(confetti.style.animationDuration) * 1000);
+        }
+
+        // 픽셀 느낌을 위해 조금 더 느리게 생성
+        setInterval(createPixelConfetti, 150); 
+    </script>
 </body>
 </html>
