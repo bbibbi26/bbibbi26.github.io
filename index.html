@@ -12,7 +12,6 @@
             --soft-pink: #ffe4f1;
             --cyber-white: #ffffff;
             --accent-blue: #70d6ff;
-            /* 폰트 설정: 메인 요소를 Bold로 변경 */
             --font-main: 'GmarketSansBold', sans-serif;
             --font-light: 'GmarketSansLight', sans-serif;
         }
@@ -62,7 +61,6 @@
         }
 
         .loading-text {
-            /* 로딩 텍스트는 가독성을 위해 Light 유지 */
             font-family: var(--font-light);
             font-size: 0.9rem;
             letter-spacing: 1px;
@@ -70,62 +68,94 @@
             height: 20px;
         }
 
-        /* --- 로그인 프레임 --- */
+        /* --- 로그인 프레임 (모서리 곡선 + 입체감 강화) --- */
         .login-frame {
             display: none;
             position: relative;
             width: 380px;
-            padding: 50px 40px;
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid var(--main-pink);
-            box-shadow: 0 0 20px rgba(255, 126, 185, 0.3);
+            padding: 60px 40px;
+            background: rgba(255, 255, 255, 0.95);
+            
+            /* 모서리 둥글게 (비대칭 곡선으로 세련미 추가) */
+            border: 2px solid rgba(255, 126, 185, 0.3);
+            border-radius: 50px 15px 50px 15px;
+            
+            /* 다중 그림자로 입체감 형성 (Neumorphism 스타일 가미) */
+            box-shadow: 
+                15px 15px 30px rgba(255, 126, 185, 0.2), 
+                -5px -5px 15px rgba(255, 255, 255, 0.8),
+                inset 2px 2px 5px rgba(255, 255, 255, 0.5);
+            
             text-align: center;
-            clip-path: polygon(0 0, 100% 0, 100% 88%, 88% 100%, 0 100%);
-            backdrop-filter: blur(10px);
-            animation: fadeIn 1s;
+            backdrop-filter: blur(15px);
+            animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
         .top-accent {
-            position: absolute; top: 0; left: 0; width: 100%; height: 5px;
+            position: absolute; 
+            top: 0; left: 0; width: 100%; height: 8px;
             background: linear-gradient(90deg, var(--main-pink), var(--accent-blue));
+            border-radius: 50px 15px 0 0; /* 프레임 곡선에 맞춤 */
         }
 
         h1 {
             font-size: 3rem; 
             margin-bottom: 40px;
-            letter-spacing: 8px; 
+            letter-spacing: 6px; 
             color: var(--main-pink); 
             text-transform: uppercase;
-            text-shadow: 2px 2px 0px #fff, -2px -2px 0px var(--accent-blue);
+            text-shadow: 2px 2px 0px #fff, 0px 4px 10px rgba(255, 126, 185, 0.2);
             animation: glitch-anim 3s infinite;
         }
 
         @keyframes glitch-anim {
             0% { transform: none; }
-            10% { transform: skew(1deg); opacity: 0.8; }
+            10% { transform: skew(1deg); opacity: 0.9; }
             20% { transform: none; }
             100% { transform: none; }
         }
 
+        /* --- 입력창 입체감 --- */
         input {
-            width: 100%; background: #fff; border: 1px solid var(--main-pink);
+            width: 100%; background: #fff; 
+            border: 2px solid var(--soft-pink);
+            border-radius: 15px;
             padding: 15px; color: var(--main-pink); font-size: 1.1rem;
             text-align: center; outline: none; box-sizing: border-box;
-            border-bottom: 4px solid var(--main-pink);
-            font-family: var(--font-main); /* Bold 적용 */
+            font-family: var(--font-main);
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.03); /* 안으로 살짝 파인 느낌 */
+            transition: 0.3s ease;
         }
 
+        input:focus {
+            border-color: var(--main-pink);
+            box-shadow: 0 0 15px rgba(255, 126, 185, 0.15);
+            transform: translateY(-1px);
+        }
+
+        /* --- 버튼 입체감 --- */
         button {
-            width: 100%; margin-top: 20px; padding: 15px; background: var(--main-pink);
-            border: none; color: #fff; font-size: 1.1rem;
-            letter-spacing: 5px; cursor: pointer; transition: 0.3s;
-            clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
-            font-family: var(--font-main); /* Bold 적용 */
+            width: 100%; margin-top: 25px; padding: 18px; 
+            background: var(--main-pink);
+            border: none; color: #fff; font-size: 1.2rem;
+            letter-spacing: 5px; cursor: pointer; 
+            border-radius: 15px 40px 15px 40px; /* 프레임 디자인 계승 */
+            font-family: var(--font-main);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 20px rgba(255, 126, 185, 0.3);
         }
 
-        button:hover { background: #ff50a0; box-shadow: 0 0 20px rgba(255, 126, 185, 0.6); }
+        button:hover { 
+            background: #ff50a0; 
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 25px rgba(255, 126, 185, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0px) scale(0.98);
+        }
 
         .footer-info { 
             margin-top: 30px; 
@@ -203,7 +233,7 @@
                 alert("ACCESS GRANTED.");
                 location.href = "main.html";
             } else {
-                alert("DENIED.");
+                alert("DENIED: INCORRECT PASSCODE.");
             }
         }
     </script>
