@@ -12,8 +12,8 @@
             --main-purple: #9d00ff;
             --dark-bg: #050508;
             --panel-bg: rgba(15, 15, 25, 0.9);
-            --bubble-me: rgba(255, 126, 185, 0.15); /* 내 말풍선 */
-            --bubble-other: rgba(255, 255, 255, 0.05); /* 상대 말풍선 */
+            --bubble-me: rgba(255, 126, 185, 0.15);
+            --bubble-other: rgba(255, 255, 255, 0.05);
             --accent-blue: #00f3ff;
             --font-main: 'GmarketSansBold', sans-serif;
             --font-light: 'GmarketSansLight', sans-serif;
@@ -113,14 +113,10 @@
         }
         .me .post-info { flex-direction: row-reverse; }
 
-        .del-btn { cursor: pointer; color: var(--main-pink); opacity: 0.5; margin: 0 10px; }
-        .del-btn:hover { opacity: 1; }
-
         .input-area { display: flex; gap: 10px; margin-top: 25px; }
         #comment-input {
             flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 15px; padding: 15px; color: #fff; font-family: var(--font-light); outline: none;
-            transition: 0.3s;
         }
         #comment-input:focus { border-color: var(--main-pink); background: rgba(255, 255, 255, 0.08); }
         
@@ -147,7 +143,7 @@
 </head>
 <body>
 
-    <div id="boot-loader"><div id="loader-text">> INITIALIZING_SECURE_SESSION...</div></div>
+    <div id="boot-loader"><div id="loader-text">> INITIALIZING_SECURE_CONNECTION...</div></div>
 
     <div class="terminal-frame">
         <div class="content-wrapper">
@@ -173,9 +169,7 @@
 
                 <section class="system-board">
                     <ul class="post-list" id="post-list"></ul>
-                    
                     <div style="flex:1;"></div> 
-
                     <div class="input-area">
                         <input type="text" id="comment-input" placeholder="여기에 기록을 남겨주세요..." maxlength="50">
                         <button class="save-btn" onclick="saveComment()">SAVE</button>
@@ -187,100 +181,107 @@
         </div>
     </div>
 
-   <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
-<script>
-    // 1. Firebase 설정 (본인의 Config로 교체하세요!)
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_AUTH_DOMAIN",
-        databaseURL: "YOUR_DATABASE_URL",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_STORAGE_BUCKET",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
-    };
-
-    // Firebase 초기화
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const chatRef = database.ref('nya_chat_history');
-
-    // 2. 세션 확인
-    const session = JSON.parse(localStorage.getItem('nya_current_session'));
-    if (!session) { location.href = 'index.html'; }
-
-    // 3. 페이지 초기 설정
-    window.addEventListener('load', () => {
-        document.getElementById('session-icon').innerText = session.icon;
-        document.getElementById('session-name').innerText = session.name;
-        
-        setTimeout(() => {
-            document.getElementById('boot-loader').style.opacity = "0";
-            setTimeout(() => document.getElementById('boot-loader').remove(), 500);
-        }, 800);
-
-        // 🔥 [실시간 핵심] 데이터가 변경될 때마다 실행됨
-        chatRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            renderComments(data);
-        });
-    });
-
-    const commentInput = document.getElementById('comment-input');
-    const postList = document.getElementById('post-list');
-
-    // 4. 메시지 저장 (서버로 전송)
-    function saveComment() {
-        const text = commentInput.value.trim();
-        if (!text) return;
-
-        const newPost = {
-            id: Date.now(),
-            senderType: session.type,
-            senderName: session.name,
-            content: text,
-            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+    <script>
+        // 1. Firebase 설정 (올려주신 콘솔 정보 적용)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDi9JQLtpp4KaF5mGkf0aApv_fcQP2PpD0",
+            authDomain: "nya-ppi.firebaseapp.com",
+            projectId: "nya-ppi",
+            storageBucket: "nya-ppi.firebasestorage.app",
+            messagingSenderId: "27439633492",
+            appId: "1:27439633492:web:1cd43fd32322f6bc62c9c1",
+            // 데이터베이스 주소 (일반적인 프로젝트 형식)
+            databaseURL: "https://nya-ppi-default-rtdb.firebaseio.com/" 
         };
 
-        // LocalStorage가 아닌 Firebase 서버에 푸시
-        chatRef.push(newPost);
-        commentInput.value = '';
-    }
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const chatRef = database.ref('nya_chat_history');
 
-    // 5. 메시지 렌더링
-    function renderComments(data) {
-        postList.innerHTML = '';
-        if (!data) return;
+        // 2. 세션 데이터 확인
+        const session = JSON.parse(localStorage.getItem('nya_current_session'));
+        if (!session) { location.href = 'index.html'; }
 
-        // Firebase의 객체 데이터를 배열로 변환하여 출력
-        const comments = Object.values(data);
-        document.getElementById('post-count').innerText = `MEMORIES: ${String(comments.length).padStart(2, '0')}`;
+        // 3. 초기화
+        window.addEventListener('load', () => {
+            const iconBox = document.getElementById('session-icon');
+            iconBox.innerText = session.icon;
+            iconBox.style.background = (session.type === 'me') ? 
+                'linear-gradient(135deg, var(--main-pink), var(--main-purple))' : 
+                'linear-gradient(135deg, #00c6ff, #0072ff)';
+            document.getElementById('session-name').innerText = session.name;
 
-        comments.forEach(post => {
-            const li = document.createElement('li');
-            const alignClass = (post.senderType === session.type) ? 'me' : 'other';
-            
-            li.className = `post-item ${alignClass}`;
-            li.innerHTML = `
-                <div class="post-sender">${post.senderName}</div>
-                <div class="post-text">${post.content}</div>
-                <div class="post-info">
-                    <span>${post.time}</span>
-                </div>
-            `;
-            postList.appendChild(li);
+            setTimeout(() => {
+                const loader = document.getElementById('boot-loader');
+                if(loader) {
+                    loader.style.opacity = "0";
+                    setTimeout(() => loader.remove(), 500);
+                }
+            }, 800);
+
+            // 🔥 서버 데이터 실시간 감지 시작
+            chatRef.on('value', (snapshot) => {
+                renderComments(snapshot.val());
+            });
         });
-        postList.scrollTop = postList.scrollHeight;
-    }
 
-    // 엔터키 및 시계 로직 (기존과 동일)
-    commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('current-time').textContent = now.toLocaleTimeString('en-GB');
-        document.getElementById('current-date').textContent = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-    }
-    setInterval(updateClock, 1000); updateClock();
-</script>
+        const commentInput = document.getElementById('comment-input');
+        const postList = document.getElementById('post-list');
+
+        // 4. 저장 (Firebase 전송)
+        function saveComment() {
+            const text = commentInput.value.trim();
+            if (!text) return;
+
+            const newPost = {
+                id: Date.now(),
+                senderType: session.type,
+                senderName: session.name,
+                content: text,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            };
+
+            chatRef.push(newPost);
+            commentInput.value = '';
+        }
+
+        // 5. 렌더링
+        function renderComments(data) {
+            postList.innerHTML = '';
+            if (!data) return;
+
+            const comments = Object.values(data);
+            document.getElementById('post-count').innerText = `MEMORIES: ${String(comments.length).padStart(2, '0')}`;
+
+            comments.forEach(post => {
+                const li = document.createElement('li');
+                const alignClass = (post.senderType === session.type) ? 'me' : 'other';
+                
+                li.className = `post-item ${alignClass}`;
+                li.innerHTML = `
+                    <div class="post-sender">${post.senderName}</div>
+                    <div class="post-text">${post.content}</div>
+                    <div class="post-info">
+                        <span>${post.time}</span>
+                    </div>
+                `;
+                postList.appendChild(li);
+            });
+            postList.scrollTop = postList.scrollHeight;
+        }
+
+        commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
+        function updateClock() {
+            const now = new Date();
+            const timeEl = document.getElementById('current-time');
+            const dateEl = document.getElementById('current-date');
+            if(timeEl) timeEl.textContent = now.toLocaleTimeString('en-GB');
+            if(dateEl) dateEl.textContent = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        setInterval(updateClock, 1000); updateClock();
+    </script>
+</body>
+</html>
