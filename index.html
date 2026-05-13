@@ -27,6 +27,13 @@
             font-family: var(--font-main);
             display: flex; justify-content: center; align-items: center;
             height: 100vh; margin: 0; overflow: hidden;
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+        }
+
+        /* --- 화면 전환 애니메이션용 클래스 --- */
+        body.fade-out {
+            opacity: 0;
+            transform: scale(1.05);
         }
 
         /* --- 로딩 화면 --- */
@@ -40,14 +47,12 @@
         .loader-bar { width: 0%; height: 4px; background: var(--main-pink); box-shadow: 0 0 15px var(--main-pink); margin: 15px 0; transition: width 0.5s; }
         .loading-text { font-family: var(--font-light); font-size: 0.9rem; letter-spacing: 1px; margin-bottom: 5px; height: 20px; }
 
-        /* --- 로그인 프레임 (자연스러운 테두리 그라데이션 적용) --- */
+        /* --- 로그인 프레임 --- */
         .login-frame {
             display: none;
             position: relative;
             width: 380px;
             padding: 60px 40px;
-            
-            /* [수정 포인트] 배경과 테두리를 하나로 합침 */
             background-color: rgba(255, 255, 255, 0.95);
             border: 3px solid transparent;
             border-radius: 50px 15px 50px 15px;
@@ -55,19 +60,14 @@
                               linear-gradient(90deg, var(--main-pink), var(--accent-blue));
             background-origin: border-box;
             background-clip: padding-box, border-box;
-            
             box-shadow: 15px 15px 30px rgba(255, 126, 185, 0.15), 
                         -5px -5px 15px rgba(255, 255, 255, 0.8);
-            
             text-align: center;
             backdrop-filter: blur(15px);
             animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-
-        /* 기존 상단 줄은 투명하게 처리하여 부자연스러움 제거 */
-        .top-accent { display: none; }
 
         h1 {
             font-size: 3rem; margin-bottom: 40px; letter-spacing: 6px; 
@@ -98,9 +98,27 @@
             border-radius: 15px 40px 15px 40px; font-family: var(--font-main);
             transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 8px 20px rgba(255, 126, 185, 0.3);
+            outline: none;
         }
         button:hover { background: #ff50a0; transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 25px rgba(255, 126, 185, 0.4); }
-        button:active { transform: translateY(0px) scale(0.98); }
+        
+        /* 버튼 로딩 상태 스타일 */
+        button.access-granted {
+            background: var(--accent-blue);
+            box-shadow: 0 0 20px var(--accent-blue);
+            transform: scale(0.98);
+        }
+        
+        button.denied {
+            background: #ff4d4d;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
 
         .footer-info { margin-top: 30px; font-size: 0.75rem; color: var(--main-pink); display: flex; justify-content: space-between; opacity: 0.7; font-family: var(--font-light); }
     </style>
@@ -118,7 +136,7 @@
     <div class="login-frame" id="login-content">
         <h1>냥냥펀치</h1>
         <input type="password" id="passcode" placeholder="PASSCODE_REQUIRED">
-        <button onclick="validateAccess()">ENTER SYSTEM</button>
+        <button id="login-btn" onclick="validateAccess()">ENTER SYSTEM</button>
         <div class="footer-info">
             <span>UNIT: NYA-PPI</span>
             <span>SECURE_MODE: ON</span>
@@ -151,11 +169,48 @@
             }, 500);
         }
 
+        // [수정된 로그인 검증 로직]
         function validateAccess() {
-            const pass = document.getElementById('passcode').value;
-            if(pass === "1234") { alert("ACCESS GRANTED."); location.href = "main.html"; } 
-            else { alert("DENIED."); }
+            const passField = document.getElementById('passcode');
+            const btn = document.getElementById('login-btn');
+            const pass = passField.value;
+
+            if(pass === "1234") {
+                // 1. 버튼 상태 업데이트
+                btn.onclick = null; // 중복 클릭 방지
+                btn.innerText = "ACCESS GRANTED";
+                btn.classList.add('access-granted');
+                
+                // 2. 약간의 지연 후 화면 페이드 아웃
+                setTimeout(() => {
+                    document.body.classList.add('fade-out');
+                    
+                    // 3. 애니메이션 종료 후 페이지 이동
+                    setTimeout(() => {
+                        location.href = "main.html";
+                    }, 600);
+                }, 400);
+            } 
+            else {
+                // 틀렸을 경우 팝업 대신 버튼 흔들림 효과
+                btn.innerText = "ACCESS DENIED";
+                btn.classList.add('denied');
+                passField.value = "";
+                passField.focus();
+
+                setTimeout(() => {
+                    btn.classList.remove('denied');
+                    btn.innerText = "ENTER SYSTEM";
+                }, 1500);
+            }
         }
+
+        // 엔터키 지원
+        document.getElementById('passcode').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                validateAccess();
+            }
+        });
     </script>
 </body>
 </html>
