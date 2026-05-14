@@ -371,21 +371,40 @@ body {
 }
 
 /* 파일 창 헤더 디자인 */
-.sticker-container::before {
-    content: "📁 STICKER_FILE_EXPLORER_V1.0";
+/* style.css 에서 .sticker-container::before 부분은 삭제하거나 아래로 대체하세요 */
+
+.sticker-header {
     display: flex;
     align-items: center;
+    justify-content: space-between; /* 제목은 왼쪽, 버튼은 오른쪽 */
     width: 100%;
     height: 45px;
     background: rgba(255, 126, 185, 0.15);
     border-bottom: 1px solid rgba(255, 126, 185, 0.3);
-    padding: 0 25px;
+    padding: 0 20px;
     box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.header-title {
     font-size: 0.75rem;
     color: var(--main-pink);
     letter-spacing: 1px;
     font-family: var(--font-main);
-    flex-shrink: 0;
+}
+
+.header-close {
+    color: var(--main-pink);
+    cursor: pointer;
+    font-size: 0.7rem;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: 0.2s;
+}
+
+.header-close:hover {
+    background: rgba(255, 126, 185, 0.2);
+    text-shadow: 0 0 5px var(--main-pink);
 }
 
 /* [내부 래퍼 수정] */
