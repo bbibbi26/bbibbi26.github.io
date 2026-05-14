@@ -352,22 +352,23 @@ body {
 }
 
 /* [스티커 컨테이너 - 메인 박스를 덮는 팝업 형태] */
+/* [1. 팝업 컨테이너 수정] */
 .sticker-container { 
-    position: fixed; /* absolute가 아닌 fixed여야 터미널 박스를 탈출합니다 */
+    position: fixed; 
     top: 50%; 
     left: 50%; 
     transform: translate(-50%, -50%); 
-    width: 98vw;  /* 화면 너비의 98% */
-    height: 95vh; /* 화면 높이의 95% */
-    display: none; /* handleMenu에서 flex로 변경됨 */
-    z-index: 9999; /* 모든 요소보다 위에 오도록 설정 */
-    background: var(--panel-bg); 
+    width: 96vw; 
+    height: 92vh; 
+    display: none; /* JS에서 flex로 열어줘야 합니다 */
+    z-index: 9999; 
+    background: rgba(15, 15, 25, 0.9); /* 너무 어두우면 투명도를 조절하세요 */
     border: 2px solid var(--main-pink);
     border-radius: 24px;
-    box-shadow: 0 0 100px rgba(0,0,0,0.8);
+    box-shadow: 0 0 60px rgba(0,0,0,0.8);
     backdrop-filter: blur(40px);
     overflow: hidden;
-    flex-direction: column;
+    flex-direction: column; /* 헤더와 바디를 세로로 정렬 */
 }
 
 /* 파일 창 헤더 디자인 */
@@ -388,14 +389,15 @@ body {
     flex-shrink: 0;
 }
 
-/* 내부 스크롤 가능 영역 */
+/* [2. 내부 래퍼 수정 - 여기가 핵심!] */
 #sticker-area-wrapper {
-    flex: 1;
-    overflow: auto;
+    flex: 1; /* 남은 높이를 모두 차지하게 함 */
+    width: 100%;
+    height: 100%; /* 부모 높이를 꽉 채움 */
+    overflow: auto; /* 스크롤 활성화 */
     position: relative;
-    cursor: crosshair;
+    background: rgba(255, 255, 255, 0.02); /* 영역 확인용 미세한 배경색 */
 }
-
 #sticker-area {
     width: 4000px; /* 더 광활한 캔버스 */
     height: 4000px; 
