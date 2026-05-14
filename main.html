@@ -738,19 +738,9 @@
                     canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                     const compressedData = canvas.toDataURL('image/jpeg', 0.7); 
                     
-                    // 팝업 대신 커스텀 UI 흐름 유도 (선택 사항)
-                    if(confirm("이 이미지를 캘린더(STORAGE)에 기록할까요? 취소하면 채팅으로 전송됩니다.")) {
-                        const now = new Date();
-                        const dateKey = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
-                        openWriteModal(dateKey);
-                        selectedDiaryImgData = compressedData;
-                        const pImg = document.getElementById('write-img-preview');
-                        pImg.src = compressedData;
-                        pImg.style.display = 'block';
-                        document.getElementById('preview-placeholder').style.display = 'none';
-                    } else {
-                        sendDirectMessage(compressedData);
-                    }
+                    // [수정] 팝업(confirm)을 제거하고 즉시 채팅으로 전송함
+                    sendDirectMessage(compressedData);
+                    systemLog("IMAGE_TRANSMITTED");
                 };
                 img.src = e.target.result;
             };
@@ -771,7 +761,6 @@
         bgm.loop = true; bgm.volume = 0.3;
         let isPlaying = false;
 
-        // [기능 추가] 재생바 클릭 시 노래 위치 이동 함수
         function seekMusic(e) {
             if (!bgm.duration) return;
             const slider = document.getElementById('arrow-slider');
