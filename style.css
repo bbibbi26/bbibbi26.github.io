@@ -351,20 +351,20 @@ body {
     color: #fff; padding: 8px 12px; font-size: 0.75rem; outline: none; font-family: var(--font-light);
 }
 
-/* [개선된 팝업 형태의 파일 탐색기 스티커 컨테이너] */
+/* [스티커 컨테이너 - 메인 박스를 덮는 팝업 형태] */
 .sticker-container { 
-    position: fixed; 
+    position: fixed; /* absolute가 아닌 fixed여야 터미널 박스를 탈출합니다 */
     top: 50%; 
     left: 50%; 
     transform: translate(-50%, -50%); 
-    width: 96vw; /* 메인 터미널(90vw)보다 큰 너비 */
-    height: 92vh; /* 메인 터미널(85vh)보다 큰 높이 */
-    display: none; 
-    z-index: 1000; 
+    width: 98vw;  /* 화면 너비의 98% */
+    height: 95vh; /* 화면 높이의 95% */
+    display: none; /* handleMenu에서 flex로 변경됨 */
+    z-index: 9999; /* 모든 요소보다 위에 오도록 설정 */
     background: var(--panel-bg); 
     border: 2px solid var(--main-pink);
     border-radius: 24px;
-    box-shadow: 0 0 60px rgba(0,0,0,0.6), 0 0 30px rgba(255, 126, 185, 0.15);
+    box-shadow: 0 0 100px rgba(0,0,0,0.8);
     backdrop-filter: blur(40px);
     overflow: hidden;
     flex-direction: column;
