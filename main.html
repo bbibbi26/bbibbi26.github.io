@@ -160,9 +160,9 @@
         if (!session) { location.href = 'index.html'; }
 
         /* --- [스티커북 전용 로직] --- */
-        function openStickerBook() {
-            const book = document.getElementById('sticker-book');
-            book.style.display = 'flex'; // 팝업 형태이므로 flex 권장
+       function openStickerBook() {
+    const book = document.getElementById('sticker-book');
+    book.style.display = 'flex';
             
             // 처음 열 때 스크롤 초기화
             const wrapper = document.getElementById('sticker-area-wrapper');
