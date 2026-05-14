@@ -53,6 +53,13 @@
             </aside>
 
             <main class="main-content">
+                <div id="sticker-book" class="sticker-container">
+                    <div style="position:absolute; top:20px; right:20px; z-index:210;">
+                        <span style="color:var(--main-pink); cursor:pointer; font-size: 0.7rem;" onclick="closeStickerBook()">[CLOSE_공책_X]</span>
+                    </div>
+                    <div id="sticker-area" style="width:100%; height:100%; position:relative;"></div>
+                </div>
+
                 <div id="diary-overlay">
                     <div class="calendar-header">
                         <div class="calendar-nav">
@@ -148,6 +155,58 @@
 
         let session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
+
+        /* --- [스티커북 전용 로직] --- */
+        function openStickerBook() {
+            document.getElementById('sticker-book').style.display = 'block';
+            renderStickers();
+            systemLog("OPENING_STICKER_BOOK...");
+        }
+
+        function closeStickerBook() {
+            document.getElementById('sticker-book').style.display = 'none';
+        }
+
+        function renderStickers() {
+            const area = document.getElementById('sticker-area');
+            diaryRef.on('value', (snap) => {
+                area.innerHTML = '';
+                const data = snap.val() || {};
+                Object.entries(data).forEach(([key, val]) => {
+                    if (val.image) {
+                        const sticker = document.createElement('div');
+                        sticker.className = 'sticker';
+                        sticker.style.left = (val.posX || 50) + 'px';
+                        sticker.style.top = (val.posY || 50) + 'px';
+                        sticker.innerHTML = `<img src="${val.image}">`;
+                        
+                        sticker.onmousedown = (e) => {
+                            let shiftX = e.clientX - sticker.getBoundingClientRect().left;
+                            let shiftY = e.clientY - sticker.getBoundingClientRect().top;
+                            function moveAt(pageX, pageY) {
+                                let newX = pageX - area.getBoundingClientRect().left - shiftX;
+                                let newY = pageY - area.getBoundingClientRect().top - shiftY;
+                                sticker.style.left = newX + 'px';
+                                sticker.style.top = newY + 'px';
+                            }
+                            function onMouseMove(e) { moveAt(e.pageX, e.pageY); }
+                            document.addEventListener('mousemove', onMouseMove);
+                            sticker.onmouseup = function() {
+                                document.removeEventListener('mousemove', onMouseMove);
+                                diaryRef.child(key).update({
+                                    posX: parseInt(sticker.style.left),
+                                    posY: parseInt(sticker.style.top)
+                                });
+                                playSystemSound();
+                                sticker.onmouseup = null;
+                            };
+                        };
+                        sticker.ondragstart = () => false;
+                        area.appendChild(sticker);
+                    }
+                });
+            });
+        }
 
         /* --- [실시간성 강화된 기능] --- */
         let currentCalendarDate = new Date();
@@ -443,6 +502,7 @@
 
         function handleMenu(type) {
             playSystemSound();
+            if(type === 'DASHBOARD') openStickerBook();
             if(type === 'STORAGE') openDiary();
             systemLog(`ACCESSING_${type}... OK`);
         }
