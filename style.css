@@ -399,6 +399,30 @@ body {
     gap: 8px;
 }
 
+/* 도구 버튼 스타일 (모드 전환 전용) */
+.tool-btn {
+    font-size: 9px;
+    padding: 3px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 126, 185, 0.3);
+    color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+    font-family: var(--font-main);
+    transition: all 0.2s;
+}
+
+.tool-btn:hover {
+    background: rgba(255, 126, 185, 0.2);
+}
+
+.tool-btn.active {
+    background: var(--main-pink);
+    color: #fff;
+    border-color: #fff;
+    box-shadow: 0 0 10px var(--main-pink);
+}
+
 /* [CLOSE_X] 버튼 디자인 */
 .header-close {
     font-size: 0.65rem;
@@ -426,6 +450,7 @@ body {
     position: relative;
     background: rgba(255, 255, 255, 0.02); /* 영역 확인용 미세한 배경색 */
 }
+
 #sticker-area {
     width: 4000px; /* 더 광활한 캔버스 */
     height: 4000px; 
@@ -442,7 +467,7 @@ body {
     left: 0;
     z-index: 500; 
     cursor: crosshair;
-    pointer-events: auto;
+    pointer-events: none; /* 초기값: 편집 모드이므로 마우스 통과 */
 }
 
 /* [스티커 기본 스타일] */
