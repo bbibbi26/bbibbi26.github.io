@@ -167,47 +167,79 @@
             document.getElementById('sticker-book').style.display = 'none';
         }
 
-        function renderStickers() {
-            const area = document.getElementById('sticker-area');
-            diaryRef.on('value', (snap) => {
-                area.innerHTML = '';
-                const data = snap.val() || {};
-                Object.entries(data).forEach(([key, val]) => {
-                    if (val.image) {
-                        const sticker = document.createElement('div');
-                        sticker.className = 'sticker';
-                        sticker.style.left = (val.posX || 50) + 'px';
-                        sticker.style.top = (val.posY || 50) + 'px';
-                        sticker.innerHTML = `<img src="${val.image}">`;
-                        
-                        sticker.onmousedown = (e) => {
-                            let shiftX = e.clientX - sticker.getBoundingClientRect().left;
-                            let shiftY = e.clientY - sticker.getBoundingClientRect().top;
-                            function moveAt(pageX, pageY) {
-                                let newX = pageX - area.getBoundingClientRect().left - shiftX;
-                                let newY = pageY - area.getBoundingClientRect().top - shiftY;
-                                sticker.style.left = newX + 'px';
-                                sticker.style.top = newY + 'px';
-                            }
-                            function onMouseMove(e) { moveAt(e.pageX, e.pageY); }
-                            document.addEventListener('mousemove', onMouseMove);
-                            sticker.onmouseup = function() {
-                                document.removeEventListener('mousemove', onMouseMove);
-                                diaryRef.child(key).update({
-                                    posX: parseInt(sticker.style.left),
-                                    posY: parseInt(sticker.style.top)
-                                });
-                                playSystemSound();
-                                sticker.onmouseup = null;
-                            };
-                        };
-                        sticker.ondragstart = () => false;
-                        area.appendChild(sticker);
-                    }
-                });
-            });
-        }
+      function renderStickers() {
+    const area = document.getElementById('sticker-area');
+    diaryRef.on('value', (snap) => {
+        area.innerHTML = '';
+        const data = snap.val() || {};
+        Object.entries(data).forEach(([key, val]) => {
+            if (val.image) {
+                const sticker = document.createElement('div');
+                sticker.className = 'sticker';
+                // 저장된 좌표와 너비 불러오기 (기본값 설정)
+                sticker.style.left = (val.posX || 50) + 'px';
+                sticker.style.top = (val.posY || 50) + 'px';
+                sticker.style.width = (val.width || 150) + 'px';
 
+                sticker.innerHTML = `
+                    <img src="${val.image}" style="width:100%; height:auto;">
+                    <div class="resizer"></div>
+                `;
+
+                // --- [1. 이동 로직] ---
+                sticker.onmousedown = (e) => {
+                    if (e.target.className === 'resizer') return; // 리사이즈 중엔 이동 방지
+                    
+                    let shiftX = e.clientX - sticker.getBoundingClientRect().left;
+                    let shiftY = e.clientY - sticker.getBoundingClientRect().top;
+
+                    function onMouseMove(e) {
+                        sticker.style.left = (e.pageX - area.getBoundingClientRect().left - shiftX) + 'px';
+                        sticker.style.top = (e.pageY - area.getBoundingClientRect().top - shiftY) + 'px';
+                    }
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.onmouseup = () => {
+                        document.removeEventListener('mousemove', onMouseMove);
+                        diaryRef.child(key).update({
+                            posX: parseInt(sticker.style.left),
+                            posY: parseInt(sticker.style.top)
+                        });
+                        document.onmouseup = null;
+                    };
+                };
+
+                // --- [2. 크기 조절 로직] ---
+                const resizer = sticker.querySelector('.resizer');
+                resizer.onmousedown = (e) => {
+                    e.stopPropagation(); // 부모의 이동 이벤트 방지
+                    let startX = e.clientX;
+                    let startWidth = parseInt(document.defaultView.getComputedStyle(sticker).width, 10);
+
+                    function onMouseMove(e) {
+                        const newWidth = startWidth + (e.clientX - startX);
+                        if (newWidth > 50) { // 최소 크기 제한
+                            sticker.style.width = newWidth + 'px';
+                        }
+                    }
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.onmouseup = () => {
+                        document.removeEventListener('mousemove', onMouseMove);
+                        diaryRef.child(key).update({
+                            width: parseInt(sticker.style.width)
+                        });
+                        playSystemSound();
+                        document.onmouseup = null;
+                    };
+                };
+
+                sticker.ondragstart = () => false;
+                area.appendChild(sticker);
+            }
+        });
+    });
+}
         /* --- [실시간성 강화된 기능] --- */
         let currentCalendarDate = new Date();
         let selectedDiaryDate = "";
