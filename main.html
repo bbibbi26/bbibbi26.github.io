@@ -496,6 +496,7 @@
             if (!text) return;
             sendDirectMessage(text);
             input.value = '';
+            playSystemSound(); // 채팅 전송 시 효과음 실행 추가
         }
 
         function renderComments(data) {
