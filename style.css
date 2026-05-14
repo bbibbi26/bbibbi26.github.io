@@ -370,9 +370,6 @@ body {
     flex-direction: column;
 }
 
-/* 파일 창 헤더 디자인 */
-/* style.css 에서 .sticker-container::before 부분은 삭제하거나 아래로 대체하세요 */
-
 /* 기존 ::before 가짜 헤더 삭제 (중복 방지) */
 .sticker-container::before {
     display: none !important;
@@ -438,6 +435,16 @@ body {
     background-size: 50px 50px; 
 }
 
+/* 캔버스 드로잉 레이어 (z-index 500) */
+#drawing-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 500; 
+    cursor: crosshair;
+    pointer-events: auto;
+}
+
 /* [스티커 기본 스타일] */
 .sticker { 
     position: absolute; 
@@ -452,7 +459,6 @@ body {
     width: 100%; 
     border-radius: 10px; 
     box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-    /* 평상시에는 외곽선을 투명하게 설정 */
     border: 2px solid transparent; 
     pointer-events: none; 
     transition: border 0.3s ease;
@@ -461,10 +467,11 @@ body {
 /* [마우스를 올렸을 때(Hover) 이미지 외곽선 표시] */
 .sticker:hover img { 
     border: 2px solid #fff; 
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
-/* [리사이즈 점(분홍색 점) 스타일] */
+/* [리사이즈 점(분홍색 점) 및 삭제 버튼] */
+/* 그림 캔버스(500)보다 높게(600) 설정하여 그림 위에서도 조작 가능하게 함 */
 .resizer {
     width: 15px;
     height: 15px;
@@ -475,34 +482,24 @@ body {
     cursor: nwse-resize; 
     border-radius: 50%;
     border: 2px solid #fff;
-    z-index: 201;
-    /* 평상시에는 숨김 처리 */
+    z-index: 600 !important; 
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
-/* [마우스를 올렸을 때(Hover) 분홍색 점 표시] */
-.sticker:hover .resizer {
+.sticker-delete {
+    z-index: 601 !important;
+}
+
+/* [마우스를 올렸을 때(Hover) 리사이즈 점 및 삭제 버튼 표시] */
+.sticker:hover .resizer,
+.sticker:hover .sticker-delete {
     opacity: 1;
 }
 
-/* 스티커 호버 시 우선순위 상승 */
+/* 스티커 호버 시 우선순위 상승 (편집 시에만) */
 .sticker:hover { 
-    z-index: 200; 
-}
-
-/* 리사이즈 핸들 스타일 */
-.resizer {
-    width: 15px;
-    height: 15px;
-    background: var(--main-pink); 
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    cursor: nwse-resize; 
-    border-radius: 50%;
-    border: 2px solid #fff;
-    z-index: 201;
+    z-index: 550; 
 }
 
 /* 탐색기 스타일 스크롤바 */
