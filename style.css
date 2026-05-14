@@ -388,7 +388,7 @@ body {
     flex-shrink: 0;
 }
 
-/* [2. 내부 래퍼 수정 - 여기가 핵심!] */
+/* [내부 래퍼 수정] */
 #sticker-area-wrapper {
     flex: 1; /* 남은 높이를 모두 차지하게 함 */
     width: 100%;
