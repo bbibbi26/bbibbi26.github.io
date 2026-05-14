@@ -9,25 +9,62 @@
 </head>
 <body ondragover="event.preventDefault()" ondrop="handleDrop(event)">
 
-    <div id="sticker-book" class="sticker-container">
-        <div class="sticker-header">
-            <div class="header-title">
-                <span style="font-size: 10px;">📁</span> STICKER_FILE_EXPLORER_V1.0
-            </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <span style="font-size: 10px; color: rgba(255,255,255,0.4);">[🖊 DRAW_MODE]</span>
-                <input type="color" id="pen-color" value="#ff7eb9" style="width:18px; height:18px; border:none; background:none; cursor:pointer;">
-                <button onclick="clearCanvas()" style="font-size: 10px; padding: 2px 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--main-pink); color: var(--main-pink); cursor:pointer; border-radius:4px;">CLEAR</button>
-                <div class="header-close" onclick="closeStickerBook()">[CLOSE_X]</div>
-            </div>
-        </div>
-        
-        <div id="sticker-area-wrapper">
-            <div id="sticker-area">
-                <canvas id="drawing-canvas" width="4000" height="4000" style="position:absolute; top:0; left:0; z-index: 500; cursor: crosshair;"></canvas>
-            </div>
+  <div id="sticker-book" class="sticker-container">
+    <div class="sticker-header">
+        <div class="header-title">📁 STICKER_FILE_EXPLORER_V1.0</div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <button onclick="setMode('edit')" id="btn-edit" class="tool-btn active">MOVE_EDIT</button>
+            <button onclick="setMode('draw')" id="btn-draw" class="tool-btn">PENCIL</button>
+            <button onclick="setMode('erase')" id="btn-erase" class="tool-btn">ERASER</button>
+            
+            <input type="color" id="pen-color" value="#ff7eb9" style="width:18px; height:18px; border:none; background:none; cursor:pointer;">
+            <button onclick="clearCanvas()" class="tool-btn" style="border-color: #ff4b4b; color: #ff4b4b;">CLEAR</button>
+            <div class="header-close" onclick="closeStickerBook()">[CLOSE_X]</div>
         </div>
     </div>
+    
+    <div id="sticker-area-wrapper">
+        <div id="sticker-area">
+            <canvas id="drawing-canvas" width="4000" height="4000"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* --- 모드 전환 및 드로잉 로직 --- */
+    let currentMode = 'edit'; // 기본값은 편집 모드
+
+    function setMode(mode) {
+        currentMode = mode;
+        const canvas = document.getElementById('drawing-canvas');
+        
+        // 버튼 활성화 스타일 관리
+        document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`btn-${mode}`).classList.add('active');
+
+        if (mode === 'edit') {
+            // 편집 모드: 캔버스가 마우스 이벤트를 통과시켜 스티커를 만질 수 있게 함
+            canvas.style.pointerEvents = 'none';
+            canvas.style.cursor = 'default';
+        } else {
+            // 그리기/지우개 모드: 캔버스가 마우스 이벤트를 받아 그림을 그림
+            canvas.style.pointerEvents = 'auto';
+            canvas.style.cursor = 'crosshair';
+            
+            if (mode === 'erase') {
+                ctx.globalCompositeOperation = 'destination-out'; // 지우개 모드
+                ctx.lineWidth = 20;
+            } else {
+                ctx.globalCompositeOperation = 'source-over'; // 연필 모드
+                ctx.lineWidth = 4;
+            }
+        }
+        systemLog(`MODE_CHANGED_TO: ${mode.toUpperCase()}`);
+    }
+
+    // 기존의 initDrawingCanvas 내부에 위 모드 로직이 잘 작동하도록 설정되어야 합니다.
+    // drawLine 함수 내에서 지우개일 때와 연필일 때의 설정은 setMode에서 처리합니다.
+</script>
     
     <div id="system-log-bg"></div>
     <div id="boot-loader"><div id="loader-text">> INITIALIZING_SECURE_CONNECTION...</div></div>
