@@ -350,43 +350,89 @@ body {
     flex: 1; background: transparent; border: none;
     color: #fff; padding: 8px 12px; font-size: 0.75rem; outline: none; font-family: var(--font-light);
 }
-.sticker-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: auto; display: none; z-index: 105; background: rgba(0,0,0,0.1); }
+
+/* [개선된 팝업 형태의 파일 탐색기 스티커 컨테이너] */
+.sticker-container { 
+    position: fixed; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    width: 96vw; /* 메인 터미널(90vw)보다 큰 너비 */
+    height: 92vh; /* 메인 터미널(85vh)보다 큰 높이 */
+    display: none; 
+    z-index: 1000; 
+    background: var(--panel-bg); 
+    border: 2px solid var(--main-pink);
+    border-radius: 24px;
+    box-shadow: 0 0 60px rgba(0,0,0,0.6), 0 0 30px rgba(255, 126, 185, 0.15);
+    backdrop-filter: blur(40px);
+    overflow: hidden;
+    flex-direction: column;
+}
+
+/* 파일 창 헤더 디자인 */
+.sticker-container::before {
+    content: "📁 STICKER_FILE_EXPLORER_V1.0";
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 45px;
+    background: rgba(255, 126, 185, 0.15);
+    border-bottom: 1px solid rgba(255, 126, 185, 0.3);
+    padding: 0 25px;
+    box-sizing: border-box;
+    font-size: 0.75rem;
+    color: var(--main-pink);
+    letter-spacing: 1px;
+    font-family: var(--font-main);
+    flex-shrink: 0;
+}
+
+/* 내부 스크롤 가능 영역 */
+#sticker-area-wrapper {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+    cursor: crosshair;
+}
+
+#sticker-area {
+    width: 4000px; /* 더 광활한 캔버스 */
+    height: 4000px; 
+    position: relative;
+    background-image: 
+        radial-gradient(rgba(255,255,255,0.05) 1.5px, transparent 1.5px);
+    background-size: 50px 50px; 
+}
+
 .sticker { position: absolute; cursor: move; user-select: none; z-index: 110; transition: transform 0.2s; }
 .sticker img { width: 150px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid #fff; pointer-events: none; }
 .sticker:hover { transform: scale(1.05); z-index: 200; }
+
 /* 리사이즈 핸들 스타일 */
 .resizer {
     width: 15px;
     height: 15px;
-    background: var(--main-pink); /* 삐삐 테마 색상 */
+    background: var(--main-pink); 
     position: absolute;
     right: 0;
     bottom: 0;
-    cursor: nwse-resize; /* 대각선 크기 조절 커서 */
+    cursor: nwse-resize; 
     border-radius: 50%;
     border: 2px solid #fff;
     z-index: 201;
 }
 
-#sticker-area {
-    width: 3000px; /* 자유롭게 배치할 수 있는 아주 넓은 가로 폭 */
-    height: 3000px; /* 아주 깊은 세로 높이 */
-    position: relative;
-    /* 모눈종이 같은 가이드 라인 효과 */
-    background-image: 
-        radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
-    background-size: 40px 40px; 
+/* 탐색기 스타일 스크롤바 */
+#sticker-area-wrapper::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
 }
-
-/* 스크롤바 디자인 (캔버스 이동 시 깔끔하게) */
-.sticker-container::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-.sticker-container::-webkit-scrollbar-thumb {
+#sticker-area-wrapper::-webkit-scrollbar-thumb {
     background: var(--main-pink);
     border-radius: 10px;
+    border: 3px solid rgba(15, 15, 25, 1);
 }
-.sticker-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+#sticker-area-wrapper::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
 }
