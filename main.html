@@ -7,6 +7,7 @@
     <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
     
     <style>
+        /* [원본 스타일 유지 - 절대 수정 금지] */
         :root {
             --main-pink: #ff7eb9;
             --main-purple: #9d00ff;
@@ -41,7 +42,8 @@
         }
 
         .terminal-frame {
-            width: 90vw; height: 85vh; max-width: 1100px;
+            width: 90vw; height: 85vh;
+            max-width: 1100px;
             position: relative; z-index: 10;
             filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));
             animation: terminalScanOpen 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
@@ -49,20 +51,30 @@
 
         .terminal-frame::before {
             content: "INTEGRATED TERMINAL";
-            position: absolute; top: -35px; left: 0; width: 200px; height: 40px;
-            background: var(--panel-bg); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-bottom: none; border-radius: 15px 15px 0 0;
+            position: absolute; top: -35px; left: 0;
+            width: 200px; height: 40px;
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: none;
+            border-radius: 15px 15px 0 0;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.65rem; color: var(--accent-blue); backdrop-filter: blur(25px);
+            font-size: 0.65rem; color: var(--accent-blue);
+            backdrop-filter: blur(25px);
         }
 
         .content-wrapper {
-            width: 100%; height: 100%; background: var(--panel-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0 30px 30px 30px;
-            backdrop-filter: blur(25px); display: flex; overflow: hidden;
+            width: 100%; height: 100%;
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0 30px 30px 30px;
+            backdrop-filter: blur(25px);
+            display: flex; overflow: hidden;
         }
 
-        @keyframes terminalScanOpen { from { transform: translateY(20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        @keyframes terminalScanOpen {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
 
         .sidebar {
             width: 240px; border-right: 1px solid rgba(255, 255, 255, 0.05);
@@ -77,65 +89,187 @@
         }
 
         #session-name { margin: 0; font-size: 0.9rem; color: var(--main-pink); }
-        .menu-item { cursor: pointer; transition: 0.2s; display: inline-block; width: 100%; font-size: 0.75rem; color: rgba(255,255,255,0.5); }
-        .menu-item.active { color: var(--accent-blue); text-shadow: 0 0 8px var(--accent-blue); }
-        .menu-item:hover { color: var(--accent-blue); transform: translateX(5px); }
 
-        .settings-panel { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .menu-item {
+            cursor: pointer; transition: 0.2s; display: inline-block; width: 100%;
+        }
+        .menu-item:hover {
+            color: var(--accent-blue); text-shadow: 0 0 8px var(--accent-blue); transform: translateX(5px);
+        }
+
+        .settings-panel {
+            margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);
+        }
         .settings-title { font-size: 0.6rem; color: var(--accent-blue); margin-bottom: 10px; opacity: 0.6; }
         .setting-input {
             width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
             border-radius: 6px; padding: 6px 8px; color: #fff; font-size: 0.7rem; font-family: var(--font-light);
             margin-bottom: 8px; outline: none; box-sizing: border-box;
         }
+        .setting-input:focus { border-color: var(--main-pink); }
 
-        /* 뮤직 플레이어 */
         .music-section { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
-        .arrow-player { display: flex; align-items: center; width: 100%; height: 50px; position: relative; margin-bottom: 10px; }
-        .arrow-vane { width: 18px; height: 18px; background: var(--accent-blue); clip-path: polygon(0% 0%, 100% 50%, 0% 100%); cursor: pointer; transition: 0.3s; z-index: 10; }
-        .arrow-vane.playing { background: var(--main-pink); clip-path: polygon(15% 0%, 40% 0%, 40% 100%, 15% 100%, 60% 0%, 85% 0%, 85% 100%, 60% 100%); }
-        .arrow-shaft-container { flex: 1; height: 30px; display: flex; align-items: center; cursor: pointer; position: relative; margin: 0 5px; }
+
+        .arrow-player {
+            display: flex; align-items: center; width: 100%; height: 50px; position: relative; margin-bottom: 10px;
+        }
+
+        .arrow-vane {
+            width: 18px; height: 18px; background: var(--accent-blue);
+            clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+            cursor: pointer; transition: 0.3s; z-index: 10;
+        }
+        .arrow-vane.playing {
+            background: var(--main-pink);
+            clip-path: polygon(15% 0%, 40% 0%, 40% 100%, 15% 100%, 60% 0%, 85% 0%, 85% 100%, 60% 100%);
+            filter: drop-shadow(0 0 8px var(--main-pink));
+        }
+
+        .arrow-shaft-container {
+            flex: 1; height: 30px; display: flex; align-items: center; cursor: pointer; position: relative; margin: 0 5px;
+        }
         .arrow-shaft-bg { width: 100%; height: 1.5px; background: rgba(255, 255, 255, 0.15); position: relative; }
-        .arrow-shaft-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-blue), var(--main-pink)); position: relative; transition: width 0.1s linear; }
-        .arrow-circle-knob { width: 6px; height: 6px; background: #fff; border-radius: 50%; position: absolute; right: -3px; top: 50%; transform: translateY(-50%); box-shadow: 0 0 8px var(--main-pink); }
-        .arrow-point-heart { width: 12px; height: 12px; background: var(--main-pink); transform: rotate(-45deg); position: relative; flex-shrink: 0; margin-left: 2px; filter: drop-shadow(0 0 5px var(--main-pink)); }
-        .arrow-point-heart::before, .arrow-point-heart::after { content: ''; width: 12px; height: 12px; background: var(--main-pink); border-radius: 50%; position: absolute; }
+        .arrow-shaft-fill { 
+            height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-blue), var(--main-pink)); 
+            position: relative; transition: width 0.1s linear; 
+        }
+
+        .arrow-circle-knob {
+            width: 6px; height: 6px; background: #fff; border-radius: 50%;
+            position: absolute; right: -3px; top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 0 8px var(--main-pink);
+        }
+
+        .arrow-point-heart {
+            width: 12px; height: 12px; background: var(--main-pink);
+            transform: rotate(-45deg); 
+            position: relative; flex-shrink: 0; margin-left: 2px;
+            filter: drop-shadow(0 0 5px var(--main-pink));
+        }
+        .arrow-point-heart::before, .arrow-point-heart::after {
+            content: ''; width: 12px; height: 12px; background: var(--main-pink); border-radius: 50%; position: absolute;
+        }
         .arrow-point-heart::before { left: -6px; top: 0; }
         .arrow-point-heart::after { left: 0; top: -6px; }
+
         .beating .arrow-point-heart { animation: point-pulse 0.8s infinite; }
-        @keyframes point-pulse { 0% { transform: rotate(-45deg) scale(1); } 50% { transform: rotate(-45deg) scale(1.2); } 100% { transform: rotate(-45deg) scale(1); } }
+        @keyframes point-pulse {
+            0% { transform: rotate(-45deg) scale(1); }
+            50% { transform: rotate(-45deg) scale(1.2); }
+            100% { transform: rotate(-45deg) scale(1); }
+        }
 
-        /* 메인 영역 및 기능 섹션 */
-        .main-content { flex: 1; display: flex; flex-direction: column; padding: 30px 40px; overflow: hidden; }
-        .content-section { display: none; flex-direction: column; height: 100%; overflow: hidden; }
-        .content-section.active { display: flex; }
+        .volume-container { display: flex; flex-direction: column; gap: 6px; }
+        .volume-label { font-size: 0.55rem; color: rgba(255, 255, 255, 0.4); display: flex; justify-content: space-between; }
+        #volume-range {
+            -webkit-appearance: none; width: 100%; height: 2px; background: rgba(0, 243, 255, 0.2);
+            outline: none; cursor: pointer;
+        }
+        #volume-range::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 10px; height: 10px; background: var(--main-pink);
+            border-radius: 50%; box-shadow: 0 0 5px var(--main-pink);
+        }
 
-        .post-list { flex: 1; list-style: none; padding: 10px; margin: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .post-item { max-width: 75%; padding: 12px 16px; position: relative; animation: popIn 0.3s ease-out both; }
-        .post-item.me { align-self: flex-end; background: var(--bubble-me); border: 1px solid rgba(255, 126, 185, 0.3); border-radius: 15px 0 15px 15px; }
-        .post-item.other { align-self: flex-start; background: var(--bubble-other); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0 15px 15px 15px; }
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 30px 40px; overflow: hidden; position: relative; }
+        .system-board { flex: 1; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+        .board-header { font-size: 0.65rem; color: var(--main-pink); margin-bottom: 10px; opacity: 0.7; }
 
-        /* 일기/캘린더 전용 스타일 */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; flex: 1; overflow-y: auto; padding-top: 10px; }
-        .cal-day { background: rgba(255,255,255,0.05); border-radius: 8px; min-height: 70px; padding: 5px; font-size: 0.65rem; cursor: pointer; transition: 0.2s; position: relative; border: 1px solid transparent; }
-        .cal-day:hover { background: rgba(255,255,255,0.12); border-color: var(--accent-blue); }
-        .cal-day.has-diary { background: rgba(255, 126, 185, 0.15); border-color: rgba(255, 126, 185, 0.3); }
-        .cal-day img { width: 100%; height: 35px; object-fit: cover; border-radius: 4px; margin-top: 5px; }
+        .post-list { 
+            flex: 1; list-style: none; padding: 10px; margin: 0; overflow-y: auto; 
+            display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth;
+        }
 
-        /* 작성 폼 */
-        .write-container { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; display: flex; flex-direction: column; gap: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        #diary-preview-wrap { width: 100%; height: 150px; background: rgba(0,0,0,0.3); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px dashed rgba(255,255,255,0.2); cursor: pointer; }
-        #diary-preview-wrap img { width: 100%; height: 100%; object-fit: contain; }
+        .post-item {
+            max-width: 75%; padding: 12px 16px; position: relative;
+            animation: popIn 0.3s ease-out both; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
 
-        /* 모달 */
-        #diary-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .modal-body { background: var(--panel-bg); padding: 30px; border-radius: 25px; max-width: 450px; width: 90%; border: 1px solid var(--main-pink); position: relative; text-align: center; }
+        .post-item.other {
+            align-self: flex-start; background: var(--bubble-other);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0 15px 15px 15px;
+        }
+        .post-item.other::after {
+            content: ''; position: absolute; left: -8px; top: 0;
+            border-right: 8px solid rgba(255, 255, 255, 0.1); border-bottom: 8px solid transparent;
+        }
 
-        .hidden { display: none !important; }
-        .delete-btn { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; background: #050508; border: 1px solid var(--main-pink); color: var(--main-pink); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; cursor: pointer; opacity: 0; transition: 0.2s; }
+        .post-item.me {
+            align-self: flex-end; background: var(--bubble-me);
+            border: 1px solid rgba(255, 126, 185, 0.3); border-radius: 15px 0 15px 15px;
+        }
+        .post-item.me::after {
+            content: ''; position: absolute; right: -8px; top: 0;
+            border-left: 8px solid rgba(255, 126, 185, 0.2); border-bottom: 8px solid transparent;
+        }
+
+        .delete-btn {
+            position: absolute; top: -5px; right: -5px;
+            width: 18px; height: 18px; background: #050508;
+            border: 1px solid var(--main-pink); color: var(--main-pink);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 9px; cursor: pointer; opacity: 0; transition: 0.2s; z-index: 10;
+        }
         .post-item.me:hover .delete-btn { opacity: 1; }
+        .delete-btn:hover { background: var(--main-pink); color: #fff; }
 
-        #boot-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 9999; display: flex; justify-content: center; align-items: center; font-family: 'Courier New', monospace; color: var(--main-pink); transition: opacity 0.5s ease; }
+        .post-sender { font-size: 0.65rem; font-weight: bold; margin-bottom: 4px; color: var(--accent-blue); }
+        .me .post-sender { text-align: right; color: var(--main-pink); }
+        .post-text { font-family: var(--font-light); font-size: 0.9rem; color: #eee; line-height: 1.4; word-break: break-all; }
+        .post-text img { max-width: 100%; border-radius: 10px; margin-top: 8px; display: block; border: 1px solid rgba(255,255,255,0.1); }
+        .post-info { display: flex; justify-content: flex-end; margin-top: 5px; font-size: 0.6rem; color: rgba(255, 255, 255, 0.3); }
+        .other .post-info { justify-content: flex-start; }
+
+        .input-area { display: flex; gap: 10px; margin-top: 15px; padding-bottom: 5px; }
+        #comment-input {
+            flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; padding: 12px; color: #fff; font-family: var(--font-light); outline: none;
+        }
+        .save-btn {
+            background: linear-gradient(135deg, var(--main-pink), var(--main-purple));
+            border: none; color: #fff; padding: 0 20px; border-radius: 12px;
+            cursor: pointer; font-family: var(--font-main); font-size: 0.75rem;
+        }
+
+        .disconnect-btn { margin-top: 10px; font-size: 0.65rem; color: rgba(255,255,255,0.2); cursor: pointer; text-align: right; }
+        .post-list::-webkit-scrollbar { width: 4px; }
+        .post-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        #boot-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #050508; z-index: 9999; display: flex;
+            justify-content: center; align-items: center;
+            font-family: 'Courier New', monospace; color: var(--main-pink);
+            transition: opacity 0.5s ease;
+        }
+
+        @keyframes popIn { from { opacity: 0; transform: scale(0.98) translateY(5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        /* [추가 기능: 캘린더 전용 스타일 - 기존 레이아웃을 해치지 않는 오버레이 레이어] */
+        #diary-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 8, 0.95); z-index: 100; display: none;
+            flex-direction: column; padding: 40px; box-sizing: border-box;
+            backdrop-filter: blur(10px); animation: popIn 0.3s ease-out;
+        }
+        .diary-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; flex: 1; overflow-y: auto; }
+        .diary-cell {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            aspect-ratio: 1; border-radius: 10px; padding: 5px; cursor: pointer;
+            font-size: 0.65rem; display: flex; flex-direction: column; transition: 0.2s;
+        }
+        .diary-cell:hover { border-color: var(--accent-blue); background: rgba(0, 243, 255, 0.05); }
+        .diary-cell.filled { border-color: var(--main-pink); background: rgba(255, 126, 185, 0.1); }
+        .diary-cell img { width: 100%; height: 70%; object-fit: cover; border-radius: 5px; margin-top: 5px; }
+        #diary-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 200; display: none;
+            align-items: center; justify-content: center;
+        }
+        .modal-box {
+            background: var(--panel-bg); border: 1px solid var(--main-pink);
+            width: 90%; max-width: 400px; padding: 20px; border-radius: 20px; text-align: center;
+        }
     </style>
 </head>
 <body ondragover="event.preventDefault()" ondrop="handleDrop(event)">
@@ -148,12 +282,12 @@
             <aside class="sidebar">
                 <div id="session-icon"></div>
                 <h3 id="session-name"></h3>
-                <p id="session-status" style="font-size: 0.65rem; color: var(--accent-blue); margin-bottom:15px;">연결 확인 중...</p>
+                <p id="session-status" style="font-size: 0.65rem; color: var(--accent-blue); margin-bottom:15px;">짝궁 접속종료!</p>
                 
-                <div style="font-size: 0.65rem; line-height:2.0;">
-                    <div class="menu-item active" id="m-chat" onclick="switchNav('CHAT')">> DASHBOARD (채팅)</div><br>
-                    <div class="menu-item" id="m-cal" onclick="switchNav('CAL')">> STORAGE (캘린더)</div><br>
-                    <div class="menu-item" id="m-write" onclick="switchNav('WRITE')">> WRITE (일기작성)</div>
+                <div style="font-size: 0.65rem; color:rgba(255,255,255,0.3); line-height:2.0;">
+                    <div class="menu-item" onclick="handleMenu('DASHBOARD')">> DASHBOARD</div><br>
+                    <div class="menu-item" onclick="handleMenu('STORAGE')">> STORAGE</div><br>
+                    <div class="menu-item" onclick="handleMenu('NETWORK')">> NETWORK</div>
                 </div>
 
                 <div class="settings-panel">
@@ -166,10 +300,15 @@
                     <div class="arrow-player" id="arrow-player-wrap">
                         <div class="arrow-vane" id="music-btn" onclick="toggleMusic()"></div>
                         <div class="arrow-shaft-container" id="arrow-slider">
-                            <div class="arrow-shaft-bg"><div class="arrow-shaft-fill" id="arrow-progress"><div class="arrow-circle-knob"></div></div></div>
+                            <div class="arrow-shaft-bg">
+                                <div class="arrow-shaft-fill" id="arrow-progress">
+                                    <div class="arrow-circle-knob"></div>
+                                </div>
+                            </div>
                         </div>
                         <div class="arrow-point-heart"></div>
                     </div>
+
                     <div class="volume-container">
                         <div class="volume-label"><span>VOL</span><span id="vol-value">30%</span></div>
                         <input type="range" id="volume-range" min="0" max="100" value="30" oninput="changeVolume(this.value)">
@@ -178,6 +317,14 @@
             </aside>
 
             <main class="main-content">
+                <div id="diary-overlay">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                        <span style="color:var(--accent-blue); font-size:0.7rem;">STORAGE_ARCHIVE</span>
+                        <span style="color:var(--main-pink); cursor:pointer;" onclick="closeDiary()">[CLOSE_X]</span>
+                    </div>
+                    <div class="diary-grid" id="diary-grid"></div>
+                </div>
+
                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px;">
                     <div>
                         <div id="current-date" style="font-size: 0.65rem; color: var(--accent-blue);">DATE</div>
@@ -186,35 +333,13 @@
                     <div id="post-count" style="font-size: 0.65rem; opacity: 0.5;">MEMORIES: 00</div>
                 </div>
 
-                <section id="sec-chat" class="content-section active">
+                <section class="system-board">
                     <div class="board-header">> CONNECTION_ESTABLISHED // DATA_STREAM_READY</div>
                     <ul class="post-list" id="post-list"></ul>
-                    <div style="display:flex; gap:10px; margin-top:15px;">
-                        <input type="text" id="comment-input" style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:12px; color:#fff; outline:none;" placeholder="기록을 남기세요..." maxlength="200">
+                    
+                    <div class="input-area">
+                        <input type="text" id="comment-input" placeholder="기록을 남기거나 파일을 끌어넣으세요..." maxlength="200" onpaste="handlePaste(event)">
                         <button class="save-btn" onclick="saveComment()">SAVE</button>
-                    </div>
-                </section>
-
-                <section id="sec-cal" class="content-section">
-                    <div class="board-header" id="cal-header-title">> ARCHIVE_VAULT // 2023.10</div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                        <button onclick="changeMonth(-1)" style="background:none; border:none; color:var(--accent-blue); cursor:pointer;">< PREV</button>
-                        <button onclick="changeMonth(1)" style="background:none; border:none; color:var(--accent-blue); cursor:pointer;">NEXT ></button>
-                    </div>
-                    <div class="calendar-grid" id="calendar-grid"></div>
-                </section>
-
-                <section id="sec-write" class="content-section">
-                    <div class="board-header">> MEMORY_INPUT_UNIT // ENCRYPTED</div>
-                    <div class="write-container">
-                        <input type="date" id="diary-date" class="setting-input" style="font-size:1rem; height:40px;">
-                        <div id="diary-preview-wrap" onclick="document.getElementById('diary-file').click()">
-                            <span id="diary-hint">TAP TO UPLOAD IMAGE</span>
-                            <img id="diary-preview-img" class="hidden">
-                        </div>
-                        <input type="file" id="diary-file" class="hidden" accept="image/*" onchange="previewDiaryImg(this)">
-                        <textarea id="diary-text" class="setting-input" style="height:100px; resize:none; padding:12px;" placeholder="오늘의 추억을 입력하세요..."></textarea>
-                        <button class="save-btn" style="height:45px;" onclick="saveDiary()">SAVE TO ARCHIVE</button>
                     </div>
                 </section>
 
@@ -223,12 +348,11 @@
         </div>
     </div>
 
-    <div id="diary-modal" onclick="closeModal()">
-        <div class="modal-body" onclick="event.stopPropagation()">
-            <h3 id="modal-date" style="color:var(--accent-blue); margin-top:0;"></h3>
-            <img id="modal-img" style="width:100%; border-radius:15px; margin-bottom:15px;">
-            <p id="modal-text" style="line-height:1.6; font-family:var(--font-light); font-size:0.9rem;"></p>
-            <div id="modal-author" style="font-size:0.6rem; opacity:0.5; text-align:right; margin-top:10px;"></div>
+    <div id="diary-modal" onclick="this.style.display='none'">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div id="modal-date" style="font-size:0.6rem; color:var(--accent-blue); margin-bottom:10px;"></div>
+            <img id="modal-img" style="width:100%; border-radius:10px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.1);">
+            <div id="modal-text" style="font-family:var(--font-light); font-size:0.85rem; line-height:1.5;"></div>
         </div>
     </div>
 
@@ -240,130 +364,20 @@
             apiKey: "AIzaSyDi9JQLtpp4KaF5mGkf0aApv_fcQP2PpD0",
             authDomain: "nya-ppi.firebaseapp.com",
             projectId: "nya-ppi",
+            storageBucket: "nya-ppi.firebasestorage.app",
+            messagingSenderId: "27439633492",
+            appId: "1:27439633492:web:1cd43fd32322f6bc62c9c1",
             databaseURL: "https://nya-ppi-default-rtdb.firebaseio.com/" 
         };
+
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const chatRef = database.ref('nya_chat_history');
-        const diaryRef = database.ref('nya_diaries');
+        const diaryRef = database.ref('nya_diaries'); // 캘린더용 DB 경로
 
         let session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
-        let currentViewDate = new Date();
-
-        /* --- 메뉴 전환 --- */
-        function switchNav(target) {
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-            
-            if(target === 'CHAT') {
-                document.getElementById('sec-chat').classList.add('active');
-                document.getElementById('m-chat').classList.add('active');
-            } else if(target === 'CAL') {
-                document.getElementById('sec-cal').classList.add('active');
-                document.getElementById('m-cal').classList.add('active');
-                renderCalendar();
-            } else {
-                document.getElementById('sec-write').classList.add('active');
-                document.getElementById('m-write').classList.add('active');
-                document.getElementById('diary-date').valueAsDate = new Date();
-            }
-            playSystemSound();
-        }
-
-        /* --- 일기 기능 --- */
-        function previewDiaryImg(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = document.getElementById('diary-preview-img');
-                    img.src = e.target.result;
-                    img.classList.remove('hidden');
-                    document.getElementById('diary-hint').classList.add('hidden');
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function saveDiary() {
-            const date = document.getElementById('diary-date').value;
-            const text = document.getElementById('diary-text').value.trim();
-            const imgData = document.getElementById('diary-preview-img').src;
-
-            if(!date || !text || imgData.includes('hidden')) {
-                alert("기록할 날짜와 내용, 이미지를 확인해주세요."); return;
-            }
-
-            diaryRef.child(date).set({
-                text: text, image: imgData, author: session.name, timestamp: Date.now()
-            }).then(() => {
-                alert("데이터가 아카이브에 저장되었습니다.");
-                switchNav('CAL');
-                document.getElementById('diary-text').value = '';
-                document.getElementById('diary-preview-img').classList.add('hidden');
-                document.getElementById('diary-hint').classList.remove('hidden');
-            });
-        }
-
-        function renderCalendar() {
-            const grid = document.getElementById('calendar-grid');
-            const title = document.getElementById('cal-header-title');
-            grid.innerHTML = '';
-
-            const year = currentViewDate.getFullYear();
-            const month = currentViewDate.getMonth();
-            title.innerText = `> ARCHIVE_VAULT // ${year}.${month + 1}`;
-
-            ['SUN','MON','TUE','WED','THU','FRI','SAT'].forEach(d => {
-                const div = document.createElement('div');
-                div.style = "text-align:center; font-size:0.5rem; color:var(--accent-blue); padding-bottom:5px;";
-                div.innerText = d; grid.appendChild(div);
-            });
-
-            const firstDay = new Date(year, month, 1).getDay();
-            const lastDate = new Date(year, month + 1, 0).getDate();
-
-            for(let i=0; i<firstDay; i++) grid.appendChild(document.createElement('div'));
-
-            diaryRef.once('value', (snap) => {
-                const diaries = snap.val() || {};
-                for(let d=1; d<=lastDate; d++) {
-                    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                    const dayDiv = document.createElement('div');
-                    dayDiv.className = 'cal-day';
-                    dayDiv.innerHTML = `<span>${d}</span>`;
-                    
-                    if(diaries[dateStr]) {
-                        dayDiv.classList.add('has-diary');
-                        dayDiv.innerHTML += `<img src="${diaries[dateStr].image}">`;
-                        dayDiv.onclick = () => openDiaryModal(dateStr, diaries[dateStr]);
-                    } else {
-                        dayDiv.onclick = () => {
-                            document.getElementById('diary-date').value = dateStr;
-                            switchNav('WRITE');
-                        };
-                    }
-                    grid.appendChild(dayDiv);
-                }
-            });
-        }
-
-        function changeMonth(diff) {
-            currentViewDate.setMonth(currentViewDate.getMonth() + diff);
-            renderCalendar();
-        }
-
-        function openDiaryModal(date, data) {
-            document.getElementById('modal-date').innerText = `[ ${date} ]`;
-            document.getElementById('modal-img').src = data.image;
-            document.getElementById('modal-text').innerText = data.text;
-            document.getElementById('modal-author').innerText = `ENCRYPTED BY: ${data.author}`;
-            document.getElementById('diary-modal').style.display = 'flex';
-        }
-        function closeModal() { document.getElementById('diary-modal').style.display = 'none'; }
-
-        /* --- 기존 로직 (접속상태, 프로필, 채팅, 뮤직 등) 유지 --- */
         const otherType = (session.type === 'me') ? 'other' : 'me';
         const myPresenceRef = database.ref('presence/' + session.type);
         const otherPresenceRef = database.ref('presence/' + otherType);
@@ -378,8 +392,13 @@
 
         otherPresenceRef.on('value', (snap) => {
             const status = snap.val() || 'OFFLINE';
-            statusDisplay.innerText = status === 'ONLINE' ? "짝궁도 접속중!" : "짝궁 접속종료!";
-            statusDisplay.style.color = status === 'ONLINE' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.2)';
+            if (status === 'ONLINE') {
+                statusDisplay.innerText = "짝궁도 접속중!";
+                statusDisplay.style.color = 'var(--accent-blue)';
+            } else {
+                statusDisplay.innerText = "짝궁 접속종료!";
+                statusDisplay.style.color = 'rgba(255,255,255,0.2)';
+            }
         });
 
         function updateProfile() {
@@ -388,132 +407,268 @@
             if(nameVal) session.name = nameVal;
             if(iconVal) session.icon = iconVal;
             localStorage.setItem('nya_current_session', JSON.stringify(session));
-            database.ref('user_profiles/' + session.type).set({ name: session.name, icon: session.icon });
+            const userTypeKey = (session.type === 'me') ? 'nya_me_session' : 'nya_other_session';
+            localStorage.setItem(userTypeKey, JSON.stringify(session));
+            database.ref('user_profiles/' + session.type).set({
+                name: session.name,
+                icon: session.icon
+            });
             renderProfile();
         }
 
         function renderProfile() {
             const iconBox = document.getElementById('session-icon');
             const nameBox = document.getElementById('session-name');
+            if(!iconBox || !nameBox) return;
             nameBox.innerText = session.name || "Unknown";
             const isImage = session.icon && (session.icon.startsWith('http') || session.icon.startsWith('data:image'));
-            iconBox.innerHTML = isImage ? `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;">` : (session.icon || '👤');
+            if (isImage) {
+                iconBox.innerHTML = `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://via.placeholder.com/55?text=?';">`;
+            } else {
+                iconBox.innerHTML = session.icon || '👤';
+            }
         }
 
-        /* 채팅 이미지 처리 */
-        function handleDrop(e) { e.preventDefault(); if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); }
-        function handlePaste(e) { 
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let item of items) { if (item.type.indexOf("image") !== -1) processFile(item.getAsFile()); }
+        /* --- [추가] 캘린더 관련 함수 --- */
+        function openDiary() {
+            document.getElementById('diary-overlay').style.display = 'flex';
+            renderCalendar();
         }
+        function closeDiary() { document.getElementById('diary-overlay').style.display = 'none'; }
+        
+        function renderCalendar() {
+            const grid = document.getElementById('diary-grid');
+            grid.innerHTML = '';
+            const now = new Date();
+            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            
+            diaryRef.once('value', (snap) => {
+                const data = snap.val() || {};
+                for(let i=1; i<=lastDay; i++) {
+                    const dateKey = `${now.getFullYear()}-${now.getMonth()+1}-${i}`;
+                    const cell = document.createElement('div');
+                    cell.className = 'diary-cell';
+                    cell.innerHTML = `<span>${i}</span>`;
+                    if(data[dateKey]) {
+                        cell.classList.add('filled');
+                        cell.innerHTML += `<img src="${data[dateKey].image}">`;
+                        cell.onclick = () => {
+                            document.getElementById('modal-date').innerText = `DATE_LOG: ${dateKey}`;
+                            document.getElementById('modal-img').src = data[dateKey].image;
+                            document.getElementById('modal-text').innerText = data[dateKey].text;
+                            document.getElementById('diary-modal').style.display = 'flex';
+                        };
+                    }
+                    grid.appendChild(cell);
+                }
+            });
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            if (files && files[0]) processFile(files[0]);
+        }
+
+        function handlePaste(e) {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let item of items) {
+                if (item.type.indexOf("image") !== -1) processFile(item.getAsFile());
+            }
+        }
+
         function processFile(file) {
+            if (!file.type.match('image.*')) return;
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    let w = img.width; let h = img.height;
-                    if (w > 800) { h *= 800/w; w = 800; }
-                    canvas.width = w; canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    sendMsg(canvas.toDataURL('image/jpeg', 0.7));
+                    const MAX_WIDTH = 800; 
+                    let width = img.width; let height = img.height;
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    const compressedData = canvas.toDataURL('image/jpeg', 0.7); 
+                    
+                    // 파일 업로드 시 일기 기록 여부 확인
+                    if(confirm("이 이미지를 캘린더(STORAGE)에 기록할까요?")) {
+                        const now = new Date();
+                        const dateKey = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
+                        const note = prompt("짧은 기록을 남겨주세요:", "오늘의 추억.");
+                        diaryRef.child(dateKey).set({ image: compressedData, text: note || "" });
+                    }
+                    sendDirectMessage(compressedData);
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        function sendMsg(content) {
+        function sendDirectMessage(content) {
+            const currentSession = JSON.parse(localStorage.getItem('nya_current_session')) || session;
             chatRef.push({
-                senderType: session.type, senderName: session.name, content: content,
+                id: Date.now(),
+                senderType: currentSession.type,
+                senderName: currentSession.name,
+                content: content,
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             });
         }
-        function saveComment() {
-            const input = document.getElementById('comment-input');
-            if (!input.value.trim()) return;
-            sendMsg(input.value.trim());
-            input.value = '';
-        }
 
-        /* 뮤직 & 시스템 공통 */
         const bgm = new Audio('bgm.mp3');
         bgm.loop = true; bgm.volume = 0.3;
         let isPlaying = false;
+        const arrowProgress = document.getElementById('arrow-progress');
+        const arrowSlider = document.getElementById('arrow-slider');
+        const arrowPlayerWrap = document.getElementById('arrow-player-wrap');
 
         function toggleMusic() {
             const btn = document.getElementById('music-btn');
             if (!isPlaying) {
-                bgm.play().catch(e => {});
+                bgm.play().catch(() => console.log("Interaction required"));
                 btn.classList.add('playing');
-                document.getElementById('arrow-player-wrap').classList.add('beating');
-                isPlaying = true; requestAnimationFrame(syncArrow);
+                arrowPlayerWrap.classList.add('beating');
+                isPlaying = true;
+                requestAnimationFrame(syncArrow);
             } else {
-                bgm.pause(); btn.classList.remove('playing');
-                document.getElementById('arrow-player-wrap').classList.remove('beating');
+                bgm.pause();
+                btn.classList.remove('playing');
+                arrowPlayerWrap.classList.remove('beating');
                 isPlaying = false;
             }
         }
+
         function syncArrow() {
-            if (isPlaying && bgm.duration) {
-                document.getElementById('arrow-progress').style.width = (bgm.currentTime / bgm.duration) * 100 + "%";
-                requestAnimationFrame(syncArrow);
-            }
+            if (!isPlaying) return;
+            if (bgm.duration) { arrowProgress.style.width = (bgm.currentTime / bgm.duration) * 100 + "%"; }
+            requestAnimationFrame(syncArrow);
         }
-        function changeVolume(val) { bgm.volume = val/100; document.getElementById('vol-value').innerText = val+"%"; }
+
+        arrowSlider.addEventListener('mousedown', (e) => {
+            seek(e); window.addEventListener('mousemove', seek);
+            const upHandler = () => { window.removeEventListener('mousemove', seek); window.removeEventListener('mouseup', upHandler); };
+            window.addEventListener('mouseup', upHandler);
+        });
+
+        function seek(e) {
+            const rect = arrowSlider.getBoundingClientRect();
+            let pct = Math.min(Math.max(0, (e.clientX - rect.left) / rect.width), 1);
+            if (bgm.duration) { bgm.currentTime = pct * bgm.duration; arrowProgress.style.width = (pct * 100) + "%"; }
+        }
+
+        function changeVolume(val) { bgm.volume = val / 100; document.getElementById('vol-value').innerText = val + "%"; }
+
+        function handleMenu(type) {
+            playSystemSound();
+            if(type === 'STORAGE') openDiary(); // STORAGE 클릭 시 캘린더 오픈
+            const logBg = document.getElementById('system-log-bg');
+            const div = document.createElement('div');
+            div.style.color = "var(--accent-blue)";
+            div.innerText = `> ACCESSING_${type}... OK`;
+            logBg.appendChild(div);
+            if (logBg.childNodes.length > 6) logBg.removeChild(logBg.firstChild);
+        }
+
+        let lastMessageKey = null;
 
         function playSystemSound() {
             try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.frequency.setValueAtTime(850, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.start(); osc.stop(ctx.currentTime + 0.1);
-            } catch(e){}
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(850, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
+                oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.1);
+            } catch (e) { }
         }
 
-        window.onload = () => {
-            renderProfile();
+        function createLogLine() {
+            const logBg = document.getElementById('system-log-bg');
+            if(!logBg) return;
+            const lines = ["SYNC_SUCCESS", "ENCRYPT_OP_04", "HEARTBEAT_STABLE", "PACKET_RECV"];
+            const div = document.createElement('div');
+            div.innerText = `> ${lines[Math.floor(Math.random() * lines.length)]}_${Math.floor(Math.random() * 999)}`;
+            logBg.appendChild(div);
+            if (logBg.childNodes.length > 6) logBg.removeChild(logBg.firstChild);
+        }
+        setInterval(createLogLine, 12000);
+
+        window.addEventListener('load', () => {
+            const iconBox = document.getElementById('session-icon');
+            iconBox.style.background = (session.type === 'me') ? 
+                'linear-gradient(135deg, var(--main-pink), var(--main-purple))' : 
+                'linear-gradient(135deg, #00c6ff, #0072ff)';
             document.getElementById('edit-name').value = session.name;
             document.getElementById('edit-icon').value = session.icon || '';
-            
+            renderProfile();
+            database.ref('user_profiles/' + session.type).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) { session.name = data.name; session.icon = data.icon; localStorage.setItem('nya_current_session', JSON.stringify(session)); renderProfile(); }
+            });
             setTimeout(() => {
                 const loader = document.getElementById('boot-loader');
                 if(loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 500); }
             }, 800);
-
-            chatRef.limitToLast(30).on('value', (snap) => {
-                const list = document.getElementById('post-list');
-                list.innerHTML = '';
-                const data = snap.val();
-                if(data) {
-                    Object.entries(data).forEach(([key, post]) => {
-                        const isMe = post.senderType === session.type;
-                        const li = document.createElement('li');
-                        li.className = `post-item ${isMe ? 'me' : 'other'}`;
-                        const isImg = post.content.startsWith('data:image/');
-                        li.innerHTML = `
-                            ${isMe ? `<div class="delete-btn" onclick="deleteMsg('${key}')">✕</div>` : ''}
-                            <div style="font-size:0.6rem; color:var(--accent-blue); margin-bottom:4px;">${post.senderName}</div>
-                            <div class="post-text">${isImg ? `<img src="${post.content}" style="max-width:100%; border-radius:10px; cursor:pointer;" onclick="window.open(this.src)">` : post.content}</div>
-                            <div style="font-size:0.55rem; opacity:0.3; text-align:right; margin-top:4px;">${post.time}</div>
-                        `;
-                        list.appendChild(li);
-                    });
-                    list.scrollTop = list.scrollHeight;
-                    document.getElementById('post-count').innerText = `MEMORIES: ${String(Object.keys(data).length).padStart(2, '0')}`;
+            chatRef.limitToLast(30).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const keys = Object.keys(data);
+                    if (lastMessageKey && lastMessageKey !== keys[keys.length - 1]) playSystemSound();
+                    lastMessageKey = keys[keys.length - 1];
                 }
+                renderComments(data);
             });
-        };
+        });
 
-        function deleteMsg(key) { if (confirm("기록을 삭제하시겠습니까?")) database.ref('nya_chat_history/' + key).remove(); }
-        setInterval(() => {
+        const commentInput = document.getElementById('comment-input');
+        const postList = document.getElementById('post-list');
+
+        function saveComment() {
+            const text = commentInput.value.trim();
+            if (!text) return; sendDirectMessage(text);
+            commentInput.value = '';
+        }
+
+        function renderComments(data) {
+            postList.innerHTML = '';
+            if (!data) return;
+            const entries = Object.entries(data);
+            document.getElementById('post-count').innerText = `MEMORIES: ${String(entries.length).padStart(2, '0')}`;
+            entries.forEach(([key, post]) => {
+                const li = document.createElement('li');
+                const isMe = post.senderType === session.type;
+                li.className = `post-item ${isMe ? 'me' : 'other'}`;
+                let displayContent = "";
+                const isBase64 = post.content.startsWith('data:image/');
+                const isUrl = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i.test(post.content);
+                if (isBase64 || isUrl) {
+                    displayContent = `<img src="${post.content}" alt="Sent Image" style="max-width:100%; border-radius:10px; margin-top:8px; display:block; cursor:pointer;" onclick="window.open(this.src)">`;
+                } else {
+                    displayContent = post.content;
+                }
+                li.innerHTML = `
+                    ${isMe ? `<div class="delete-btn" onclick="deleteMessage('${key}')">✕</div>` : ''}
+                    <div class="post-sender">${post.senderName}</div>
+                    <div class="post-text">${displayContent}</div>
+                    <div class="post-info"><span>${post.time}</span></div>
+                `;
+                postList.appendChild(li);
+            });
+            postList.scrollTop = postList.scrollHeight;
+        }
+
+        function deleteMessage(key) { if (confirm("이 기록을 파기하시겠습니까?")) database.ref('nya_chat_history/' + key).remove(); }
+
+        commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
+        function updateClock() {
             const now = new Date();
             document.getElementById('current-time').textContent = now.toLocaleTimeString('en-GB');
             document.getElementById('current-date').textContent = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-        }, 1000);
+        }
+        setInterval(updateClock, 1000); updateClock();
     </script>
 </body>
 </html>
