@@ -406,9 +406,58 @@ body {
     background-size: 50px 50px; 
 }
 
-.sticker { position: absolute; cursor: move; user-select: none; z-index: 110; transition: transform 0.2s; }
-.sticker img { width: 150px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid #fff; pointer-events: none; }
-.sticker:hover { transform: scale(1.05); z-index: 200; }
+/* [스티커 기본 스타일] */
+.sticker { 
+    position: absolute; 
+    cursor: move; 
+    user-select: none; 
+    z-index: 110; 
+    transition: transform 0.2s; 
+}
+
+/* [스티커 이미지 스타일] */
+.sticker img { 
+    width: 100%; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+    /* 평상시에는 외곽선을 투명하게 설정 */
+    border: 2px solid transparent; 
+    pointer-events: none; 
+    transition: border 0.3s ease;
+}
+
+/* [마우스를 올렸을 때(Hover) 이미지 외곽선 표시] */
+.sticker:hover img { 
+    border: 2px solid #fff; 
+    transform: scale(1.05);
+}
+
+/* [리사이즈 점(분홍색 점) 스타일] */
+.resizer {
+    width: 15px;
+    height: 15px;
+    background: var(--main-pink); 
+    position: absolute;
+    right: -5px;
+    bottom: -5px;
+    cursor: nwse-resize; 
+    border-radius: 50%;
+    border: 2px solid #fff;
+    z-index: 201;
+    /* 평상시에는 숨김 처리 */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* [마우스를 올렸을 때(Hover) 분홍색 점 표시] */
+.sticker:hover .resizer {
+    opacity: 1;
+}
+
+/* 스티커 호버 시 우선순위 상승 */
+.sticker:hover { 
+    z-index: 200; 
+}
 
 /* 리사이즈 핸들 스타일 */
 .resizer {
