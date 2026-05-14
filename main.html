@@ -259,21 +259,42 @@
         .diary-grid { 
             display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; 
             flex: 1; overflow-y: auto; padding-right: 5px;
+            /* 그리드 높이 고정으로 일관성 유지 */
+            grid-auto-rows: minmax(100px, 1fr);
         }
         .diary-cell {
             background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-            aspect-ratio: 0.9; border-radius: 12px; padding: 8px; cursor: pointer;
+            border-radius: 12px; padding: 8px; cursor: pointer;
             position: relative; transition: 0.2s; overflow: hidden;
-            display: flex; flex-direction: column;
+            display: flex; flex-direction: column; min-height: 100px;
         }
         .diary-cell:hover { border-color: var(--accent-blue); background: rgba(0, 243, 255, 0.05); transform: translateY(-2px); }
         .diary-cell.today { border-color: var(--accent-blue); box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.2); }
         .diary-cell.filled { border-color: var(--main-pink); }
         .diary-cell .day-num { font-size: 0.6rem; opacity: 0.5; margin-bottom: 4px; }
-        .diary-cell .preview-img { width: 100%; height: 60%; object-fit: cover; border-radius: 6px; margin-top: auto; }
+        .diary-cell .preview-img { width: 100%; height: 50px; object-fit: cover; border-radius: 6px; margin-top: auto; }
         .diary-cell .preview-text { font-size: 0.55rem; color: #ccc; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--font-light); }
 
-        /* 글쓰기 모달 강화 */
+        /* 상세보기 모달 레이아웃 변경 (댓글 공간 확보) */
+        .modal-box {
+            background: var(--panel-bg); border: 1px solid var(--main-pink);
+            width: 90%; max-width: 750px; padding: 25px; border-radius: 20px; 
+            display: flex; gap: 20px; text-align: left;
+        }
+        .modal-left { flex: 1.2; }
+        .modal-right { 
+            flex: 1; border-left: 1px solid rgba(255,255,255,0.1); 
+            padding-left: 20px; display: flex; flex-direction: column; 
+        }
+        .diary-comment-list { flex: 1; overflow-y: auto; margin-bottom: 15px; font-size: 0.75rem; }
+        .diary-comment-item { margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; }
+        .diary-comment-sender { font-weight: bold; color: var(--main-pink); margin-right: 5px; }
+        .diary-comment-input-wrap { display: flex; gap: 5px; }
+        .diary-comment-input { 
+            flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 5px; color: #fff; padding: 8px; font-size: 0.7rem; outline: none;
+        }
+
         #diary-write-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 300; display: none;
@@ -282,34 +303,6 @@
         .write-box {
             background: var(--panel-bg); border: 1px solid var(--main-pink);
             width: 90%; max-width: 450px; padding: 25px; border-radius: 20px;
-            box-shadow: 0 0 30px rgba(255, 126, 185, 0.2);
-        }
-        .write-box h4 { margin: 0 0 15px 0; color: var(--accent-blue); font-size: 0.9rem; }
-        #diary-preview-area { 
-            width: 100%; height: 180px; background: rgba(255,255,255,0.05); 
-            border: 1px dashed rgba(255,255,255,0.2); border-radius: 10px;
-            margin-bottom: 15px; display: flex; align-items: center; justify-content: center;
-            overflow: hidden; cursor: pointer;
-        }
-        #diary-preview-area img { width: 100%; height: 100%; object-fit: cover; }
-        #diary-text-input {
-            width: 100%; height: 80px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px; color: #fff; padding: 10px; box-sizing: border-box;
-            font-family: var(--font-light); font-size: 0.8rem; resize: none; outline: none; margin-bottom: 15px;
-        }
-        .btn-group { display: flex; gap: 10px; }
-        .btn-group button { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-family: var(--font-main); font-size: 0.7rem; }
-        .btn-cancel { background: rgba(255,255,255,0.1); color: #fff; }
-        .btn-save { background: linear-gradient(135deg, var(--main-pink), var(--main-purple)); color: #fff; }
-
-        #diary-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 200; display: none;
-            align-items: center; justify-content: center;
-        }
-        .modal-box {
-            background: var(--panel-bg); border: 1px solid var(--main-pink);
-            width: 90%; max-width: 400px; padding: 20px; border-radius: 20px; text-align: center;
         }
     </style>
 </head>
@@ -398,7 +391,7 @@
             <h4 id="write-modal-date">DATE_LOG: 2024-05-24</h4>
             <div id="diary-preview-area" onclick="document.getElementById('diary-file').click()">
                 <span id="preview-placeholder">사진을 선택하거나 끌어넣으세요</span>
-                <img id="write-img-preview" style="display:none;">
+                <img id="write-img-preview" style="display:none; width:100%; height:100%; object-fit:cover;">
             </div>
             <input type="file" id="diary-file" hidden accept="image/*" onchange="previewDiaryImage(this)">
             <textarea id="diary-text-input" placeholder="오늘의 추억을 한 줄로 기록해 보세요..."></textarea>
@@ -409,12 +402,25 @@
         </div>
     </div>
 
-    <div id="diary-modal" onclick="this.style.display='none'">
+    <div id="diary-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:200; display:none; align-items:center; justify-content:center;" onclick="this.style.display='none'">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <div id="modal-date" style="font-size:0.6rem; color:var(--accent-blue); margin-bottom:10px;"></div>
-            <img id="modal-img" style="width:100%; border-radius:10px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.1);">
-            <div id="modal-text" style="font-family:var(--font-light); font-size:0.85rem; line-height:1.5;"></div>
-            <button class="btn-cancel" style="margin-top:15px; width:100%;" onclick="document.getElementById('diary-modal').style.display='none'">CLOSE</button>
+            <div class="modal-left">
+                <div id="modal-date" style="font-size:0.6rem; color:var(--accent-blue); margin-bottom:10px;"></div>
+                <img id="modal-img" style="width:100%; border-radius:10px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="triggerEdit()">
+                <div id="modal-text" style="font-family:var(--font-light); font-size:0.85rem; line-height:1.5; margin-bottom:10px;"></div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-save" style="flex:1; padding:10px; font-size:0.65rem;" onclick="triggerEdit()">EDIT_POST</button>
+                    <button class="btn-cancel" style="flex:1; padding:10px; font-size:0.65rem;" onclick="document.getElementById('diary-modal').style.display='none'">CLOSE</button>
+                </div>
+            </div>
+            <div class="modal-right">
+                <div style="font-size: 0.65rem; color: var(--accent-blue); margin-bottom: 10px;">> FEEDBACK_LOG</div>
+                <div class="diary-comment-list" id="diary-comment-list"></div>
+                <div class="diary-comment-input-wrap">
+                    <input type="text" id="diary-comment-input" class="diary-comment-input" placeholder="감상평 남기기...">
+                    <button class="save-btn" style="padding:0 10px; border-radius:5px;" onclick="saveDiaryComment()">SEND</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -440,6 +446,153 @@
         let session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
+        /* --- [신규 기능: 수정 및 댓글 시스템] --- */
+        let currentCalendarDate = new Date();
+        let selectedDiaryDate = "";
+        let selectedDiaryImgData = "";
+        let isEditing = false;
+
+        function openDiary() {
+            document.getElementById('diary-overlay').style.display = 'flex';
+            renderCalendar();
+        }
+        function closeDiary() { document.getElementById('diary-overlay').style.display = 'none'; }
+
+        function renderCalendar() {
+            const grid = document.getElementById('diary-grid');
+            const title = document.getElementById('calendar-title');
+            grid.innerHTML = '';
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            title.innerText = `${year}. ${String(month + 1).padStart(2, '0')}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDate = new Date(year, month + 1, 0).getDate();
+            
+            // 빈 칸 유지
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'diary-cell';
+                empty.style.visibility = 'hidden';
+                grid.appendChild(empty);
+            }
+
+            diaryRef.on('value', (snap) => {
+                const data = snap.val() || {};
+                grid.querySelectorAll('.diary-cell:not([style*="visibility: hidden"])').forEach(el => el.remove());
+                
+                for (let i = 1; i <= lastDate; i++) {
+                    const dateKey = `${year}-${month + 1}-${i}`;
+                    const cell = document.createElement('div');
+                    cell.className = 'diary-cell';
+                    if (new Date().toDateString() === new Date(year, month, i).toDateString()) cell.classList.add('today');
+
+                    cell.innerHTML = `<span class="day-num">${i}</span>`;
+                    if (data[dateKey]) {
+                        cell.classList.add('filled');
+                        cell.innerHTML += `<img src="${data[dateKey].image}" class="preview-img"><div class="preview-text">${data[dateKey].text}</div>`;
+                        cell.onclick = () => showDiaryDetail(dateKey, data[dateKey]);
+                    } else {
+                        cell.onclick = () => openWriteModal(dateKey);
+                    }
+                    grid.appendChild(cell);
+                }
+            });
+        }
+
+        function showDiaryDetail(dateKey, diaryData) {
+            selectedDiaryDate = dateKey;
+            document.getElementById('modal-date').innerText = `DATE_LOG: ${dateKey}`;
+            document.getElementById('modal-img').src = diaryData.image;
+            document.getElementById('modal-text').innerText = diaryData.text;
+            document.getElementById('diary-modal').style.display = 'flex';
+            
+            // 감상평 렌더링
+            const commentList = document.getElementById('diary-comment-list');
+            commentList.innerHTML = '';
+            if(diaryData.comments) {
+                Object.values(diaryData.comments).forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = 'diary-comment-item';
+                    div.innerHTML = `<span class="diary-comment-sender">${c.name}:</span><span>${c.text}</span>`;
+                    commentList.appendChild(div);
+                });
+            }
+        }
+
+        function saveDiaryComment() {
+            const input = document.getElementById('diary-comment-input');
+            const text = input.value.trim();
+            if(!text) return;
+            diaryRef.child(`${selectedDiaryDate}/comments`).push({
+                name: session.name,
+                text: text,
+                timestamp: Date.now()
+            });
+            input.value = '';
+            playSystemSound();
+        }
+
+        function triggerEdit() {
+            const diaryData = {
+                image: document.getElementById('modal-img').src,
+                text: document.getElementById('modal-text').innerText
+            };
+            document.getElementById('diary-modal').style.display = 'none';
+            openWriteModal(selectedDiaryDate, diaryData);
+        }
+
+        function openWriteModal(dateKey, editData = null) {
+            selectedDiaryDate = dateKey;
+            document.getElementById('write-modal-date').innerText = `DATE_LOG: ${dateKey}`;
+            const pImg = document.getElementById('write-img-preview');
+            const placeholder = document.getElementById('preview-placeholder');
+            const input = document.getElementById('diary-text-input');
+
+            if(editData) {
+                isEditing = true;
+                selectedDiaryImgData = editData.image;
+                pImg.src = editData.image;
+                pImg.style.display = 'block';
+                placeholder.style.display = 'none';
+                input.value = editData.text;
+            } else {
+                isEditing = false;
+                selectedDiaryImgData = "";
+                pImg.style.display = 'none';
+                placeholder.style.display = 'block';
+                input.value = "";
+            }
+            document.getElementById('diary-write-modal').style.display = 'flex';
+        }
+
+        function saveDiary() {
+            const text = document.getElementById('diary-text-input').value.trim();
+            if (!selectedDiaryImgData) { alert("사진을 선택해주세요!"); return; }
+            
+            // 일기 데이터 저장 (채팅 전송은 제외됨)
+            const updateData = {
+                image: selectedDiaryImgData,
+                text: text || "...",
+                timestamp: Date.now(),
+                author: session.name
+            };
+
+            // 수정 시에는 기존 댓글 유지
+            if(isEditing) {
+                diaryRef.child(selectedDiaryDate).update(updateData).then(() => {
+                    closeWriteModal();
+                    playSystemSound();
+                });
+            } else {
+                diaryRef.child(selectedDiaryDate).set(updateData).then(() => {
+                    closeWriteModal();
+                    playSystemSound();
+                });
+            }
+        }
+
+        /* --- [기존 로직 유지 및 보완] --- */
         const otherType = (session.type === 'me') ? 'other' : 'me';
         const myPresenceRef = database.ref('presence/' + session.type);
         const otherPresenceRef = database.ref('presence/' + otherType);
@@ -454,125 +607,13 @@
 
         otherPresenceRef.on('value', (snap) => {
             const status = snap.val() || 'OFFLINE';
-            if (status === 'ONLINE') {
-                statusDisplay.innerText = "짝궁도 접속중!";
-                statusDisplay.style.color = 'var(--accent-blue)';
-            } else {
-                statusDisplay.innerText = "짝궁 접속종료!";
-                statusDisplay.style.color = 'rgba(255,255,255,0.2)';
-            }
+            statusDisplay.innerText = status === 'ONLINE' ? "짝궁도 접속중!" : "짝궁 접속종료!";
+            statusDisplay.style.color = status === 'ONLINE' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.2)';
         });
-
-        function updateProfile() {
-            const nameVal = document.getElementById('edit-name').value.trim();
-            const iconVal = document.getElementById('edit-icon').value.trim();
-            if(nameVal) session.name = nameVal;
-            if(iconVal) session.icon = iconVal;
-            localStorage.setItem('nya_current_session', JSON.stringify(session));
-            const userTypeKey = (session.type === 'me') ? 'nya_me_session' : 'nya_other_session';
-            localStorage.setItem(userTypeKey, JSON.stringify(session));
-            database.ref('user_profiles/' + session.type).set({
-                name: session.name,
-                icon: session.icon
-            });
-            renderProfile();
-        }
-
-        function renderProfile() {
-            const iconBox = document.getElementById('session-icon');
-            const nameBox = document.getElementById('session-name');
-            if(!iconBox || !nameBox) return;
-            nameBox.innerText = session.name || "Unknown";
-            const isImage = session.icon && (session.icon.startsWith('http') || session.icon.startsWith('data:image'));
-            if (isImage) {
-                iconBox.innerHTML = `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://via.placeholder.com/55?text=?';">`;
-            } else {
-                iconBox.innerHTML = session.icon || '👤';
-            }
-        }
-
-        /* --- [강화된 캘린더 기능] --- */
-        let currentCalendarDate = new Date();
-        let selectedDiaryDate = "";
-        let selectedDiaryImgData = "";
-
-        function openDiary() {
-            document.getElementById('diary-overlay').style.display = 'flex';
-            renderCalendar();
-        }
-        function closeDiary() { document.getElementById('diary-overlay').style.display = 'none'; }
 
         function changeMonth(delta) {
             currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
             renderCalendar();
-        }
-
-        function renderCalendar() {
-            const grid = document.getElementById('diary-grid');
-            const title = document.getElementById('calendar-title');
-            grid.innerHTML = '';
-
-            const year = currentCalendarDate.getFullYear();
-            const month = currentCalendarDate.getMonth();
-            title.innerText = `${year}. ${String(month + 1).padStart(2, '0')}`;
-
-            const firstDay = new Date(year, month, 1).getDay();
-            const lastDate = new Date(year, month + 1, 0).getDate();
-            const today = new Date();
-
-            // 빈 칸 (이전 달 끝부분)
-            for (let i = 0; i < firstDay; i++) {
-                const empty = document.createElement('div');
-                empty.className = 'diary-cell';
-                empty.style.opacity = '0';
-                grid.appendChild(empty);
-            }
-
-            diaryRef.on('value', (snap) => {
-                const data = snap.val() || {};
-                // 실제 날짜 생성
-                grid.querySelectorAll('.diary-cell:not([style*="opacity: 0"])').forEach(el => el.remove());
-                
-                for (let i = 1; i <= lastDate; i++) {
-                    const dateKey = `${year}-${month + 1}-${i}`;
-                    const cell = document.createElement('div');
-                    cell.className = 'diary-cell';
-                    if (today.getFullYear() === year && today.getMonth() === month && today.getDate() === i) {
-                        cell.classList.add('today');
-                    }
-
-                    cell.innerHTML = `<span class="day-num">${i}</span>`;
-                    
-                    if (data[dateKey]) {
-                        cell.classList.add('filled');
-                        cell.innerHTML += `
-                            <img src="${data[dateKey].image}" class="preview-img">
-                            <div class="preview-text">${data[dateKey].text}</div>
-                        `;
-                        cell.onclick = () => showDiaryDetail(dateKey, data[dateKey]);
-                    } else {
-                        cell.onclick = () => openWriteModal(dateKey);
-                    }
-                    grid.appendChild(cell);
-                }
-            });
-        }
-
-        function showDiaryDetail(dateKey, diaryData) {
-            document.getElementById('modal-date').innerText = `DATE_LOG: ${dateKey}`;
-            document.getElementById('modal-img').src = diaryData.image;
-            document.getElementById('modal-text').innerText = diaryData.text;
-            document.getElementById('diary-modal').style.display = 'flex';
-        }
-
-        function openWriteModal(dateKey) {
-            selectedDiaryDate = dateKey;
-            selectedDiaryImgData = "";
-            document.getElementById('write-modal-date').innerText = `DATE_LOG: ${dateKey}`;
-            document.getElementById('diary-text-input').value = "";
-            document.getElementById('write-img-preview').style.display = 'none';
-            document.getElementById('preview-placeholder').style.display = 'block';
-            document.getElementById('diary-write-modal').style.display = 'flex';
         }
 
         function closeWriteModal() { document.getElementById('diary-write-modal').style.display = 'none'; }
@@ -592,21 +633,6 @@
             }
         }
 
-        function saveDiary() {
-            const text = document.getElementById('diary-text-input').value.trim();
-            if (!selectedDiaryImgData) { alert("그림(사진)을 선택해주세요!"); return; }
-            
-            diaryRef.child(selectedDiaryDate).set({
-                image: selectedDiaryImgData,
-                text: text || "말줄임...",
-                timestamp: Date.now()
-            }).then(() => {
-                closeWriteModal();
-                playSystemSound();
-            });
-        }
-
-        /* --- [원본 기능 유지] --- */
         function handleDrop(e) {
             e.preventDefault();
             const files = e.dataTransfer.files;
@@ -639,12 +665,12 @@
                         const dateKey = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
                         openWriteModal(dateKey);
                         selectedDiaryImgData = compressedData;
-                        const pImg = document.getElementById('write-img-preview');
-                        pImg.src = compressedData;
-                        pImg.style.display = 'block';
+                        document.getElementById('write-img-preview').src = compressedData;
+                        document.getElementById('write-img-preview').style.display = 'block';
                         document.getElementById('preview-placeholder').style.display = 'none';
+                    } else {
+                        sendDirectMessage(compressedData);
                     }
-                    sendDirectMessage(compressedData);
                 };
                 img.src = e.target.result;
             };
@@ -652,11 +678,10 @@
         }
 
         function sendDirectMessage(content) {
-            const currentSession = JSON.parse(localStorage.getItem('nya_current_session')) || session;
             chatRef.push({
                 id: Date.now(),
-                senderType: currentSession.type,
-                senderName: currentSession.name,
+                senderType: session.type,
+                senderName: session.name,
                 content: content,
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             });
@@ -665,42 +690,27 @@
         const bgm = new Audio('bgm.mp3');
         bgm.loop = true; bgm.volume = 0.3;
         let isPlaying = false;
-        const arrowProgress = document.getElementById('arrow-progress');
-        const arrowSlider = document.getElementById('arrow-slider');
-        const arrowPlayerWrap = document.getElementById('arrow-player-wrap');
 
         function toggleMusic() {
             const btn = document.getElementById('music-btn');
             if (!isPlaying) {
-                bgm.play().catch(() => console.log("Interaction required"));
+                bgm.play().catch(() => {});
                 btn.classList.add('playing');
-                arrowPlayerWrap.classList.add('beating');
+                document.getElementById('arrow-player-wrap').classList.add('beating');
                 isPlaying = true;
                 requestAnimationFrame(syncArrow);
             } else {
                 bgm.pause();
                 btn.classList.remove('playing');
-                arrowPlayerWrap.classList.remove('beating');
+                document.getElementById('arrow-player-wrap').classList.remove('beating');
                 isPlaying = false;
             }
         }
 
         function syncArrow() {
             if (!isPlaying) return;
-            if (bgm.duration) { arrowProgress.style.width = (bgm.currentTime / bgm.duration) * 100 + "%"; }
+            if (bgm.duration) { document.getElementById('arrow-progress').style.width = (bgm.currentTime / bgm.duration) * 100 + "%"; }
             requestAnimationFrame(syncArrow);
-        }
-
-        arrowSlider.addEventListener('mousedown', (e) => {
-            seek(e); window.addEventListener('mousemove', seek);
-            const upHandler = () => { window.removeEventListener('mousemove', seek); window.removeEventListener('mouseup', upHandler); };
-            window.addEventListener('mouseup', upHandler);
-        });
-
-        function seek(e) {
-            const rect = arrowSlider.getBoundingClientRect();
-            let pct = Math.min(Math.max(0, (e.clientX - rect.left) / rect.width), 1);
-            if (bgm.duration) { bgm.currentTime = pct * bgm.duration; arrowProgress.style.width = (pct * 100) + "%"; }
         }
 
         function changeVolume(val) { bgm.volume = val / 100; document.getElementById('vol-value').innerText = val + "%"; }
@@ -716,8 +726,6 @@
             if (logBg.childNodes.length > 6) logBg.removeChild(logBg.firstChild);
         }
 
-        let lastMessageKey = null;
-
         function playSystemSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -731,54 +739,46 @@
             } catch (e) { }
         }
 
-        function createLogLine() {
-            const logBg = document.getElementById('system-log-bg');
-            if(!logBg) return;
-            const lines = ["SYNC_SUCCESS", "ENCRYPT_OP_04", "HEARTBEAT_STABLE", "PACKET_RECV"];
-            const div = document.createElement('div');
-            div.innerText = `> ${lines[Math.floor(Math.random() * lines.length)]}_${Math.floor(Math.random() * 999)}`;
-            logBg.appendChild(div);
-            if (logBg.childNodes.length > 6) logBg.removeChild(logBg.firstChild);
+        function updateProfile() {
+            const nameVal = document.getElementById('edit-name').value.trim();
+            const iconVal = document.getElementById('edit-icon').value.trim();
+            if(nameVal) session.name = nameVal;
+            if(iconVal) session.icon = iconVal;
+            localStorage.setItem('nya_current_session', JSON.stringify(session));
+            database.ref('user_profiles/' + session.type).set({ name: session.name, icon: session.icon });
+            renderProfile();
         }
-        setInterval(createLogLine, 12000);
+
+        function renderProfile() {
+            const iconBox = document.getElementById('session-icon');
+            const nameBox = document.getElementById('session-name');
+            nameBox.innerText = session.name || "Unknown";
+            const isImage = session.icon && (session.icon.startsWith('http') || session.icon.startsWith('data:image'));
+            iconBox.innerHTML = isImage ? `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;">` : (session.icon || '👤');
+        }
 
         window.addEventListener('load', () => {
-            const iconBox = document.getElementById('session-icon');
-            iconBox.style.background = (session.type === 'me') ? 
-                'linear-gradient(135deg, var(--main-pink), var(--main-purple))' : 
-                'linear-gradient(135deg, #00c6ff, #0072ff)';
+            document.getElementById('session-icon').style.background = (session.type === 'me') ? 'linear-gradient(135deg, var(--main-pink), var(--main-purple))' : 'linear-gradient(135deg, #00c6ff, #0072ff)';
             document.getElementById('edit-name').value = session.name;
             document.getElementById('edit-icon').value = session.icon || '';
             renderProfile();
-            database.ref('user_profiles/' + session.type).on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) { session.name = data.name; session.icon = data.icon; localStorage.setItem('nya_current_session', JSON.stringify(session)); renderProfile(); }
-            });
             setTimeout(() => {
                 const loader = document.getElementById('boot-loader');
                 if(loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 500); }
             }, 800);
-            chatRef.limitToLast(30).on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const keys = Object.keys(data);
-                    if (lastMessageKey && lastMessageKey !== keys[keys.length - 1]) playSystemSound();
-                    lastMessageKey = keys[keys.length - 1];
-                }
-                renderComments(data);
-            });
+            chatRef.limitToLast(30).on('value', (snapshot) => renderComments(snapshot.val()));
         });
 
-        const commentInput = document.getElementById('comment-input');
-        const postList = document.getElementById('post-list');
-
         function saveComment() {
-            const text = commentInput.value.trim();
-            if (!text) return; sendDirectMessage(text);
-            commentInput.value = '';
+            const input = document.getElementById('comment-input');
+            const text = input.value.trim();
+            if (!text) return;
+            sendDirectMessage(text);
+            input.value = '';
         }
 
         function renderComments(data) {
+            const postList = document.getElementById('post-list');
             postList.innerHTML = '';
             if (!data) return;
             const entries = Object.entries(data);
@@ -787,14 +787,8 @@
                 const li = document.createElement('li');
                 const isMe = post.senderType === session.type;
                 li.className = `post-item ${isMe ? 'me' : 'other'}`;
-                let displayContent = "";
-                const isBase64 = post.content.startsWith('data:image/');
-                const isUrl = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i.test(post.content);
-                if (isBase64 || isUrl) {
-                    displayContent = `<img src="${post.content}" alt="Sent Image" style="max-width:100%; border-radius:10px; margin-top:8px; display:block; cursor:pointer;" onclick="window.open(this.src)">`;
-                } else {
-                    displayContent = post.content;
-                }
+                const isImg = post.content.startsWith('data:image/') || /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i.test(post.content);
+                const displayContent = isImg ? `<img src="${post.content}" onclick="window.open(this.src)">` : post.content;
                 li.innerHTML = `
                     ${isMe ? `<div class="delete-btn" onclick="deleteMessage('${key}')">✕</div>` : ''}
                     <div class="post-sender">${post.senderName}</div>
@@ -806,9 +800,8 @@
             postList.scrollTop = postList.scrollHeight;
         }
 
-        function deleteMessage(key) { if (confirm("이 기록을 파기하시겠습니까?")) database.ref('nya_chat_history/' + key).remove(); }
-
-        commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
+        function deleteMessage(key) { if (confirm("기록을 파기할까요?")) database.ref('nya_chat_history/' + key).remove(); }
+        document.getElementById('comment-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
         function updateClock() {
             const now = new Date();
             document.getElementById('current-time').textContent = now.toLocaleTimeString('en-GB');
