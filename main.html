@@ -391,7 +391,7 @@
                 <div class="music-section">
                     <div class="arrow-player" id="arrow-player-wrap">
                         <div class="arrow-vane" id="music-btn" onclick="toggleMusic()"></div>
-                        <div class="arrow-shaft-container" id="arrow-slider">
+                        <div class="arrow-shaft-container" id="arrow-slider" onclick="seekMusic(event)">
                             <div class="arrow-shaft-bg">
                                 <div class="arrow-shaft-fill" id="arrow-progress">
                                     <div class="arrow-circle-knob"></div>
@@ -770,6 +770,19 @@
         const bgm = new Audio('bgm.mp3');
         bgm.loop = true; bgm.volume = 0.3;
         let isPlaying = false;
+
+        // [기능 추가] 재생바 클릭 시 노래 위치 이동 함수
+        function seekMusic(e) {
+            if (!bgm.duration) return;
+            const slider = document.getElementById('arrow-slider');
+            const rect = slider.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const width = rect.width;
+            const percent = Math.min(Math.max(offsetX / width, 0), 1);
+            bgm.currentTime = percent * bgm.duration;
+            document.getElementById('arrow-progress').style.width = (percent * 100) + "%";
+            if (!isPlaying) toggleMusic();
+        }
 
         function toggleMusic() {
             const btn = document.getElementById('music-btn');
