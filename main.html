@@ -9,6 +9,15 @@
 </head>
 <body ondragover="event.preventDefault()" ondrop="handleDrop(event)">
 
+    <div id="sticker-book" class="sticker-container">
+        <div style="position:absolute; top:20px; right:20px; z-index:10001;">
+            <span style="color:var(--main-pink); cursor:pointer; font-size: 0.7rem; background:rgba(0,0,0,0.5); padding:5px; border-radius:5px;" onclick="closeStickerBook()">[CLOSE_공책_X]</span>
+        </div>
+        <div id="sticker-area-wrapper">
+            <div id="sticker-area"></div>
+        </div>
+    </div>
+
     <div id="system-log-bg"></div>
     <div id="boot-loader"><div id="loader-text">> INITIALIZING_SECURE_CONNECTION...</div></div>
 
@@ -52,16 +61,6 @@
             </aside>
 
             <main class="main-content">
-
-<div id="sticker-book" class="sticker-container">
-    <div style="position:absolute; top:20px; right:20px; z-index:1001;">
-        <span style="color:var(--main-pink); cursor:pointer; font-size: 0.7rem; background:rgba(0,0,0,0.5); padding:5px; border-radius:5px;" onclick="closeStickerBook()">[CLOSE_공책_X]</span>
-    </div>
-    <div id="sticker-area-wrapper">
-        <div id="sticker-area"></div>
-    </div>
-</div>
-
                 <div id="diary-overlay">
                     <div class="calendar-header">
                         <div class="calendar-nav">
@@ -160,22 +159,22 @@
         if (!session) { location.href = 'index.html'; }
 
         /* --- [스티커북 전용 로직] --- */
-       function openStickerBook() {
-    const book = document.getElementById('sticker-book');
-    const wrapper = document.getElementById('sticker-area-wrapper');
-    
-    // 이 부분이 'flex'로 되어야 내부의 #sticker-area-wrapper가 보입니다.
-    book.style.display = 'flex'; 
-    
-    if(wrapper) {
-        wrapper.scrollLeft = 0;
-        wrapper.scrollTop = 0;
-    }
-    
-    renderStickers();
-    setupStickerDrop(); 
-    systemLog("OPENING_EXPANDED_STICKER_BOOK...");
-}
+        function openStickerBook() {
+            const book = document.getElementById('sticker-book');
+            const wrapper = document.getElementById('sticker-area-wrapper');
+            
+            // 이 부분이 'flex'로 되어야 내부의 #sticker-area-wrapper가 보입니다.
+            book.style.display = 'flex'; 
+            
+            if(wrapper) {
+                wrapper.scrollLeft = 0;
+                wrapper.scrollTop = 0;
+            }
+            
+            renderStickers();
+            setupStickerDrop(); 
+            systemLog("OPENING_EXPANDED_STICKER_BOOK...");
+        }
 
         function closeStickerBook() {
             document.getElementById('sticker-book').style.display = 'none';
@@ -183,50 +182,49 @@
         }
 
         function setupStickerDrop() {
-    const area = document.getElementById('sticker-area');
-    const wrapper = document.getElementById('sticker-area-wrapper');
-    
-    if (!area || !wrapper) return; // 오류 방지
+            const area = document.getElementById('sticker-area');
+            const wrapper = document.getElementById('sticker-area-wrapper');
+            
+            if (!area || !wrapper) return;
 
-    area.ondragover = (e) => {
-        e.preventDefault();
-        area.style.background = "rgba(255, 126, 185, 0.05)";
-    };
-    
-    area.ondragleave = () => {
-        area.style.background = "transparent";
-    };
-    
-    area.ondrop = (e) => {
-        e.preventDefault();
-        area.style.background = "transparent";
-        const files = e.dataTransfer.files;
-        
-        if (files && files[0]) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                // 마우스 위치에서 sticker-area의 절대 위치를 빼서 
-                // 4000px 캔버스 내의 정확한 좌표를 계산합니다.
-                const rect = area.getBoundingClientRect();
-                const posX = e.clientX - rect.left;
-                const posY = e.clientY - rect.top;
-                
-                const newStickerRef = stickerRef.push(); 
-                newStickerRef.set({
-                    image: event.target.result,
-                    posX: posX - 75, // 스티커 크기의 절반만큼 빼서 마우스 중앙에 생성
-                    posY: posY - 75,
-                    width: 150,
-                    timestamp: Date.now()
-                });
-                
-                systemLog("STICKER_AUTO_ADDED!");
-                playSystemSound();
+            area.ondragover = (e) => {
+                e.preventDefault();
+                area.style.background = "rgba(255, 126, 185, 0.05)";
             };
-            reader.readAsDataURL(files[0]);
+            
+            area.ondragleave = () => {
+                area.style.background = "transparent";
+            };
+            
+            area.ondrop = (e) => {
+                e.preventDefault();
+                area.style.background = "transparent";
+                const files = e.dataTransfer.files;
+                
+                if (files && files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const rect = area.getBoundingClientRect();
+                        const posX = e.clientX - rect.left;
+                        const posY = e.clientY - rect.top;
+                        
+                        const newStickerRef = stickerRef.push(); 
+                        newStickerRef.set({
+                            image: event.target.result,
+                            posX: posX - 75,
+                            posY: posY - 75,
+                            width: 150,
+                            timestamp: Date.now()
+                        });
+                        
+                        systemLog("STICKER_AUTO_ADDED!");
+                        playSystemSound();
+                    };
+                    reader.readAsDataURL(files[0]);
+                }
+            };
         }
-    };
-}
+
         function renderStickers() {
             const area = document.getElementById('sticker-area');
             const wrapper = document.getElementById('sticker-area-wrapper');
@@ -670,12 +668,7 @@
                 li.className = `post-item ${isMe ? 'me' : 'other'}`;
                 const isImg = post.content.startsWith('data:image/') || /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i.test(post.content);
                 const displayContent = isImg ? `<img src="${post.content}" onclick="window.open(this.src)">` : post.content;
-                li.innerHTML = `
-                    ${isMe ? `<div class="delete-btn" onclick="deleteMessage('${key}')">✕</div>` : ''}
-                    <div class="post-sender">${post.senderName}</div>
-                    <div class="post-text">${displayContent}</div>
-                    <div class="post-info"><span>${post.time}</span></div>
-                `;
+                li.innerHTML = ` ${isMe ? `<div class="delete-btn" onclick="deleteMessage('${key}')">✕</div>` : ''} <div class="post-sender">${post.senderName}</div> <div class="post-text">${displayContent}</div> <div class="post-info"><span>${post.time}</span></div> `;
                 postList.appendChild(li);
             });
             postList.scrollTop = postList.scrollHeight;
