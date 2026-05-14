@@ -367,3 +367,26 @@ body {
     border: 2px solid #fff;
     z-index: 201;
 }
+
+#sticker-area {
+    width: 3000px; /* 자유롭게 배치할 수 있는 아주 넓은 가로 폭 */
+    height: 3000px; /* 아주 깊은 세로 높이 */
+    position: relative;
+    /* 모눈종이 같은 가이드 라인 효과 */
+    background-image: 
+        radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 40px 40px; 
+}
+
+/* 스크롤바 디자인 (캔버스 이동 시 깔끔하게) */
+.sticker-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+.sticker-container::-webkit-scrollbar-thumb {
+    background: var(--main-pink);
+    border-radius: 10px;
+}
+.sticker-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
