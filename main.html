@@ -157,15 +157,59 @@
         if (!session) { location.href = 'index.html'; }
 
         /* --- [스티커북 전용 로직] --- */
-        function openStickerBook() {
-            document.getElementById('sticker-book').style.display = 'block';
-            renderStickers();
-            systemLog("OPENING_STICKER_BOOK...");
-        }
+        /* --- [스티커북 전용 로직 업데이트] --- */
 
-        function closeStickerBook() {
-            document.getElementById('sticker-book').style.display = 'none';
+function openStickerBook() {
+    const book = document.getElementById('sticker-book');
+    book.style.display = 'block';
+    
+    // 처음 열 때 중앙으로 스크롤 이동 (선택 사항)
+    book.scrollLeft = 0;
+    book.scrollTop = 0;
+    
+    renderStickers();
+    setupStickerDrop(); // 드롭 이벤트 설정
+    systemLog("OPENING_EXPANDED_STICKER_BOOK...");
+}
+
+// 사진을 끌어다 놓으면 자동으로 추가되는 로직
+function setupStickerDrop() {
+    const area = document.getElementById('sticker-area');
+    
+    area.ondragover = (e) => e.preventDefault();
+    
+    area.ondrop = (e) => {
+        e.preventDefault();
+        const files = e.dataTransfer.files;
+        if (files && files[0]) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                // 마우스가 놓인 위치 계산
+                const rect = area.getBoundingClientRect();
+                const posX = e.clientX - rect.left;
+                const posY = e.clientY - rect.top;
+                
+                // Firebase에 새로운 스티커로 저장 (임의의 키 생성)
+                const newStickerRef = diaryRef.push(); 
+                newStickerRef.set({
+                    image: event.target.result,
+                    posX: posX - 75, // 사진의 절반 정도 보정
+                    posY: posY - 75,
+                    width: 150,
+                    timestamp: Date.now(),
+                    text: "새로운 스티커"
+                });
+                
+                systemLog("STICKER_AUTO_ADDED!");
+                playSystemSound();
+            };
+            reader.readAsDataURL(files[0]);
         }
+    };
+}
+
+// 기존 renderStickers 함수는 그대로 유지되나, 
+// setupStickerDrop이 추가됨으로써 실시간으로 드롭된 이미지를 그려줍니다.
 
       function renderStickers() {
     const area = document.getElementById('sticker-area');
