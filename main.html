@@ -30,42 +30,6 @@
     </div>
 </div>
 
-<script>
-    /* --- 모드 전환 및 드로잉 로직 --- */
-    let currentMode = 'edit'; // 기본값은 편집 모드
-
-    function setMode(mode) {
-        currentMode = mode;
-        const canvas = document.getElementById('drawing-canvas');
-        
-        // 버튼 활성화 스타일 관리
-        document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(`btn-${mode}`).classList.add('active');
-
-        if (mode === 'edit') {
-            // 편집 모드: 캔버스가 마우스 이벤트를 통과시켜 스티커를 만질 수 있게 함
-            canvas.style.pointerEvents = 'none';
-            canvas.style.cursor = 'default';
-        } else {
-            // 그리기/지우개 모드: 캔버스가 마우스 이벤트를 받아 그림을 그림
-            canvas.style.pointerEvents = 'auto';
-            canvas.style.cursor = 'crosshair';
-            
-            if (mode === 'erase') {
-                ctx.globalCompositeOperation = 'destination-out'; // 지우개 모드
-                ctx.lineWidth = 20;
-            } else {
-                ctx.globalCompositeOperation = 'source-over'; // 연필 모드
-                ctx.lineWidth = 4;
-            }
-        }
-        systemLog(`MODE_CHANGED_TO: ${mode.toUpperCase()}`);
-    }
-
-    // 기존의 initDrawingCanvas 내부에 위 모드 로직이 잘 작동하도록 설정되어야 합니다.
-    // drawLine 함수 내에서 지우개일 때와 연필일 때의 설정은 setMode에서 처리합니다.
-</script>
-    
     <div id="system-log-bg"></div>
     <div id="boot-loader"><div id="loader-text">> INITIALIZING_SECURE_CONNECTION...</div></div>
 
