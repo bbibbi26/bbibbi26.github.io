@@ -201,6 +201,9 @@
         let session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
+        /* --- [알림음 동기화 전용 변수] --- */
+        let lastMessageId = null;
+
         /* --- [스티커북 및 낙서 전용 로직] --- */
         let drawingCanvas, ctx, isDrawing = false;
         let currentMode = 'edit'; // 초기 모드: 편집
@@ -573,6 +576,22 @@
             document.getElementById('session-icon').style.background = (session.type === 'me') ? 'linear-gradient(135deg, var(--main-pink), var(--main-purple))' : 'linear-gradient(135deg, #00c6ff, #0072ff)';
             document.getElementById('edit-name').value = session.name; document.getElementById('edit-icon').value = session.icon || '';
             renderProfile(); setTimeout(() => { const loader = document.getElementById('boot-loader'); if(loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 500); } }, 800);
+            
+            /* --- [실시간 알림음 연동 로직 추가] --- */
+            chatRef.limitToLast(1).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const entries = Object.entries(data);
+                    const [key, post] = entries[0];
+                    // 새로운 메시지이고, 내가 보낸 메시지가 아닐 때 알림음 재생
+                    if (lastMessageId && lastMessageId !== key && post.senderType !== session.type) {
+                        playSystemSound();
+                        systemLog("NEW_MESSAGE_RECEIVED");
+                    }
+                    lastMessageId = key;
+                }
+            });
+
             chatRef.limitToLast(30).on('value', (snapshot) => renderComments(snapshot.val()));
         });
         function saveComment() {
