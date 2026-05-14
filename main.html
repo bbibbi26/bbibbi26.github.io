@@ -6,30 +6,61 @@
     <title>NYA-PPI / INTEGRATED_TERMINAL</title>
     <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* 모드 전환 버튼 전용 스타일 */
+        .tool-btn {
+            font-size: 9px;
+            padding: 3px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 126, 185, 0.3);
+            color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            font-family: 'GmarketSansBold', sans-serif;
+            transition: all 0.2s;
+        }
+        .tool-btn:hover { background: rgba(255, 126, 185, 0.2); }
+        .tool-btn.active {
+            background: #ff7eb9;
+            color: #fff;
+            border-color: #fff;
+            box-shadow: 0 0 10px #ff7eb9;
+        }
+        /* 캔버스 기본 설정: 초기에는 편집 모드이므로 클릭 통과 */
+        #drawing-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 500;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body ondragover="event.preventDefault()" ondrop="handleDrop(event)">
 
-  <div id="sticker-book" class="sticker-container">
-    <div class="sticker-header">
-        <div class="header-title">📁 STICKER_FILE_EXPLORER_V1.0</div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-            <button onclick="setMode('edit')" id="btn-edit" class="tool-btn active">MOVE_EDIT</button>
-            <button onclick="setMode('draw')" id="btn-draw" class="tool-btn">PENCIL</button>
-            <button onclick="setMode('erase')" id="btn-erase" class="tool-btn">ERASER</button>
-            
-            <input type="color" id="pen-color" value="#ff7eb9" style="width:18px; height:18px; border:none; background:none; cursor:pointer;">
-            <button onclick="clearCanvas()" class="tool-btn" style="border-color: #ff4b4b; color: #ff4b4b;">CLEAR</button>
-            <div class="header-close" onclick="closeStickerBook()">[CLOSE_X]</div>
+    <div id="sticker-book" class="sticker-container">
+        <div class="sticker-header">
+            <div class="header-title">
+                <span style="font-size: 10px;">📁</span> STICKER_FILE_EXPLORER_V1.0
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button onclick="setMode('edit')" id="btn-edit" class="tool-btn active">MOVE_EDIT</button>
+                <button onclick="setMode('draw')" id="btn-draw" class="tool-btn">PENCIL</button>
+                <button onclick="setMode('erase')" id="btn-erase" class="tool-btn">ERASER</button>
+                
+                <input type="color" id="pen-color" value="#ff7eb9" style="width:18px; height:18px; border:none; background:none; cursor:pointer;">
+                <button onclick="clearCanvas()" class="tool-btn" style="border-color: #ff4b4b; color: #ff4b4b;">CLEAR</button>
+                <div class="header-close" onclick="closeStickerBook()">[CLOSE_X]</div>
+            </div>
+        </div>
+        
+        <div id="sticker-area-wrapper">
+            <div id="sticker-area">
+                <canvas id="drawing-canvas" width="4000" height="4000"></canvas>
+            </div>
         </div>
     </div>
     
-    <div id="sticker-area-wrapper">
-        <div id="sticker-area">
-            <canvas id="drawing-canvas" width="4000" height="4000"></canvas>
-        </div>
-    </div>
-</div>
-
     <div id="system-log-bg"></div>
     <div id="boot-loader"><div id="loader-text">> INITIALIZING_SECURE_CONNECTION...</div></div>
 
@@ -172,22 +203,18 @@
 
         /* --- [스티커북 및 낙서 전용 로직] --- */
         let drawingCanvas, ctx, isDrawing = false;
+        let currentMode = 'edit'; // 초기 모드: 편집
 
         function openStickerBook() {
             const book = document.getElementById('sticker-book');
             const wrapper = document.getElementById('sticker-area-wrapper');
-            
             book.style.display = 'flex'; 
-            
-            if(wrapper) {
-                wrapper.scrollLeft = 0;
-                wrapper.scrollTop = 0;
-            }
-            
+            if(wrapper) { wrapper.scrollLeft = 0; wrapper.scrollTop = 0; }
             renderStickers();
             setupStickerDrop(); 
             initDrawingCanvas();
-            systemLog("OPENING_STICKER_BOOK_WITH_CANVAS...");
+            setMode('edit'); // 열 때 항상 편집 모드로 시작
+            systemLog("OPENING_STICKER_BOOK...");
         }
 
         function closeStickerBook() {
@@ -198,8 +225,6 @@
         function initDrawingCanvas() {
             drawingCanvas = document.getElementById('drawing-canvas');
             ctx = drawingCanvas.getContext('2d');
-            ctx.strokeStyle = document.getElementById('pen-color').value;
-            ctx.lineWidth = 4;
             ctx.lineCap = "round";
 
             drawingCanvas.addEventListener('mousedown', startDrawing);
@@ -217,7 +242,34 @@
             }, { passive: false });
         }
 
+        function setMode(mode) {
+            currentMode = mode;
+            const canvas = document.getElementById('drawing-canvas');
+            
+            // 버튼 스타일 업데이트
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            const targetBtn = document.getElementById(`btn-${mode}`);
+            if(targetBtn) targetBtn.classList.add('active');
+
+            if (mode === 'edit') {
+                canvas.style.pointerEvents = 'none'; // 캔버스 통과
+                canvas.style.cursor = 'default';
+            } else {
+                canvas.style.pointerEvents = 'auto'; // 캔버스 활성화
+                canvas.style.cursor = 'crosshair';
+                if (mode === 'erase') {
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.lineWidth = 25;
+                } else {
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.lineWidth = 4;
+                }
+            }
+            systemLog(`MODE: ${mode.toUpperCase()}`);
+        }
+
         function startDrawing(e) {
+            if (currentMode === 'edit') return;
             isDrawing = true;
             const rect = drawingCanvas.getBoundingClientRect();
             ctx.beginPath();
@@ -226,9 +278,9 @@
         }
 
         function drawLine(e) {
-            if (!isDrawing) return;
+            if (!isDrawing || currentMode === 'edit') return;
             const rect = drawingCanvas.getBoundingClientRect();
-            ctx.strokeStyle = document.getElementById('pen-color').value;
+            if (currentMode === 'draw') ctx.strokeStyle = document.getElementById('pen-color').value;
             ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
             ctx.stroke();
             if(e.preventDefault) e.preventDefault();
@@ -244,12 +296,9 @@
         }
 
         function setupStickerDrop() {
-            // 캔버스가 가장 위에 있으므로 캔버스에 드롭 이벤트를 겁니다.
-            const canvasLayer = document.getElementById('drawing-canvas');
             const area = document.getElementById('sticker-area');
-            
-            canvasLayer.ondragover = (e) => e.preventDefault();
-            canvasLayer.ondrop = (e) => {
+            area.ondragover = (e) => e.preventDefault();
+            area.ondrop = (e) => {
                 e.preventDefault();
                 const files = e.dataTransfer.files;
                 if (files && files[0]) {
@@ -258,15 +307,12 @@
                         const rect = area.getBoundingClientRect();
                         const posX = e.clientX - rect.left;
                         const posY = e.clientY - rect.top;
-                        
                         stickerRef.push().set({
                             image: event.target.result,
-                            posX: posX - 75,
-                            posY: posY - 75,
-                            width: 150,
-                            timestamp: Date.now()
+                            posX: posX - 75, posY: posY - 75,
+                            width: 150, timestamp: Date.now()
                         });
-                        systemLog("STICKER_ADDED_UNDER_INK.");
+                        systemLog("STICKER_ADDED.");
                         playSystemSound();
                     };
                     reader.readAsDataURL(files[0]);
@@ -278,10 +324,7 @@
             const area = document.getElementById('sticker-area');
             const wrapper = document.getElementById('sticker-area-wrapper');
             stickerRef.on('value', (snap) => {
-                // 캔버스 요소를 제외한 기존 스티커들만 비웁니다.
-                const currentStickers = area.querySelectorAll('.sticker');
-                currentStickers.forEach(s => s.remove());
-
+                area.querySelectorAll('.sticker').forEach(s => s.remove());
                 const data = snap.val() || {};
                 Object.entries(data).forEach(([key, val]) => {
                     if (val.image) {
@@ -290,22 +333,15 @@
                         sticker.style.left = (val.posX || 50) + 'px';
                         sticker.style.top = (val.posY || 50) + 'px';
                         sticker.style.width = (val.width || 150) + 'px';
-
                         sticker.innerHTML = `
                             <img src="${val.image}" style="width:100%; height:auto;">
                             <div class="resizer"></div>
                             <div class="sticker-delete" onclick="deleteSticker('${key}')" style="position:absolute; top:-10px; right:-10px; cursor:pointer; background:#fff; color:red; border-radius:50%; width:20px; height:20px; text-align:center; font-size:12px; line-height:20px; display:none; border:1px solid #ddd; z-index:210;">✕</div>
                         `;
-
-                        // 마우스 이벤트 시 그림그리기와 충돌하지 않도록 z-index 조절 로직이 필요할 수 있으나, 
-                        // 현재는 그림 레이어가 최상단이므로 스티커 편집은 캔버스를 잠시 뚫고 클릭해야 합니다.
-                        // (간결함을 위해 기본 클릭 유지)
-
                         sticker.onmouseenter = () => sticker.querySelector('.sticker-delete').style.display = 'block';
                         sticker.onmouseleave = () => sticker.querySelector('.sticker-delete').style.display = 'none';
-
                         sticker.onmousedown = (e) => {
-                            if (e.target.className === 'resizer' || e.target.className === 'sticker-delete') return;
+                            if (currentMode !== 'edit' || e.target.className === 'resizer' || e.target.className === 'sticker-delete') return;
                             let shiftX = e.clientX - sticker.getBoundingClientRect().left;
                             let shiftY = e.clientY - sticker.getBoundingClientRect().top;
                             function onMouseMove(e) {
@@ -320,9 +356,9 @@
                                 document.onmouseup = null;
                             };
                         };
-
                         const resizer = sticker.querySelector('.resizer');
                         resizer.onmousedown = (e) => {
+                            if (currentMode !== 'edit') return;
                             e.stopPropagation();
                             let startX = e.clientX;
                             let startWidth = parseInt(sticker.style.width, 10);
@@ -355,10 +391,8 @@
         let selectedDiaryDate = "";
         let selectedDiaryImgData = "";
         let isEditing = false;
-
         function openDiary() { document.getElementById('diary-overlay').style.display = 'flex'; renderCalendar(); }
         function closeDiary() { document.getElementById('diary-overlay').style.display = 'none'; }
-
         function renderCalendar() {
             const grid = document.getElementById('diary-grid');
             const title = document.getElementById('calendar-title');
@@ -384,7 +418,6 @@
                 }
             });
         }
-
         function showDiaryDetail(dateKey, diaryData) {
             selectedDiaryDate = dateKey;
             document.getElementById('modal-date').innerText = `DATE_LOG: ${dateKey}`;
@@ -404,20 +437,17 @@
                 commentList.scrollTop = commentList.scrollHeight;
             });
         }
-
         function saveDiaryComment() {
             const input = document.getElementById('diary-comment-input');
             const text = input.value.trim(); if(!text) return;
             diaryRef.child(`${selectedDiaryDate}/comments`).push({ name: session.name, text: text, timestamp: Date.now() });
             input.value = ''; playSystemSound();
         }
-
         function triggerEdit() {
             const diaryData = { image: document.getElementById('modal-img').src, text: document.getElementById('modal-text').innerText };
             document.getElementById('diary-modal').style.display = 'none';
             openWriteModal(selectedDiaryDate, diaryData);
         }
-
         function openWriteModal(dateKey, editData = null) {
             selectedDiaryDate = dateKey;
             document.getElementById('write-modal-date').innerText = `DATE_LOG: ${dateKey}`;
@@ -434,7 +464,6 @@
             }
             document.getElementById('diary-write-modal').style.display = 'flex';
         }
-
         function saveDiary() {
             const text = document.getElementById('diary-text-input').value.trim();
             if (!selectedDiaryImgData) { systemLog("ERROR: NO_IMAGE_DETECTED"); return; }
@@ -443,19 +472,16 @@
             const task = isEditing ? ref.update(updateData) : ref.set(updateData);
             task.then(() => { closeWriteModal(); playSystemSound(); systemLog("SUCCESS: DIARY_SAVED"); });
         }
-
         function deleteDiary() {
             if(confirm("이 일기 기록을 영구히 삭제할까요?")) {
                 diaryRef.child(selectedDiaryDate).remove().then(() => { closeWriteModal(); playSystemSound(); systemLog("SUCCESS: DIARY_DELETED"); });
             }
         }
-
         function systemLog(msg) {
             const logBg = document.getElementById('system-log-bg');
             const div = document.createElement('div'); div.innerText = `> ${msg}`;
             logBg.appendChild(div); if (logBg.childNodes.length > 6) logBg.removeChild(logBg.firstChild);
         }
-
         const otherType = (session.type === 'me') ? 'other' : 'me';
         const myPresenceRef = database.ref('presence/' + session.type);
         const otherPresenceRef = database.ref('presence/' + otherType);
@@ -468,7 +494,6 @@
             statusDisplay.innerText = status === 'ONLINE' ? "짝궁도 접속중!" : "짝궁 접속종료!";
             statusDisplay.style.color = status === 'ONLINE' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.2)';
         });
-
         function changeMonth(delta) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta); renderCalendar(); }
         function closeWriteModal() { document.getElementById('diary-write-modal').style.display = 'none'; }
         function previewDiaryImage(input) {
@@ -481,13 +506,11 @@
                 reader.readAsDataURL(file);
             }
         }
-
         function handleDrop(e) { e.preventDefault(); const files = e.dataTransfer.files; if (files && files[0]) processFile(files[0]); }
         function handlePaste(e) {
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
             for (let item of items) if (item.type.indexOf("image") !== -1) processFile(item.getAsFile());
         }
-
         function processFile(file) {
             if (!file.type.match('image.*')) return;
             const reader = new FileReader();
@@ -504,11 +527,9 @@
             };
             reader.readAsDataURL(file);
         }
-
         function sendDirectMessage(content) {
             chatRef.push({ id: Date.now(), senderType: session.type, senderName: session.name, content: content, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
         }
-
         const bgm = new Audio('bgm.mp3'); bgm.loop = true; bgm.volume = 0.3; let isPlaying = false;
         function seekMusic(e) {
             if (!bgm.duration) return;
@@ -517,22 +538,17 @@
             bgm.currentTime = percent * bgm.duration; document.getElementById('arrow-progress').style.width = (percent * 100) + "%";
             if (!isPlaying) toggleMusic();
         }
-
         function toggleMusic() {
             const btn = document.getElementById('music-btn');
             if (!isPlaying) { bgm.play().catch(() => {}); btn.classList.add('playing'); document.getElementById('arrow-player-wrap').classList.add('beating'); isPlaying = true; requestAnimationFrame(syncArrow); }
             else { bgm.pause(); btn.classList.remove('playing'); document.getElementById('arrow-player-wrap').classList.remove('beating'); isPlaying = false; }
         }
-
         function syncArrow() {
             if (!isPlaying) return; if (bgm.duration) document.getElementById('arrow-progress').style.width = (bgm.currentTime / bgm.duration) * 100 + "%";
             requestAnimationFrame(syncArrow);
         }
-
         function changeVolume(val) { bgm.volume = val / 100; document.getElementById('vol-value').innerText = val + "%"; }
-
         function handleMenu(type) { playSystemSound(); if(type === 'DASHBOARD') openStickerBook(); if(type === 'STORAGE') openDiary(); systemLog(`ACCESSING_${type}... OK`); }
-
         function playSystemSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -542,32 +558,27 @@
                 oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.1);
             } catch (e) {}
         }
-
         function updateProfile() {
             const nameVal = document.getElementById('edit-name').value.trim(); const iconVal = document.getElementById('edit-icon').value.trim();
             if(nameVal) session.name = nameVal; if(iconVal) session.icon = iconVal;
             localStorage.setItem('nya_current_session', JSON.stringify(session)); renderProfile();
         }
-
         function renderProfile() {
             const iconBox = document.getElementById('session-icon'); const nameBox = document.getElementById('session-name');
             nameBox.innerText = session.name || "Unknown";
             const isImage = session.icon && (session.icon.startsWith('http') || session.icon.startsWith('data:image'));
             iconBox.innerHTML = isImage ? `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;">` : (session.icon || '👤');
         }
-
         window.addEventListener('load', () => {
             document.getElementById('session-icon').style.background = (session.type === 'me') ? 'linear-gradient(135deg, var(--main-pink), var(--main-purple))' : 'linear-gradient(135deg, #00c6ff, #0072ff)';
             document.getElementById('edit-name').value = session.name; document.getElementById('edit-icon').value = session.icon || '';
             renderProfile(); setTimeout(() => { const loader = document.getElementById('boot-loader'); if(loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 500); } }, 800);
             chatRef.limitToLast(30).on('value', (snapshot) => renderComments(snapshot.val()));
         });
-
         function saveComment() {
             const input = document.getElementById('comment-input'); const text = input.value.trim(); if (!text) return;
             sendDirectMessage(text); input.value = ''; playSystemSound(); 
         }
-
         function renderComments(data) {
             const postList = document.getElementById('post-list'); postList.innerHTML = ''; if (!data) return;
             const entries = Object.entries(data); document.getElementById('post-count').innerText = `MEMORIES: ${String(entries.length).padStart(2, '0')}`;
@@ -579,7 +590,6 @@
             });
             postList.scrollTop = postList.scrollHeight;
         }
-
         function deleteMessage(key) { if (confirm("기록을 파기할까요?")) database.ref('nya_chat_history/' + key).remove(); }
         document.getElementById('comment-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
         document.getElementById('diary-comment-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveDiaryComment(); });
