@@ -9,17 +9,19 @@
 </head>
 <body ondragover="event.preventDefault()" ondrop="handleDrop(event)">
 
-   <div id="sticker-book" class="sticker-container">
+  <div id="sticker-book" class="sticker-container">
     <div class="sticker-header">
-        <span class="header-title">📁 STICKER_FILE_EXPLORER_V1.0</span>
-        <span class="header-close" onclick="closeStickerBook()">[CLOSE_X]</span>
+        <div class="header-title">
+            <span style="font-size: 10px;">📁</span> STICKER_FILE_EXPLORER_V1.0
+        </div>
+        <div class="header-close" onclick="closeStickerBook()">[CLOSE_X]</div>
     </div>
     
     <div id="sticker-area-wrapper">
         <div id="sticker-area"></div>
     </div>
 </div>
-
+    
     <div id="system-log-bg"></div>
     <div id="boot-loader"><div id="loader-text">> INITIALIZING_SECURE_CONNECTION...</div></div>
 
