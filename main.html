@@ -245,22 +245,63 @@
 
         @keyframes popIn { from { opacity: 0; transform: scale(0.98) translateY(5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        /* [추가 기능: 캘린더 전용 스타일 - 기존 레이아웃을 해치지 않는 오버레이 레이어] */
+        /* [수정 및 강화된 캘린더 스타일] */
         #diary-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 5, 8, 0.95); z-index: 100; display: none;
-            flex-direction: column; padding: 40px; box-sizing: border-box;
-            backdrop-filter: blur(10px); animation: popIn 0.3s ease-out;
+            background: rgba(5, 5, 8, 0.98); z-index: 100; display: none;
+            flex-direction: column; padding: 30px; box-sizing: border-box;
+            backdrop-filter: blur(15px); animation: popIn 0.3s ease-out;
         }
-        .diary-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; flex: 1; overflow-y: auto; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .calendar-nav { display: flex; align-items: center; gap: 15px; color: var(--accent-blue); font-size: 0.8rem; }
+        .nav-btn { cursor: pointer; padding: 5px 10px; background: rgba(255,255,255,0.05); border-radius: 5px; }
+
+        .diary-grid { 
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; 
+            flex: 1; overflow-y: auto; padding-right: 5px;
+        }
         .diary-cell {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            aspect-ratio: 1; border-radius: 10px; padding: 5px; cursor: pointer;
-            font-size: 0.65rem; display: flex; flex-direction: column; transition: 0.2s;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            aspect-ratio: 0.9; border-radius: 12px; padding: 8px; cursor: pointer;
+            position: relative; transition: 0.2s; overflow: hidden;
+            display: flex; flex-direction: column;
         }
-        .diary-cell:hover { border-color: var(--accent-blue); background: rgba(0, 243, 255, 0.05); }
-        .diary-cell.filled { border-color: var(--main-pink); background: rgba(255, 126, 185, 0.1); }
-        .diary-cell img { width: 100%; height: 70%; object-fit: cover; border-radius: 5px; margin-top: 5px; }
+        .diary-cell:hover { border-color: var(--accent-blue); background: rgba(0, 243, 255, 0.05); transform: translateY(-2px); }
+        .diary-cell.today { border-color: var(--accent-blue); box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.2); }
+        .diary-cell.filled { border-color: var(--main-pink); }
+        .diary-cell .day-num { font-size: 0.6rem; opacity: 0.5; margin-bottom: 4px; }
+        .diary-cell .preview-img { width: 100%; height: 60%; object-fit: cover; border-radius: 6px; margin-top: auto; }
+        .diary-cell .preview-text { font-size: 0.55rem; color: #ccc; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--font-light); }
+
+        /* 글쓰기 모달 강화 */
+        #diary-write-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 300; display: none;
+            align-items: center; justify-content: center; backdrop-filter: blur(5px);
+        }
+        .write-box {
+            background: var(--panel-bg); border: 1px solid var(--main-pink);
+            width: 90%; max-width: 450px; padding: 25px; border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 126, 185, 0.2);
+        }
+        .write-box h4 { margin: 0 0 15px 0; color: var(--accent-blue); font-size: 0.9rem; }
+        #diary-preview-area { 
+            width: 100%; height: 180px; background: rgba(255,255,255,0.05); 
+            border: 1px dashed rgba(255,255,255,0.2); border-radius: 10px;
+            margin-bottom: 15px; display: flex; align-items: center; justify-content: center;
+            overflow: hidden; cursor: pointer;
+        }
+        #diary-preview-area img { width: 100%; height: 100%; object-fit: cover; }
+        #diary-text-input {
+            width: 100%; height: 80px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; color: #fff; padding: 10px; box-sizing: border-box;
+            font-family: var(--font-light); font-size: 0.8rem; resize: none; outline: none; margin-bottom: 15px;
+        }
+        .btn-group { display: flex; gap: 10px; }
+        .btn-group button { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-family: var(--font-main); font-size: 0.7rem; }
+        .btn-cancel { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-save { background: linear-gradient(135deg, var(--main-pink), var(--main-purple)); color: #fff; }
+
         #diary-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); z-index: 200; display: none;
@@ -318,9 +359,13 @@
 
             <main class="main-content">
                 <div id="diary-overlay">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                        <span style="color:var(--accent-blue); font-size:0.7rem;">STORAGE_ARCHIVE</span>
-                        <span style="color:var(--main-pink); cursor:pointer;" onclick="closeDiary()">[CLOSE_X]</span>
+                    <div class="calendar-header">
+                        <div class="calendar-nav">
+                            <span class="nav-btn" onclick="changeMonth(-1)">&lt;</span>
+                            <span id="calendar-title" style="font-weight: bold; color: #fff; min-width: 100px; text-align: center;">2024. 05</span>
+                            <span class="nav-btn" onclick="changeMonth(1)">&gt;</span>
+                        </div>
+                        <span style="color:var(--main-pink); cursor:pointer; font-size: 0.7rem;" onclick="closeDiary()">[CLOSE_X]</span>
                     </div>
                     <div class="diary-grid" id="diary-grid"></div>
                 </div>
@@ -348,11 +393,28 @@
         </div>
     </div>
 
+    <div id="diary-write-modal">
+        <div class="write-box">
+            <h4 id="write-modal-date">DATE_LOG: 2024-05-24</h4>
+            <div id="diary-preview-area" onclick="document.getElementById('diary-file').click()">
+                <span id="preview-placeholder">사진을 선택하거나 끌어넣으세요</span>
+                <img id="write-img-preview" style="display:none;">
+            </div>
+            <input type="file" id="diary-file" hidden accept="image/*" onchange="previewDiaryImage(this)">
+            <textarea id="diary-text-input" placeholder="오늘의 추억을 한 줄로 기록해 보세요..."></textarea>
+            <div class="btn-group">
+                <button class="btn-cancel" onclick="closeWriteModal()">CANCEL</button>
+                <button class="btn-save" onclick="saveDiary()">SAVE_RECORD</button>
+            </div>
+        </div>
+    </div>
+
     <div id="diary-modal" onclick="this.style.display='none'">
         <div class="modal-box" onclick="event.stopPropagation()">
             <div id="modal-date" style="font-size:0.6rem; color:var(--accent-blue); margin-bottom:10px;"></div>
             <img id="modal-img" style="width:100%; border-radius:10px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.1);">
             <div id="modal-text" style="font-family:var(--font-light); font-size:0.85rem; line-height:1.5;"></div>
+            <button class="btn-cancel" style="margin-top:15px; width:100%;" onclick="document.getElementById('diary-modal').style.display='none'">CLOSE</button>
         </div>
     </div>
 
@@ -373,7 +435,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const chatRef = database.ref('nya_chat_history');
-        const diaryRef = database.ref('nya_diaries'); // 캘린더용 DB 경로
+        const diaryRef = database.ref('nya_diaries');
 
         let session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
@@ -429,41 +491,122 @@
             }
         }
 
-        /* --- [추가] 캘린더 관련 함수 --- */
+        /* --- [강화된 캘린더 기능] --- */
+        let currentCalendarDate = new Date();
+        let selectedDiaryDate = "";
+        let selectedDiaryImgData = "";
+
         function openDiary() {
             document.getElementById('diary-overlay').style.display = 'flex';
             renderCalendar();
         }
         function closeDiary() { document.getElementById('diary-overlay').style.display = 'none'; }
-        
+
+        function changeMonth(delta) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+            renderCalendar();
+        }
+
         function renderCalendar() {
             const grid = document.getElementById('diary-grid');
+            const title = document.getElementById('calendar-title');
             grid.innerHTML = '';
-            const now = new Date();
-            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            
-            diaryRef.once('value', (snap) => {
+
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            title.innerText = `${year}. ${String(month + 1).padStart(2, '0')}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDate = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+
+            // 빈 칸 (이전 달 끝부분)
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'diary-cell';
+                empty.style.opacity = '0';
+                grid.appendChild(empty);
+            }
+
+            diaryRef.on('value', (snap) => {
                 const data = snap.val() || {};
-                for(let i=1; i<=lastDay; i++) {
-                    const dateKey = `${now.getFullYear()}-${now.getMonth()+1}-${i}`;
+                // 실제 날짜 생성
+                grid.querySelectorAll('.diary-cell:not([style*="opacity: 0"])').forEach(el => el.remove());
+                
+                for (let i = 1; i <= lastDate; i++) {
+                    const dateKey = `${year}-${month + 1}-${i}`;
                     const cell = document.createElement('div');
                     cell.className = 'diary-cell';
-                    cell.innerHTML = `<span>${i}</span>`;
-                    if(data[dateKey]) {
+                    if (today.getFullYear() === year && today.getMonth() === month && today.getDate() === i) {
+                        cell.classList.add('today');
+                    }
+
+                    cell.innerHTML = `<span class="day-num">${i}</span>`;
+                    
+                    if (data[dateKey]) {
                         cell.classList.add('filled');
-                        cell.innerHTML += `<img src="${data[dateKey].image}">`;
-                        cell.onclick = () => {
-                            document.getElementById('modal-date').innerText = `DATE_LOG: ${dateKey}`;
-                            document.getElementById('modal-img').src = data[dateKey].image;
-                            document.getElementById('modal-text').innerText = data[dateKey].text;
-                            document.getElementById('diary-modal').style.display = 'flex';
-                        };
+                        cell.innerHTML += `
+                            <img src="${data[dateKey].image}" class="preview-img">
+                            <div class="preview-text">${data[dateKey].text}</div>
+                        `;
+                        cell.onclick = () => showDiaryDetail(dateKey, data[dateKey]);
+                    } else {
+                        cell.onclick = () => openWriteModal(dateKey);
                     }
                     grid.appendChild(cell);
                 }
             });
         }
 
+        function showDiaryDetail(dateKey, diaryData) {
+            document.getElementById('modal-date').innerText = `DATE_LOG: ${dateKey}`;
+            document.getElementById('modal-img').src = diaryData.image;
+            document.getElementById('modal-text').innerText = diaryData.text;
+            document.getElementById('diary-modal').style.display = 'flex';
+        }
+
+        function openWriteModal(dateKey) {
+            selectedDiaryDate = dateKey;
+            selectedDiaryImgData = "";
+            document.getElementById('write-modal-date').innerText = `DATE_LOG: ${dateKey}`;
+            document.getElementById('diary-text-input').value = "";
+            document.getElementById('write-img-preview').style.display = 'none';
+            document.getElementById('preview-placeholder').style.display = 'block';
+            document.getElementById('diary-write-modal').style.display = 'flex';
+        }
+
+        function closeWriteModal() { document.getElementById('diary-write-modal').style.display = 'none'; }
+
+        function previewDiaryImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    selectedDiaryImgData = e.target.result;
+                    const img = document.getElementById('write-img-preview');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    document.getElementById('preview-placeholder').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveDiary() {
+            const text = document.getElementById('diary-text-input').value.trim();
+            if (!selectedDiaryImgData) { alert("그림(사진)을 선택해주세요!"); return; }
+            
+            diaryRef.child(selectedDiaryDate).set({
+                image: selectedDiaryImgData,
+                text: text || "말줄임...",
+                timestamp: Date.now()
+            }).then(() => {
+                closeWriteModal();
+                playSystemSound();
+            });
+        }
+
+        /* --- [원본 기능 유지] --- */
         function handleDrop(e) {
             e.preventDefault();
             const files = e.dataTransfer.files;
@@ -491,12 +634,15 @@
                     canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                     const compressedData = canvas.toDataURL('image/jpeg', 0.7); 
                     
-                    // 파일 업로드 시 일기 기록 여부 확인
                     if(confirm("이 이미지를 캘린더(STORAGE)에 기록할까요?")) {
                         const now = new Date();
                         const dateKey = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
-                        const note = prompt("짧은 기록을 남겨주세요:", "오늘의 추억.");
-                        diaryRef.child(dateKey).set({ image: compressedData, text: note || "" });
+                        openWriteModal(dateKey);
+                        selectedDiaryImgData = compressedData;
+                        const pImg = document.getElementById('write-img-preview');
+                        pImg.src = compressedData;
+                        pImg.style.display = 'block';
+                        document.getElementById('preview-placeholder').style.display = 'none';
                     }
                     sendDirectMessage(compressedData);
                 };
@@ -561,7 +707,7 @@
 
         function handleMenu(type) {
             playSystemSound();
-            if(type === 'STORAGE') openDiary(); // STORAGE 클릭 시 캘린더 오픈
+            if(type === 'STORAGE') openDiary();
             const logBg = document.getElementById('system-log-bg');
             const div = document.createElement('div');
             div.style.color = "var(--accent-blue)";
