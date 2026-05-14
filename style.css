@@ -354,3 +354,16 @@ body {
 .sticker { position: absolute; cursor: move; user-select: none; z-index: 110; transition: transform 0.2s; }
 .sticker img { width: 150px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid #fff; pointer-events: none; }
 .sticker:hover { transform: scale(1.05); z-index: 200; }
+/* 리사이즈 핸들 스타일 */
+.resizer {
+    width: 15px;
+    height: 15px;
+    background: var(--main-pink); /* 삐삐 테마 색상 */
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    cursor: nwse-resize; /* 대각선 크기 조절 커서 */
+    border-radius: 50%;
+    border: 2px solid #fff;
+    z-index: 201;
+}
