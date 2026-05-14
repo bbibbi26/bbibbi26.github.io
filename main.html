@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NYA-PPI / INTEGRATED_TERMINAL</title>
     <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
-    
- <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body ondragover="event.preventDefault()" ondrop="handleDrop(event)">
 
@@ -54,10 +53,13 @@
 
             <main class="main-content">
                 <div id="sticker-book" class="sticker-container">
-                    <div style="position:absolute; top:20px; right:20px; z-index:210;">
-                        <span style="color:var(--main-pink); cursor:pointer; font-size: 0.7rem;" onclick="closeStickerBook()">[CLOSE_공책_X]</span>
+                    <div id="sticker-area-wrapper">
+                        <div id="sticker-area">
+                            </div>
                     </div>
-                    <div id="sticker-area" style="width:100%; height:100%; position:relative;"></div>
+                    <div onclick="closeStickerBook()" style="position:absolute; top:12px; right:20px; cursor:pointer; color:var(--main-pink); font-size:0.7rem; z-index:1001; font-family: var(--font-main);">
+                        [CLOSE_FILE_EXPLORER]
+                    </div>
                 </div>
 
                 <div id="diary-overlay">
@@ -152,170 +154,155 @@
         const database = firebase.database();
         const chatRef = database.ref('nya_chat_history');
         const diaryRef = database.ref('nya_diaries');
+        const stickerRef = database.ref('nya_stickers'); 
 
         let session = JSON.parse(localStorage.getItem('nya_current_session'));
         if (!session) { location.href = 'index.html'; }
 
         /* --- [스티커북 전용 로직] --- */
-      /* --- [스티커북 전용 로직 업데이트] --- */
-
-// 스티커 전용 레퍼런스 (일기 데이터와 섞이지 않게 분리 추천)
-const stickerRef = database.ref('nya_stickers'); 
-
-function openStickerBook() {
-    const book = document.getElementById('sticker-book');
-    book.style.display = 'block';
-    
-    // 처음 열 때 맨 위/왼쪽으로 스크롤 고정
-    book.scrollLeft = 0;
-    book.scrollTop = 0;
-    
-    renderStickers();
-    setupStickerDrop(); // 드롭 이벤트 설정
-    systemLog("OPENING_EXPANDED_STICKER_BOOK...");
-}
-
-// 공책 닫기 함수 (이게 있어야 [CLOSE_공책_X]가 작동함)
-function closeStickerBook() {
-    document.getElementById('sticker-book').style.display = 'none';
-    systemLog("CLOSING_STICKER_BOOK...");
-}
-
-// 사진을 끌어다 놓으면 자동으로 추가되는 로직
-function setupStickerDrop() {
-    const area = document.getElementById('sticker-area');
-    
-    area.ondragover = (e) => {
-        e.preventDefault();
-        area.style.background = "rgba(255, 126, 185, 0.05)"; // 드래그 중 피드백
-    };
-    
-    area.ondragleave = () => {
-        area.style.background = "transparent";
-    };
-    
-    area.ondrop = (e) => {
-        e.preventDefault();
-        area.style.background = "transparent";
-        const files = e.dataTransfer.files;
-        if (files && files[0]) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                // 마우스가 놓인 위치 계산 (스크롤 위치 고려)
-                const rect = area.getBoundingClientRect();
-                const scrollLeft = document.getElementById('sticker-book').scrollLeft;
-                const scrollTop = document.getElementById('sticker-book').scrollTop;
-                
-                const posX = e.clientX - rect.left + scrollLeft;
-                const posY = e.clientY - rect.top + scrollTop;
-                
-                // Firebase에 새로운 스티커로 저장
-                const newStickerRef = stickerRef.push(); 
-                newStickerRef.set({
-                    image: event.target.result,
-                    posX: posX - 75, 
-                    posY: posY - 75,
-                    width: 150,
-                    timestamp: Date.now()
-                });
-                
-                systemLog("STICKER_AUTO_ADDED!");
-                playSystemSound();
-            };
-            reader.readAsDataURL(files[0]);
+        function openStickerBook() {
+            const book = document.getElementById('sticker-book');
+            book.style.display = 'flex'; // 팝업 형태이므로 flex 권장
+            
+            // 처음 열 때 스크롤 초기화
+            const wrapper = document.getElementById('sticker-area-wrapper');
+            wrapper.scrollLeft = 0;
+            wrapper.scrollTop = 0;
+            
+            renderStickers();
+            setupStickerDrop(); 
+            systemLog("OPENING_EXPANDED_STICKER_BOOK...");
         }
-    };
-}
 
-function renderStickers() {
-    const area = document.getElementById('sticker-area');
-    // diaryRef 대신 전용 stickerRef 사용 권장
-    stickerRef.on('value', (snap) => {
-        area.innerHTML = '';
-        const data = snap.val() || {};
-        Object.entries(data).forEach(([key, val]) => {
-            if (val.image) {
-                const sticker = document.createElement('div');
-                sticker.className = 'sticker';
-                sticker.style.left = (val.posX || 50) + 'px';
-                sticker.style.top = (val.posY || 50) + 'px';
-                sticker.style.width = (val.width || 150) + 'px';
+        function closeStickerBook() {
+            document.getElementById('sticker-book').style.display = 'none';
+            systemLog("CLOSING_STICKER_BOOK...");
+        }
 
-                sticker.innerHTML = `
-                    <img src="${val.image}" style="width:100%; height:auto;">
-                    <div class="resizer"></div>
-                    <div class="sticker-delete" onclick="deleteSticker('${key}')" style="position:absolute; top:-10px; right:-10px; cursor:pointer; background:#fff; color:red; border-radius:50%; width:20px; height:20px; text-align:center; font-size:12px; line-height:20px; display:none; border:1px solid #ddd; z-index:210;">✕</div>
-                `;
-
-                // 삭제 버튼 보이기/숨기기
-                sticker.onmouseenter = () => sticker.querySelector('.sticker-delete').style.display = 'block';
-                sticker.onmouseleave = () => sticker.querySelector('.sticker-delete').style.display = 'none';
-
-                // --- [1. 이동 로직] ---
-                sticker.onmousedown = (e) => {
-                    if (e.target.className === 'resizer' || e.target.className === 'sticker-delete') return;
-                    
-                    let shiftX = e.clientX - sticker.getBoundingClientRect().left;
-                    let shiftY = e.clientY - sticker.getBoundingClientRect().top;
-
-                    function onMouseMove(e) {
+        function setupStickerDrop() {
+            const area = document.getElementById('sticker-area');
+            const wrapper = document.getElementById('sticker-area-wrapper');
+            
+            area.ondragover = (e) => {
+                e.preventDefault();
+                area.style.background = "rgba(255, 126, 185, 0.05)";
+            };
+            
+            area.ondragleave = () => {
+                area.style.background = "transparent";
+            };
+            
+            area.ondrop = (e) => {
+                e.preventDefault();
+                area.style.background = "transparent";
+                const files = e.dataTransfer.files;
+                if (files && files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
                         const rect = area.getBoundingClientRect();
-                        const scrollLeft = document.getElementById('sticker-book').scrollLeft;
-                        const scrollTop = document.getElementById('sticker-book').scrollTop;
+                        const posX = e.clientX - rect.left + wrapper.scrollLeft;
+                        const posY = e.clientY - rect.top + wrapper.scrollTop;
                         
-                        sticker.style.left = (e.clientX - rect.left + scrollLeft - shiftX) + 'px';
-                        sticker.style.top = (e.clientY - rect.top + scrollTop - shiftY) + 'px';
-                    }
-
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.onmouseup = () => {
-                        document.removeEventListener('mousemove', onMouseMove);
-                        stickerRef.child(key).update({
-                            posX: parseInt(sticker.style.left),
-                            posY: parseInt(sticker.style.top)
+                        const newStickerRef = stickerRef.push(); 
+                        newStickerRef.set({
+                            image: event.target.result,
+                            posX: posX - 75, 
+                            posY: posY - 75,
+                            width: 150,
+                            timestamp: Date.now()
                         });
-                        document.onmouseup = null;
+                        
+                        systemLog("STICKER_AUTO_ADDED!");
+                        playSystemSound();
                     };
-                };
+                    reader.readAsDataURL(files[0]);
+                }
+            };
+        }
 
-                // --- [2. 크기 조절 로직] ---
-                const resizer = sticker.querySelector('.resizer');
-                resizer.onmousedown = (e) => {
-                    e.stopPropagation();
-                    let startX = e.clientX;
-                    let startWidth = parseInt(sticker.style.width, 10);
+        function renderStickers() {
+            const area = document.getElementById('sticker-area');
+            const wrapper = document.getElementById('sticker-area-wrapper');
+            stickerRef.on('value', (snap) => {
+                area.innerHTML = '';
+                const data = snap.val() || {};
+                Object.entries(data).forEach(([key, val]) => {
+                    if (val.image) {
+                        const sticker = document.createElement('div');
+                        sticker.className = 'sticker';
+                        sticker.style.left = (val.posX || 50) + 'px';
+                        sticker.style.top = (val.posY || 50) + 'px';
+                        sticker.style.width = (val.width || 150) + 'px';
 
-                    function onMouseMove(e) {
-                        const newWidth = startWidth + (e.clientX - startX);
-                        if (newWidth > 50) {
-                            sticker.style.width = newWidth + 'px';
-                        }
+                        sticker.innerHTML = `
+                            <img src="${val.image}" style="width:100%; height:auto;">
+                            <div class="resizer"></div>
+                            <div class="sticker-delete" onclick="deleteSticker('${key}')" style="position:absolute; top:-10px; right:-10px; cursor:pointer; background:#fff; color:red; border-radius:50%; width:20px; height:20px; text-align:center; font-size:12px; line-height:20px; display:none; border:1px solid #ddd; z-index:210;">✕</div>
+                        `;
+
+                        sticker.onmouseenter = () => sticker.querySelector('.sticker-delete').style.display = 'block';
+                        sticker.onmouseleave = () => sticker.querySelector('.sticker-delete').style.display = 'none';
+
+                        sticker.onmousedown = (e) => {
+                            if (e.target.className === 'resizer' || e.target.className === 'sticker-delete') return;
+                            
+                            let shiftX = e.clientX - sticker.getBoundingClientRect().left;
+                            let shiftY = e.clientY - sticker.getBoundingClientRect().top;
+
+                            function onMouseMove(e) {
+                                const rect = area.getBoundingClientRect();
+                                sticker.style.left = (e.clientX - rect.left + wrapper.scrollLeft - shiftX) + 'px';
+                                sticker.style.top = (e.clientY - rect.top + wrapper.scrollTop - shiftY) + 'px';
+                            }
+
+                            document.addEventListener('mousemove', onMouseMove);
+                            document.onmouseup = () => {
+                                document.removeEventListener('mousemove', onMouseMove);
+                                stickerRef.child(key).update({
+                                    posX: parseInt(sticker.style.left),
+                                    posY: parseInt(sticker.style.top)
+                                });
+                                document.onmouseup = null;
+                            };
+                        };
+
+                        const resizer = sticker.querySelector('.resizer');
+                        resizer.onmousedown = (e) => {
+                            e.stopPropagation();
+                            let startX = e.clientX;
+                            let startWidth = parseInt(sticker.style.width, 10);
+
+                            function onMouseMove(e) {
+                                const newWidth = startWidth + (e.clientX - startX);
+                                if (newWidth > 50) {
+                                    sticker.style.width = newWidth + 'px';
+                                }
+                            }
+
+                            document.addEventListener('mousemove', onMouseMove);
+                            document.onmouseup = () => {
+                                document.removeEventListener('mousemove', onMouseMove);
+                                stickerRef.child(key).update({
+                                    width: parseInt(sticker.style.width)
+                                });
+                                document.onmouseup = null;
+                            };
+                        };
+
+                        sticker.ondragstart = () => false;
+                        area.appendChild(sticker);
                     }
+                });
+            });
+        }
 
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.onmouseup = () => {
-                        document.removeEventListener('mousemove', onMouseMove);
-                        stickerRef.child(key).update({
-                            width: parseInt(sticker.style.width)
-                        });
-                        document.onmouseup = null;
-                    };
-                };
-
-                sticker.ondragstart = () => false;
-                area.appendChild(sticker);
+        function deleteSticker(key) {
+            if(confirm("이 스티커를 제거할까요?")) {
+                stickerRef.child(key).remove();
+                systemLog("STICKER_REMOVED");
             }
-        });
-    });
-}
+        }
 
-// 스티커 삭제 기능 추가
-function deleteSticker(key) {
-    if(confirm("이 스티커를 제거할까요?")) {
-        stickerRef.child(key).remove();
-        systemLog("STICKER_REMOVED");
-    }
-}
         /* --- [실시간성 강화된 기능] --- */
         let currentCalendarDate = new Date();
         let selectedDiaryDate = "";
@@ -374,7 +361,6 @@ function deleteSticker(key) {
             document.getElementById('modal-text').innerText = diaryData.text;
             document.getElementById('diary-modal').style.display = 'flex';
             
-            // 댓글 실시간 리스너 연결
             diaryRef.child(`${dateKey}/comments`).off(); 
             diaryRef.child(`${dateKey}/comments`).on('value', (snap) => {
                 const comments = snap.val() || {};
@@ -427,7 +413,7 @@ function deleteSticker(key) {
                 pImg.style.display = 'block';
                 placeholder.style.display = 'none';
                 input.value = editData.text;
-                delBtn.style.display = 'block'; // 수정 모드일 때만 삭제 버튼 표시
+                delBtn.style.display = 'block';
             } else {
                 isEditing = false;
                 selectedDiaryImgData = "";
@@ -548,8 +534,6 @@ function deleteSticker(key) {
                     canvas.width = width; canvas.height = height;
                     canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                     const compressedData = canvas.toDataURL('image/jpeg', 0.7); 
-                    
-                    // [수정] 팝업(confirm)을 제거하고 즉시 채팅으로 전송함
                     sendDirectMessage(compressedData);
                     systemLog("IMAGE_TRANSMITTED");
                 };
@@ -664,7 +648,7 @@ function deleteSticker(key) {
             if (!text) return;
             sendDirectMessage(text);
             input.value = '';
-            playSystemSound(); // 채팅 전송 시 효과음 실행 추가
+            playSystemSound(); 
         }
 
         function renderComments(data) {
