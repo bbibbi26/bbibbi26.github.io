@@ -66,10 +66,10 @@
 
     <div class="terminal-frame">
         <div class="content-wrapper">
-            <aside class="sidebar">
+          <aside class="sidebar">
     <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 12px;">
         <div id="session-icon"></div>
-        <div id="other-session-icon" onclick="openWebView()" style="cursor: pointer;"></div>
+        <div id="other-session-icon" onclick="goToWebSite()" style="cursor: pointer;"></div>
     </div>
     <h3 id="session-name"></h3>
                 <p id="session-status" style="font-size: 0.65rem; color: var(--accent-blue); margin-bottom:15px;">짝궁 접속종료!</p>
@@ -602,22 +602,19 @@
 }
 
 /* --- [웹뷰 팝업 제어 함수] --- */
-/* --- [웹뷰 팝업 제어 함수 (사용자별 주소 분기)] --- */
-function openWebView() {
-    const iframe = document.getElementById('webview-frame');
+/* --- [새 탭으로 사이트 이동 함수 (사용자별 주소 분기)] --- */
+function goToWebSite() {
+    playSystemSound(); // 효과음 재생
     
-    // session.type이 'me'일 때와 'other'일 때 열릴 주소를 각각 지정합니다.
     if (session.type === 'me') {
-        // 내가 아이콘을 누르면 열릴 주소
-        iframe.src = "https://x.com/Bow_wow__14"; 
+        // 내가 아이콘을 누르면 새 탭으로 열릴 주소 (원하는 X/트위터 주소 등)
+        window.open("https://x.com/Bow_wow__14", "_blank");
+        systemLog("OPENING_NEW_TAB_FOR_ME...");
     } else {
-        // 상대방(짝꿍)이 아이콘을 누르면 열릴 주소
-        iframe.src = "https://x.com/ff14_bbiy"; 
+        // 상대방(짝꿍)이 아이콘을 누르면 새 탭으로 열릴 주소
+        window.open("https://x.com/ff14_bbiy");
+        systemLog("OPENING_NEW_TAB_FOR_OTHER...");
     }
-    
-    document.getElementById('webview-modal').style.display = 'flex';
-    playSystemSound();
-    systemLog("LAUNCHING_EXTERNAL_WEBVIEW...");
 }
 function closeWebView() {
     document.getElementById('webview-modal').style.display = 'none';
