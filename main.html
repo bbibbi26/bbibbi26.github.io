@@ -67,8 +67,11 @@
     <div class="terminal-frame">
         <div class="content-wrapper">
             <aside class="sidebar">
-                <div id="session-icon"></div>
-                <h3 id="session-name"></h3>
+    <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 12px;">
+        <div id="session-icon"></div>
+        <div id="other-session-icon" onclick="openWebView()" style="cursor: pointer;"></div>
+    </div>
+    <h3 id="session-name"></h3>
                 <p id="session-status" style="font-size: 0.65rem; color: var(--accent-blue); margin-bottom:15px;">짝궁 접속종료!</p>
                 
                 <div style="font-size: 0.65rem; color:rgba(255,255,255,0.3); line-height:2.0;">
