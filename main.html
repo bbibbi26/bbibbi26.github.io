@@ -119,6 +119,16 @@
                     <div class="diary-grid" id="diary-grid"></div>
                 </div>
 
+<div id="webview-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2500; display:none; align-items:center; justify-content:center;" onclick="closeWebView()">
+    <div style="width: 85%; height: 85%; background: #1a1a24; border: 2px solid var(--main-pink); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 30px rgba(255, 126, 185, 0.3);" onclick="event.stopPropagation()">
+        <div style="background: rgba(255,255,255,0.03); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <span style="font-size: 11px; color: #fff; font-family: 'GmarketSansBold'; letter-spacing: 1px;">🌐 LINKED_STREAM_VIEWER</span>
+            <span style="color: var(--main-pink); cursor: pointer; font-size: 11px; font-family: 'GmarketSansBold';" onclick="closeWebView()">[CLOSE_X]</span>
+        </div>
+        <iframe src="https://example.com" style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>
+    </div>
+</div>
+                
                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px;">
                     <div>
                         <div id="current-date" style="font-size: 0.65rem; color: var(--accent-blue);">DATE</div>
@@ -570,11 +580,38 @@
             localStorage.setItem('nya_current_session', JSON.stringify(session)); renderProfile();
         }
         function renderProfile() {
-            const iconBox = document.getElementById('session-icon'); const nameBox = document.getElementById('session-name');
-            nameBox.innerText = session.name || "Unknown";
-            const isImage = session.icon && (session.icon.startsWith('http') || session.icon.startsWith('data:image'));
-            iconBox.innerHTML = isImage ? `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;">` : (session.icon || '👤');
-        }
+    const iconBox = document.getElementById('session-icon'); 
+    const nameBox = document.getElementById('session-name');
+    const otherIconBox = document.getElementById('other-session-icon'); // 짝꿍 아이콘 박스
+    
+    // 1. 내 프로필 렌더링
+    nameBox.innerText = session.name || "Unknown";
+    const isImage = session.icon && (session.icon.startsWith('http') || session.icon.startsWith('data:image'));
+    iconBox.innerHTML = isImage ? `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;">` : (session.icon || '👤');
+
+    // 2. 짝꿍 프로필 렌더링 (내 아이콘보다 70% 작은 24px 크기)
+    const otherTypeKey = (session.type === 'me') ? 'other' : 'me';
+    
+    database.ref('presence/' + otherTypeKey).once('value', (snap) => {
+        otherIconBox.innerHTML = `
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #ff7eb9, #7652ff); display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 0 5px rgba(255, 126, 185, 0.2);">
+                🔗
+            </div>
+        `;
+    });
+}
+
+/* --- [웹뷰 팝업 제어 함수] --- */
+function openWebView() {
+    document.getElementById('webview-modal').style.display = 'flex';
+    playSystemSound();
+    systemLog("LAUNCHING_EXTERNAL_WEBVIEW...");
+}
+
+function closeWebView() {
+    document.getElementById('webview-modal').style.display = 'none';
+    systemLog("CLOSING_WEBVIEW.");
+}
         window.addEventListener('load', () => {
             document.getElementById('session-icon').style.background = (session.type === 'me') ? 'linear-gradient(135deg, var(--main-pink), var(--main-purple))' : 'linear-gradient(135deg, #00c6ff, #0072ff)';
             document.getElementById('edit-name').value = session.name; document.getElementById('edit-icon').value = session.icon || '';
