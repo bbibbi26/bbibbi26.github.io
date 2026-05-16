@@ -603,17 +603,18 @@
 
 /* --- [웹뷰 팝업 제어 함수] --- */
 /* --- [새 탭으로 사이트 이동 함수 (사용자별 주소 분기)] --- */
+/* --- [새 탭으로 사이트 이동 함수 (사용자별 주소 분기)] --- */
 function goToWebSite() {
     playSystemSound(); // 효과음 재생
     
     if (session.type === 'me') {
-        // 내가 아이콘을 누르면 새 탭으로 열릴 주소 (원하는 X/트위터 주소 등)
-        window.open("https://x.com/Bow_wow__14", "_blank");
-        systemLog("OPENING_NEW_TAB_FOR_ME...");
+        // 내가 누르면 짝꿍(상대방)의 X 주소가 새 탭으로 열립니다
+        window.open("https://x.com/ff14_bbiy", "_blank");
+        systemLog("OPENING_NEW_TAB_FOR_OTHER_PROFILE...");
     } else {
-        // 상대방(짝꿍)이 아이콘을 누르면 새 탭으로 열릴 주소
-        window.open("https://x.com/ff14_bbiy" , "_blank");
-        systemLog("OPENING_NEW_TAB_FOR_OTHER...");
+        // 짝꿍(상대방)이 누르면 나의 X 주소가 새 탭으로 열립니다
+        window.open("https://x.com/Bow_wow__14", "_blank");
+        systemLog("OPENING_NEW_TAB_FOR_MY_PROFILE...");
     }
 }
 function closeWebView() {
