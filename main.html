@@ -81,10 +81,16 @@
                 </div>
 
                 <div class="settings-panel">
-                    <div class="settings-title">> CONFIG_USER_PROFILE</div>
-                    <input type="text" id="edit-name" class="setting-input" placeholder="이름 변경..." oninput="updateProfile()">
-                    <input type="text" id="edit-icon" class="setting-input" placeholder="아이콘(이모지/URL)..." oninput="updateProfile()">
-                </div>
+    <div class="settings-title" onclick="toggleSettings()" style="cursor: pointer; user-select: none;">
+        > CONFIG_USER_PROFILE <span id="settings-arrow" style="font-size: 0.55rem; float: right; opacity: 0.7;">[▲]</span>
+    </div>
+    <div id="settings-inputs-wrapper" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+        <div style="padding-top: 8px;">
+            <input type="text" id="edit-name" class="setting-input" placeholder="이름 변경..." oninput="updateProfile()">
+            <input type="text" id="edit-icon" class="setting-input" placeholder="아이콘(이모지/URL)..." oninput="updateProfile()">
+        </div>
+    </div>
+</div>
 
                 <div class="music-section">
                     <div class="arrow-player" id="arrow-player-wrap">
@@ -671,6 +677,21 @@ function closeWebView() {
             document.getElementById('current-date').textContent = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
         }
         setInterval(updateClock, 1000); updateClock();
+
+function toggleSettings() {
+    const wrapper = document.getElementById('settings-inputs-wrapper');
+    const arrow = document.getElementById('settings-arrow');
+    
+    // max-height가 0이거나 비어있으면 열기, 아니면 닫기
+    if (wrapper.style.max-height === '0px' || wrapper.style.max-height === '') {
+        wrapper.style.max-height = wrapper.scrollHeight + 'px'; // 내용물 높이만큼 자동으로 스르륵 열림
+        arrow.textContent = '[▼]';
+    } else {
+        wrapper.style.max-height = '0px'; // 스르륵 닫힘
+        arrow.textContent = '[▲]';
+    }
+}
+        
     </script>
 </body>
 </html>
