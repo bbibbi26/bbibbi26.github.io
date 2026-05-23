@@ -217,8 +217,20 @@
         const diaryRef = database.ref('nya_diaries');
         const stickerRef = database.ref('nya_stickers'); 
 
-        let session = JSON.parse(localStorage.getItem('nya_current_session'));
-        if (!session) { location.href = 'index.html'; }
+       let session = null;
+try {
+    session = JSON.parse(localStorage.getItem('nya_current_session'));
+} catch (e) {
+    console.error("세션 파싱 실패:", e);
+}
+
+// 세션이 없으면 로그인 페이지(index.html)로 튕기되, 
+// 이동이 지연되거나 실패할 경우를 대비해 로딩창을 강제로 지웁니다.
+if (!session) { 
+    const loader = document.getElementById('boot-loader');
+    if (loader) loader.remove(); 
+    location.href = 'index.html'; 
+}
 
         /* --- [알림음 동기화 전용 변수] --- */
         let lastMessageId = null;
@@ -593,7 +605,8 @@
     // 1. 내 프로필 렌더링
     nameBox.innerText = session.name || "Unknown";
     // http://, https://, data:image 기반 또는 이미지 확장자로 끝나는지 확인
-const isImage = session.icon && (
+// session이나 session.icon이 혹시나 비어있을 경우를 대비해 안전장치 추가
+const isImage = session && session.icon && (
     /^https?:\/\//i.test(session.icon) || 
     /^data:image/i.test(session.icon) || 
     /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i.test(session.icon.split('?')[0])
