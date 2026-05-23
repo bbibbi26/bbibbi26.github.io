@@ -650,7 +650,7 @@ function closeWebView() {
             document.getElementById('edit-name').value = session.name; document.getElementById('edit-icon').value = session.icon || '';
             renderProfile(); setTimeout(() => { const loader = document.getElementById('boot-loader'); if(loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 500); } }, 800);
             
-            /* --- [실시간 알림음 연동 로직 추가] --- */
+            /* --- [실시간 알림음 연동 로직추가] --- */
             chatRef.limitToLast(1).on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
