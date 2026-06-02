@@ -201,454 +201,456 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDi9JQLtpp4KaF5mGkf0aApv_fcQP2PpD0",
-            authDomain: "nya-ppi.firebaseapp.com",
-            projectId: "nya-ppi",
-            storageBucket: "nya-ppi.firebasestorage.app",
-            messagingSenderId: "27439633492",
-            appId: "1:27439633492:web:1cd43fd32322f6bc62c9c1",
-            databaseURL: "https://nya-ppi-default-rtdb.firebaseio.com/" 
-        };
+       // --- Firebase 설정 ---
+const firebaseConfig = {
+    apiKey: "AIzaSyDi9JQLtpp4KaF5mGkf0aApv_fcQP2PpD0",
+    authDomain: "nya-ppi.firebaseapp.com",
+    projectId: "nya-ppi",
+    storageBucket: "nya-ppi.firebasestorage.app",
+    messagingSenderId: "27439633492",
+    appId: "1:27439633492:web:1cd43fd32322f6bc62c9c1",
+    databaseURL: "https://nya-ppi-default-rtdb.firebaseio.com/" 
+};
 
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const chatRef = database.ref('nya_chat_history');
-        const diaryRef = database.ref('nya_diaries');
-        const stickerRef = database.ref('nya_stickers'); 
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const chatRef = database.ref('nya_chat_history');
+const diaryRef = database.ref('nya_diaries');
+const stickerRef = database.ref('nya_stickers'); 
 
-      // 1. 세션 변수 초기화
+// =========================================================
+// [수정 핵심] 1. 세션 안전 확인 및 로드
+// =========================================================
 let session = null;
 
-// 2. localStorage 읽기 및 예외 처리 (try-catch)
 try {
     const storedSession = localStorage.getItem('nya_current_session');
     if (storedSession) {
         session = JSON.parse(storedSession);
     }
 } catch (error) {
-    // 세션 데이터가 깨졌거나 JSON 형식이 아닐 때 스크립트가 멈추는 것을 방지
     console.error("세션 파싱 실패:", error);
 }
 
-// 3. 세션 검증 및 리다이렉트 처리
-if (!session) {
-    // 페이지 이동이 지연될 때 사용자가 무한 로딩 창에 갇히지 않도록 로딩 UI 제거
+// 세션이 없으면 즉시 차단하고 index.html로 튕겨내기
+if (!session || !session.type) {
     const loader = document.getElementById('boot-loader');
-    if (loader) {
-        loader.remove();
-    }
-    
-    // 로그인 페이지로 이동
+    if (loader) loader.remove();
     location.href = 'index.html';
+    // 이동하는 동안 아래 스크립트들이 실행되어 에러를 터트리지 않도록 강제 종료
+    throw new Error("정상적인 세션이 존재하지 않아 스크립트를 중단합니다.");
 }
 
-        /* --- [알림음 동기화 전용 변수] --- */
-        let lastMessageId = null;
+// =========================================================
+// [수정 핵심] 2. 세션이 확실히 존재할 때만 전역 변수 선언 및 연동
+// =========================================================
+const otherType = (session.type === 'me') ? 'other' : 'me';
+const myPresenceRef = database.ref('presence/' + session.type);
+const otherPresenceRef = database.ref('presence/' + otherType);
+const statusDisplay = document.getElementById('session-status');
 
-        /* --- [스티커북 및 낙서 전용 로직] --- */
-        let drawingCanvas, ctx, isDrawing = false;
-        let currentMode = 'edit'; // 초기 모드: 편집
+database.ref('.info/connected').on('value', (snap) => {
+    if (snap.val() === true) { 
+        myPresenceRef.onDisconnect().set('OFFLINE'); 
+        myPresenceRef.set('ONLINE'); 
+    }
+});
 
-        function openStickerBook() {
-            const book = document.getElementById('sticker-book');
-            const wrapper = document.getElementById('sticker-area-wrapper');
-            book.style.display = 'flex'; 
-            if(wrapper) { wrapper.scrollLeft = 0; wrapper.scrollTop = 0; }
-            renderStickers();
-            setupStickerDrop(); 
-            initDrawingCanvas();
-            setMode('edit'); // 열 때 항상 편집 모드로 시작
-            systemLog("OPENING_STICKER_BOOK...");
-        }
+otherPresenceRef.on('value', (snap) => {
+    const status = snap.val() || 'OFFLINE';
+    if (statusDisplay) {
+        statusDisplay.innerText = status === 'ONLINE' ? "짝궁도 접속중!" : "짝궁 접속종료!";
+        statusDisplay.style.color = status === 'ONLINE' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.2)';
+    }
+});
 
-        function closeStickerBook() {
-            document.getElementById('sticker-book').style.display = 'none';
-            systemLog("CLOSING_STICKER_BOOK...");
-        }
+/* --- [알림음 동기화 전용 변수] --- */
+let lastMessageId = null;
 
-        function initDrawingCanvas() {
-            drawingCanvas = document.getElementById('drawing-canvas');
-            ctx = drawingCanvas.getContext('2d');
-            ctx.lineCap = "round";
+/* --- [스티커북 및 낙서 전용 로직] --- */
+let drawingCanvas, ctx, isDrawing = false;
+let currentMode = 'edit'; 
 
-            drawingCanvas.addEventListener('mousedown', startDrawing);
-            drawingCanvas.addEventListener('mousemove', drawLine);
-            window.addEventListener('mouseup', stopDrawing);
+function openStickerBook() {
+    const book = document.getElementById('sticker-book');
+    const wrapper = document.getElementById('sticker-area-wrapper');
+    book.style.display = 'flex'; 
+    if(wrapper) { wrapper.scrollLeft = 0; wrapper.scrollTop = 0; }
+    renderStickers();
+    setupStickerDrop(); 
+    initDrawingCanvas();
+    setMode('edit');
+    systemLog("OPENING_STICKER_BOOK...");
+}
 
-            // 터치 지원
-            drawingCanvas.addEventListener('touchstart', (e) => {
-                const touch = e.touches[0];
-                startDrawing({ clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => e.preventDefault() });
-            }, { passive: false });
-            drawingCanvas.addEventListener('touchmove', (e) => {
-                const touch = e.touches[0];
-                drawLine({ clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => e.preventDefault() });
-            }, { passive: false });
-        }
+function closeStickerBook() {
+    document.getElementById('sticker-book').style.display = 'none';
+    systemLog("CLOSING_STICKER_BOOK...");
+}
 
-        function setMode(mode) {
-            currentMode = mode;
-            const canvas = document.getElementById('drawing-canvas');
-            
-            // 버튼 스타일 업데이트
-            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
-            const targetBtn = document.getElementById(`btn-${mode}`);
-            if(targetBtn) targetBtn.classList.add('active');
+function initDrawingCanvas() {
+    drawingCanvas = document.getElementById('drawing-canvas');
+    ctx = drawingCanvas.getContext('2d');
+    ctx.lineCap = "round";
 
-            if (mode === 'edit') {
-                canvas.style.pointerEvents = 'none'; // 캔버스 통과
-                canvas.style.cursor = 'default';
-            } else {
-                canvas.style.pointerEvents = 'auto'; // 캔버스 활성화
-                canvas.style.cursor = 'crosshair';
-                if (mode === 'erase') {
-                    ctx.globalCompositeOperation = 'destination-out';
-                    ctx.lineWidth = 25;
-                } else {
-                    ctx.globalCompositeOperation = 'source-over';
-                    ctx.lineWidth = 4;
-                }
-            }
-            systemLog(`MODE: ${mode.toUpperCase()}`);
-        }
+    drawingCanvas.addEventListener('mousedown', startDrawing);
+    drawingCanvas.addEventListener('mousemove', drawLine);
+    window.addEventListener('mouseup', stopDrawing);
 
-        function startDrawing(e) {
-            if (currentMode === 'edit') return;
-            isDrawing = true;
-            const rect = drawingCanvas.getBoundingClientRect();
-            ctx.beginPath();
-            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-            if(e.preventDefault) e.preventDefault();
-        }
+    drawingCanvas.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        startDrawing({ clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => e.preventDefault() });
+    }, { passive: false });
+    drawingCanvas.addEventListener('touchmove', (e) => {
+        const touch = e.touches[0];
+        drawLine({ clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => e.preventDefault() });
+    }, { passive: false });
+}
 
-        function drawLine(e) {
-            if (!isDrawing || currentMode === 'edit') return;
-            const rect = drawingCanvas.getBoundingClientRect();
-            if (currentMode === 'draw') ctx.strokeStyle = document.getElementById('pen-color').value;
-            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-            ctx.stroke();
-            if(e.preventDefault) e.preventDefault();
-        }
+function setMode(mode) {
+    currentMode = mode;
+    const canvas = document.getElementById('drawing-canvas');
+    
+    document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+    const targetBtn = document.getElementById(`btn-${mode}`);
+    if(targetBtn) targetBtn.classList.add('active');
 
-        
-        function stopDrawing() { isDrawing = false; }
+    if (mode === 'edit') {
+        canvas.style.pointerEvents = 'none'; 
+        canvas.style.cursor = 'default';
+    } else {
+        canvas.style.pointerEvents = 'auto'; 
+        canvas.style.cursor = 'crosshair';
+        if (mode === 'erase') {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.lineWidth = 25;
+        } else {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.lineWidth = 4;
+        }
+    }
+    systemLog(`MODE: ${mode.toUpperCase()}`);
+}
 
-        function clearCanvas() {
-            if(confirm("그린 내용을 모두 지울까요?")) {
-                ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-                systemLog("CANVAS_CLEARED.");
-            }
-        }
+function startDrawing(e) {
+    if (currentMode === 'edit') return;
+    isDrawing = true;
+    const rect = drawingCanvas.getBoundingClientRect();
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    if(e.preventDefault) e.preventDefault();
+}
 
-        function setupStickerDrop() {
-            const area = document.getElementById('sticker-area');
-            area.ondragover = (e) => e.preventDefault();
-            area.ondrop = (e) => {
-                e.preventDefault();
-                const files = e.dataTransfer.files;
-                if (files && files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const rect = area.getBoundingClientRect();
-                        const posX = e.clientX - rect.left;
-                        const posY = e.clientY - rect.top;
-                        stickerRef.push().set({
-                            image: event.target.result,
-                            posX: posX - 75, posY: posY - 75,
-                            width: 150, timestamp: Date.now()
-                        });
-                        systemLog("STICKER_ADDED.");
-                        playSystemSound();
-                    };
-                    reader.readAsDataURL(files[0]);
-                }
-            };
-        }
+function drawLine(e) {
+    if (!isDrawing || currentMode === 'edit') return;
+    const rect = drawingCanvas.getBoundingClientRect();
+    if (currentMode === 'draw') ctx.strokeStyle = document.getElementById('pen-color').value;
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+    if(e.preventDefault) e.preventDefault();
+}
 
-        function renderStickers() {
-            const area = document.getElementById('sticker-area');
-            const wrapper = document.getElementById('sticker-area-wrapper');
-            stickerRef.on('value', (snap) => {
-                area.querySelectorAll('.sticker').forEach(s => s.remove());
-                const data = snap.val() || {};
-                Object.entries(data).forEach(([key, val]) => {
-                    if (val.image) {
-                        const sticker = document.createElement('div');
-                        sticker.className = 'sticker';
-                        sticker.style.left = (val.posX || 50) + 'px';
-                        sticker.style.top = (val.posY || 50) + 'px';
-                        sticker.style.width = (val.width || 150) + 'px';
-                        sticker.innerHTML = `
-                            <img src="${val.image}" style="width:100%; height:auto;">
-                            <div class="resizer"></div>
-                            <div class="sticker-delete" onclick="deleteSticker('${key}')" style="position:absolute; top:-10px; right:-10px; cursor:pointer; background:#fff; color:red; border-radius:50%; width:20px; height:20px; text-align:center; font-size:12px; line-height:20px; display:none; border:1px solid #ddd; z-index:210;">✕</div>
-                        `;
-                        sticker.onmouseenter = () => sticker.querySelector('.sticker-delete').style.display = 'block';
-                        sticker.onmouseleave = () => sticker.querySelector('.sticker-delete').style.display = 'none';
-                        sticker.onmousedown = (e) => {
-                            if (currentMode !== 'edit' || e.target.className === 'resizer' || e.target.className === 'sticker-delete') return;
-                            let shiftX = e.clientX - sticker.getBoundingClientRect().left;
-                            let shiftY = e.clientY - sticker.getBoundingClientRect().top;
-                            function onMouseMove(e) {
-                                const rect = area.getBoundingClientRect();
-                                sticker.style.left = (e.clientX - rect.left + wrapper.scrollLeft - shiftX) + 'px';
-                                sticker.style.top = (e.clientY - rect.top + wrapper.scrollTop - shiftY) + 'px';
-                            }
-                            document.addEventListener('mousemove', onMouseMove);
-                            document.onmouseup = () => {
-                                document.removeEventListener('mousemove', onMouseMove);
-                                stickerRef.child(key).update({ posX: parseInt(sticker.style.left), posY: parseInt(sticker.style.top) });
-                                document.onmouseup = null;
-                            };
-                        };
-                        const resizer = sticker.querySelector('.resizer');
-                        resizer.onmousedown = (e) => {
-                            if (currentMode !== 'edit') return;
-                            e.stopPropagation();
-                            let startX = e.clientX;
-                            let startWidth = parseInt(sticker.style.width, 10);
-                            function onMouseMove(e) {
-                                const newWidth = startWidth + (e.clientX - startX);
-                                if (newWidth > 50) sticker.style.width = newWidth + 'px';
-                            }
-                            document.addEventListener('mousemove', onMouseMove);
-                            document.onmouseup = () => {
-                                document.removeEventListener('mousemove', onMouseMove);
-                                stickerRef.child(key).update({ width: parseInt(sticker.style.width) });
-                                document.onmouseup = null;
-                            };
-                        };
-                        area.appendChild(sticker);
-                    }
-                });
-            });
-        }
+function stopDrawing() { isDrawing = false; }
 
-        function deleteSticker(key) {
-            if(confirm("이 스티커를 제거할까요?")) {
-                stickerRef.child(key).remove();
-                systemLog("STICKER_REMOVED");
-            }
-        }
+function clearCanvas() {
+    if(confirm("그린 내용을 모두 지울까요?")) {
+        ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        systemLog("CANVAS_CLEARED.");
+    }
+}
 
-        /* --- [기존 시스템 로직 보존] --- */
-        let currentCalendarDate = new Date();
-        let selectedDiaryDate = "";
-        let selectedDiaryImgData = "";
-        let isEditing = false;
-        function openDiary() { document.getElementById('diary-overlay').style.display = 'flex'; renderCalendar(); }
-        function closeDiary() { document.getElementById('diary-overlay').style.display = 'none'; }
-        function renderCalendar() {
-            const grid = document.getElementById('diary-grid');
-            const title = document.getElementById('calendar-title');
-            const year = currentCalendarDate.getFullYear();
-            const month = currentCalendarDate.getMonth();
-            title.innerText = `${year}. ${String(month + 1).padStart(2, '0')}`;
-            diaryRef.on('value', (snap) => {
-                const data = snap.val() || {}; grid.innerHTML = '';
-                const firstDay = new Date(year, month, 1).getDay();
-                const lastDate = new Date(year, month + 1, 0).getDate();
-                for (let i = 0; i < firstDay; i++) { const empty = document.createElement('div'); empty.className = 'diary-cell'; empty.style.visibility = 'hidden'; grid.appendChild(empty); }
-                for (let i = 1; i <= lastDate; i++) {
-                    const dateKey = `${year}-${month + 1}-${i}`;
-                    const cell = document.createElement('div'); cell.className = 'diary-cell';
-                    if (new Date().toDateString() === new Date(year, month, i).toDateString()) cell.classList.add('today');
-                    cell.innerHTML = `<span class="day-num">${i}</span>`;
-                    if (data[dateKey]) {
-                        cell.classList.add('filled');
-                        cell.innerHTML += `<img src="${data[dateKey].image}" class="preview-img"><div class="preview-text">${data[dateKey].text}</div>`;
-                        cell.onclick = () => showDiaryDetail(dateKey, data[dateKey]);
-                    } else cell.onclick = () => openWriteModal(dateKey);
-                    grid.appendChild(cell);
-                }
-            });
-        }
-        function showDiaryDetail(dateKey, diaryData) {
-            selectedDiaryDate = dateKey;
-            document.getElementById('modal-date').innerText = `DATE_LOG: ${dateKey}`;
-            document.getElementById('modal-img').src = diaryData.image;
-            document.getElementById('modal-text').innerText = diaryData.text;
-            document.getElementById('diary-modal').style.display = 'flex';
-            diaryRef.child(`${dateKey}/comments`).off(); 
-            diaryRef.child(`${dateKey}/comments`).on('value', (snap) => {
-                const comments = snap.val() || {};
-                const commentList = document.getElementById('diary-comment-list');
-                commentList.innerHTML = '';
-                Object.values(comments).sort((a,b) => a.timestamp - b.timestamp).forEach(c => {
-                    const div = document.createElement('div'); div.className = 'diary-comment-item';
-                    div.innerHTML = `<span class="diary-comment-sender">${c.name}</span><div class="diary-comment-text">${c.text}</div>`;
-                    commentList.appendChild(div);
-                });
-                commentList.scrollTop = commentList.scrollHeight;
-            });
-        }
-        function saveDiaryComment() {
-            const input = document.getElementById('diary-comment-input');
-            const text = input.value.trim(); if(!text) return;
-            diaryRef.child(`${selectedDiaryDate}/comments`).push({ name: session.name, text: text, timestamp: Date.now() });
-            input.value = ''; playSystemSound();
-        }
-        function triggerEdit() {
-            const diaryData = { image: document.getElementById('modal-img').src, text: document.getElementById('modal-text').innerText };
-            document.getElementById('diary-modal').style.display = 'none';
-            openWriteModal(selectedDiaryDate, diaryData);
-        }
-        function openWriteModal(dateKey, editData = null) {
-            selectedDiaryDate = dateKey;
-            document.getElementById('write-modal-date').innerText = `DATE_LOG: ${dateKey}`;
-            const pImg = document.getElementById('write-img-preview');
-            const placeholder = document.getElementById('preview-placeholder');
-            const input = document.getElementById('diary-text-input');
-            const delBtn = document.getElementById('btn-delete-diary');
-            if(editData) {
-                isEditing = true; selectedDiaryImgData = editData.image; pImg.src = editData.image; pImg.style.display = 'block';
-                placeholder.style.display = 'none'; input.value = editData.text; delBtn.style.display = 'block';
-            } else {
-                isEditing = false; selectedDiaryImgData = ""; pImg.style.display = 'none';
-                placeholder.style.display = 'block'; input.value = ""; delBtn.style.display = 'none';
-            }
-            document.getElementById('diary-write-modal').style.display = 'flex';
-        }
-        function saveDiary() {
-            const text = document.getElementById('diary-text-input').value.trim();
-            if (!selectedDiaryImgData) { systemLog("ERROR: NO_IMAGE_DETECTED"); return; }
-            const updateData = { image: selectedDiaryImgData, text: text || "...", timestamp: Date.now(), author: session.name };
-            const ref = diaryRef.child(selectedDiaryDate);
-            const task = isEditing ? ref.update(updateData) : ref.set(updateData);
-            task.then(() => { closeWriteModal(); playSystemSound(); systemLog("SUCCESS: DIARY_SAVED"); });
-        }
-        function deleteDiary() {
-            if(confirm("이 일기 기록을 영구히 삭제할까요?")) {
-                diaryRef.child(selectedDiaryDate).remove().then(() => { closeWriteModal(); playSystemSound(); systemLog("SUCCESS: DIARY_DELETED"); });
-            }
-        }
-        function systemLog(msg) {
-            const logBg = document.getElementById('system-log-bg');
-            const div = document.createElement('div'); div.innerText = `> ${msg}`;
-            logBg.appendChild(div); if (logBg.childNodes.length > 6) logBg.removeChild(logBg.firstChild);
-        }
-        const otherType = (session.type === 'me') ? 'other' : 'me';
-        const myPresenceRef = database.ref('presence/' + session.type);
-        const otherPresenceRef = database.ref('presence/' + otherType);
-        const statusDisplay = document.getElementById('session-status');
-        database.ref('.info/connected').on('value', (snap) => {
-            if (snap.val() === true) { myPresenceRef.onDisconnect().set('OFFLINE'); myPresenceRef.set('ONLINE'); }
-        });
-        otherPresenceRef.on('value', (snap) => {
-            const status = snap.val() || 'OFFLINE';
-            statusDisplay.innerText = status === 'ONLINE' ? "짝궁도 접속중!" : "짝궁 접속종료!";
-            statusDisplay.style.color = status === 'ONLINE' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.2)';
-        });
-        function changeMonth(delta) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta); renderCalendar(); }
-        function closeWriteModal() { document.getElementById('diary-write-modal').style.display = 'none'; }
-        function previewDiaryImage(input) {
-            const file = input.files[0]; if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    selectedDiaryImgData = e.target.result; const img = document.getElementById('write-img-preview');
-                    img.src = e.target.result; img.style.display = 'block'; document.getElementById('preview-placeholder').style.display = 'none';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-        function handleDrop(e) { e.preventDefault(); const files = e.dataTransfer.files; if (files && files[0]) processFile(files[0]); }
-        function handlePaste(e) {
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let item of items) if (item.type.indexOf("image") !== -1) processFile(item.getAsFile());
-        }
-        function processFile(file) {
-            if (!file.type.match('image.*')) return;
+function setupStickerDrop() {
+    const area = document.getElementById('sticker-area');
+    area.ondragover = (e) => e.preventDefault();
+    area.ondrop = (e) => {
+        e.preventDefault();
+        const files = e.dataTransfer.files;
+        if (files && files[0]) {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas'); const MAX_WIDTH = 800;
-                    let width = img.width; let height = img.height;
-                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    canvas.width = width; canvas.height = height; canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                    const compressedData = canvas.toDataURL('image/jpeg', 0.7); sendDirectMessage(compressedData); systemLog("IMAGE_TRANSMITTED");
-                };
-                img.src = e.target.result;
+            reader.onload = (event) => {
+                const rect = area.getBoundingClientRect();
+                const posX = e.clientX - rect.left;
+                const posY = e.clientY - rect.top;
+                stickerRef.push().set({
+                    image: event.target.result,
+                    posX: posX - 75, posY: posY - 75,
+                    width: 150, timestamp: Date.now()
+                });
+                systemLog("STICKER_ADDED.");
+                playSystemSound();
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(files[0]);
         }
-        function sendDirectMessage(content) {
-            chatRef.push({ id: Date.now(), senderType: session.type, senderName: session.name, content: content, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
-        }
-        const bgm = new Audio('bgm.mp3'); bgm.loop = true; bgm.volume = 0.3; let isPlaying = false;
-        function seekMusic(e) {
-            if (!bgm.duration) return;
-            const slider = document.getElementById('arrow-slider'); const rect = slider.getBoundingClientRect();
-            const percent = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
-            bgm.currentTime = percent * bgm.duration; document.getElementById('arrow-progress').style.width = (percent * 100) + "%";
-            if (!isPlaying) toggleMusic();
-        }
-        function toggleMusic() {
-            const btn = document.getElementById('music-btn');
-            if (!isPlaying) { bgm.play().catch(() => {}); btn.classList.add('playing'); document.getElementById('arrow-player-wrap').classList.add('beating'); isPlaying = true; requestAnimationFrame(syncArrow); }
-            else { bgm.pause(); btn.classList.remove('playing'); document.getElementById('arrow-player-wrap').classList.remove('beating'); isPlaying = false; }
-        }
-        function syncArrow() {
-            if (!isPlaying) return; if (bgm.duration) document.getElementById('arrow-progress').style.width = (bgm.currentTime / bgm.duration) * 100 + "%";
-            requestAnimationFrame(syncArrow);
-        }
-        function changeVolume(val) { bgm.volume = val / 100; document.getElementById('vol-value').innerText = val + "%"; }
-        function handleMenu(type) { playSystemSound(); if(type === 'DASHBOARD') openStickerBook(); if(type === 'STORAGE') openDiary(); systemLog(`ACCESSING_${type}... OK`); }
-        function playSystemSound() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioCtx.createOscillator(); const gainNode = audioCtx.createGain();
-                oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(850, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
-                oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.1);
-            } catch (e) {}
-        }
-        function updateProfile() {
-            const nameVal = document.getElementById('edit-name').value.trim(); const iconVal = document.getElementById('edit-icon').value.trim();
-            if(nameVal) session.name = nameVal; if(iconVal) session.icon = iconVal;
-            localStorage.setItem('nya_current_session', JSON.stringify(session)); renderProfile();
-        }
-        function renderProfile() {
-    const iconBox = document.getElementById('session-icon'); 
-    const nameBox = document.getElementById('session-name');
-    const otherIconBox = document.getElementById('other-session-icon'); // 짝꿍 아이콘 박스
-    
-    // 1. 내 프로필 렌더링
-    nameBox.innerText = session.name || "Unknown";
-    // http://, https://, data:image 기반 또는 이미지 확장자로 끝나는지 확인
-// session이나 session.icon이 혹시나 비어있을 경우를 대비해 안전장치 추가
-const isImage = session && session.icon && (
-    /^https?:\/\//i.test(session.icon) || 
-    /^data:image/i.test(session.icon) || 
-    /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i.test(session.icon.split('?')[0])
-);
+    };
+}
 
-iconBox.innerHTML = isImage ? `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;">` : (session.icon || '👤');
-    // 2. 짝꿍 프로필 렌더링 (내 아이콘보다 70% 작은 24px 크기)
-    const otherTypeKey = (session.type === 'me') ? 'other' : 'me';
-    
-    database.ref('presence/' + otherTypeKey).once('value', (snap) => {
-        otherIconBox.innerHTML = `
-            <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #ff7eb9, #7652ff); display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 0 5px rgba(255, 126, 185, 0.2);">
-                🔗
-            </div>
-        `;
+function renderStickers() {
+    const area = document.getElementById('sticker-area');
+    const wrapper = document.getElementById('sticker-area-wrapper');
+    stickerRef.on('value', (snap) => {
+        area.querySelectorAll('.sticker').forEach(s => s.remove());
+        const data = snap.val() || {};
+        Object.entries(data).forEach(([key, val]) => {
+            if (val.image) {
+                const sticker = document.createElement('div');
+                sticker.className = 'sticker';
+                sticker.style.left = (val.posX || 50) + 'px';
+                sticker.style.top = (val.posY || 50) + 'px';
+                sticker.style.width = (val.width || 150) + 'px';
+                sticker.innerHTML = `
+                    <img src="${val.image}" style="width:100%; height:auto;">
+                    <div class="resizer"></div>
+                    <div class="sticker-delete" onclick="deleteSticker('${key}')" style="position:absolute; top:-10px; right:-10px; cursor:pointer; background:#fff; color:red; border-radius:50%; width:20px; height:20px; text-align:center; font-size:12px; line-height:20px; display:none; border:1px solid #ddd; z-index:210;">✕</div>
+                `;
+                sticker.onmouseenter = () => sticker.querySelector('.sticker-delete').style.display = 'block';
+                sticker.onmouseleave = () => sticker.querySelector('.sticker-delete').style.display = 'none';
+                sticker.onmousedown = (e) => {
+                    if (currentMode !== 'edit' || e.target.className === 'resizer' || e.target.className === 'sticker-delete') return;
+                    let shiftX = e.clientX - sticker.getBoundingClientRect().left;
+                    let shiftY = e.clientY - sticker.getBoundingClientRect().top;
+                    function onMouseMove(e) {
+                        const rect = area.getBoundingClientRect();
+                        sticker.style.left = (e.clientX - rect.left + wrapper.scrollLeft - shiftX) + 'px';
+                        sticker.style.top = (e.clientY - rect.top + wrapper.scrollTop - shiftY) + 'px';
+                    }
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.onmouseup = () => {
+                        document.removeEventListener('mousemove', onMouseMove);
+                        stickerRef.child(key).update({ posX: parseInt(sticker.style.left), posY: parseInt(sticker.style.top) });
+                        document.onmouseup = null;
+                    };
+                };
+                const resizer = sticker.querySelector('.resizer');
+                resizer.onmousedown = (e) => {
+                    if (currentMode !== 'edit') return;
+                    e.stopPropagation();
+                    let startX = e.clientX;
+                    let startWidth = parseInt(sticker.style.width, 10);
+                    function onMouseMove(e) {
+                        const newWidth = startWidth + (e.clientX - startX);
+                        if (newWidth > 50) sticker.style.width = newWidth + 'px';
+                    }
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.onmouseup = () => {
+                        document.removeEventListener('mousemove', onMouseMove);
+                        stickerRef.child(key).update({ width: parseInt(sticker.style.width) });
+                        document.onmouseup = null;
+                    };
+                };
+                area.appendChild(sticker);
+            }
+        });
     });
 }
 
-/* --- [웹뷰 팝업 제어 함수] --- */
-/* --- [새 탭으로 사이트 이동 함수 (사용자별 주소 분기)] --- */
-/* --- [새 탭으로 사이트 이동 함수 (사용자별 주소 분기)] --- */
-function goToWebSite() {
-    playSystemSound(); // 효과음 재생
+function deleteSticker(key) {
+    if(confirm("이 스티커를 제거할까요?")) {
+        stickerRef.child(key).remove();
+        systemLog("STICKER_REMOVED");
+    }
+}
+
+/* --- [기존 시스템 로직 보존] --- */
+let currentCalendarDate = new Date();
+let selectedDiaryDate = "";
+let selectedDiaryImgData = "";
+let isEditing = false;
+function openDiary() { document.getElementById('diary-overlay').style.display = 'flex'; renderCalendar(); }
+function closeDiary() { document.getElementById('diary-overlay').style.display = 'none'; }
+function renderCalendar() {
+    const grid = document.getElementById('diary-grid');
+    const title = document.getElementById('calendar-title');
+    const year = currentCalendarDate.getFullYear();
+    const month = currentCalendarDate.getMonth();
+    title.innerText = `${year}. ${String(month + 1).padStart(2, '0')}`;
+    diaryRef.on('value', (snap) => {
+        const data = snap.val() || {}; grid.innerHTML = '';
+        const firstDay = new Date(year, month, 1).getDay();
+        const lastDate = new Date(year, month + 1, 0).getDate();
+        for (let i = 0; i < firstDay; i++) { const empty = document.createElement('div'); empty.className = 'diary-cell'; empty.style.visibility = 'hidden'; grid.appendChild(empty); }
+        for (let i = 1; i <= lastDate; i++) {
+            const dateKey = `${year}-${month + 1}-${i}`;
+            const cell = document.createElement('div'); cell.className = 'diary-cell';
+            if (new Date().toDateString() === new Date(year, month, i).toDateString()) cell.classList.add('today');
+            cell.innerHTML = `<span class="day-num">${i}</span>`;
+            if (data[dateKey]) {
+                cell.classList.add('filled');
+                cell.innerHTML += `<img src="${data[dateKey].image}" class="preview-img"><div class="preview-text">${data[dateKey].text}</div>`;
+                cell.onclick = () => showDiaryDetail(dateKey, data[dateKey]);
+            } else cell.onclick = () => openWriteModal(dateKey);
+            grid.appendChild(cell);
+        }
+    });
+}
+function showDiaryDetail(dateKey, diaryData) {
+    selectedDiaryDate = dateKey;
+    document.getElementById('modal-date').innerText = `DATE_LOG: ${dateKey}`;
+    document.getElementById('modal-img').src = diaryData.image;
+    document.getElementById('modal-text').innerText = diaryData.text;
+    document.getElementById('diary-modal').style.display = 'flex';
+    diaryRef.child(`${dateKey}/comments`).off(); 
+    diaryRef.child(`${dateKey}/comments`).on('value', (snap) => {
+        const comments = snap.val() || {};
+        const commentList = document.getElementById('diary-comment-list');
+        commentList.innerHTML = '';
+        Object.values(comments).sort((a,b) => a.timestamp - b.timestamp).forEach(c => {
+            const div = document.createElement('div'); div.className = 'diary-comment-item';
+            div.innerHTML = `<span class="diary-comment-sender">${c.name}</span><div class="diary-comment-text">${c.text}</div>`;
+            commentList.appendChild(div);
+        });
+        commentList.scrollTop = commentList.scrollHeight;
+    });
+}
+function saveDiaryComment() {
+    const input = document.getElementById('diary-comment-input');
+    const text = input.value.trim(); if(!text) return;
+    diaryRef.child(`${selectedDiaryDate}/comments`).push({ name: session.name, text: text, timestamp: Date.now() });
+    input.value = ''; playSystemSound();
+}
+function triggerEdit() {
+    const diaryData = { image: document.getElementById('modal-img').src, text: document.getElementById('modal-text').innerText };
+    document.getElementById('diary-modal').style.display = 'none';
+    openWriteModal(selectedDiaryDate, diaryData);
+}
+function openWriteModal(dateKey, editData = null) {
+    selectedDiaryDate = dateKey;
+    document.getElementById('write-modal-date').innerText = `DATE_LOG: ${dateKey}`;
+    const pImg = document.getElementById('write-img-preview');
+    const placeholder = document.getElementById('preview-placeholder');
+    const input = document.getElementById('diary-text-input');
+    const delBtn = document.getElementById('btn-delete-diary');
+    if(editData) {
+        isEditing = true; selectedDiaryImgData = editData.image; pImg.src = editData.image; pImg.style.display = 'block';
+        placeholder.style.display = 'none'; input.value = editData.text; delBtn.style.display = 'block';
+    } else {
+        isEditing = false; selectedDiaryImgData = ""; pImg.style.display = 'none';
+        placeholder.style.display = 'block'; input.value = ""; delBtn.style.display = 'none';
+    }
+    document.getElementById('diary-write-modal').style.display = 'flex';
+}
+function saveDiary() {
+    const text = document.getElementById('diary-text-input').value.trim();
+    if (!selectedDiaryImgData) { systemLog("ERROR: NO_IMAGE_DETECTED"); return; }
+    const updateData = { image: selectedDiaryImgData, text: text || "...", timestamp: Date.now(), author: session.name };
+    const ref = diaryRef.child(selectedDiaryDate);
+    const task = isEditing ? ref.update(updateData) : ref.set(updateData);
+    task.then(() => { closeWriteModal(); playSystemSound(); systemLog("SUCCESS: DIARY_SAVED"); });
+}
+function deleteDiary() {
+    if(confirm("이 일기 기록을 영구히 삭제할까요?")) {
+        diaryRef.child(selectedDiaryDate).remove().then(() => { closeWriteModal(); playSystemSound(); systemLog("SUCCESS: DIARY_DELETED"); });
+    }
+}
+function systemLog(msg) {
+    const logBg = document.getElementById('system-log-bg');
+    if (!logBg) return;
+    const div = document.createElement('div'); div.innerText = `> ${msg}`;
+    logBg.appendChild(div); if (logBg.childNodes.length > 6) logBg.removeChild(logBg.firstChild);
+}
+
+function changeMonth(delta) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta); renderCalendar(); }
+function closeWriteModal() { document.getElementById('diary-write-modal').style.display = 'none'; }
+function previewDiaryImage(input) {
+    const file = input.files[0]; if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            selectedDiaryImgData = e.target.result; const img = document.getElementById('write-img-preview');
+            img.src = e.target.result; img.style.display = 'block'; document.getElementById('preview-placeholder').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+function handleDrop(e) { e.preventDefault(); const files = e.dataTransfer.files; if (files && files[0]) processFile(files[0]); }
+function handlePaste(e) {
+    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+    for (let item of items) if (item.type.indexOf("image") !== -1) processFile(item.getAsFile());
+}
+function processFile(file) {
+    if (!file.type.match('image.*')) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas'); const MAX_WIDTH = 800;
+            let width = img.width; let height = img.height;
+            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+            canvas.width = width; canvas.height = height; canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+            const compressedData = canvas.toDataURL('image/jpeg', 0.7); sendDirectMessage(compressedData); systemLog("IMAGE_TRANSMITTED");
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+function sendDirectMessage(content) {
+    chatRef.push({ id: Date.now(), senderType: session.type, senderName: session.name, content: content, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+}
+const bgm = new Audio('bgm.mp3'); bgm.loop = true; bgm.volume = 0.3; let isPlaying = false;
+function seekMusic(e) {
+    if (!bgm.duration) return;
+    const slider = document.getElementById('arrow-slider'); const rect = slider.getBoundingClientRect();
+    const percent = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+    bgm.currentTime = percent * bgm.duration; document.getElementById('arrow-progress').style.width = (percent * 100) + "%";
+    if (!isPlaying) toggleMusic();
+}
+function toggleMusic() {
+    const btn = document.getElementById('music-btn');
+    if (!isPlaying) { bgm.play().catch(() => {}); btn.classList.add('playing'); document.getElementById('arrow-player-wrap').classList.add('beating'); isPlaying = true; requestAnimationFrame(syncArrow); }
+    else { bgm.pause(); btn.classList.remove('playing'); document.getElementById('arrow-player-wrap').classList.remove('beating'); isPlaying = false; }
+}
+function syncArrow() {
+    if (!isPlaying) return; if (bgm.duration) document.getElementById('arrow-progress').style.width = (bgm.currentTime / bgm.duration) * 100 + "%";
+    requestAnimationFrame(syncArrow);
+}
+function changeVolume(val) { bgm.volume = val / 100; document.getElementById('vol-value').innerText = val + "%"; }
+function handleMenu(type) { playSystemSound(); if(type === 'DASHBOARD') openStickerBook(); if(type === 'STORAGE') openDiary(); systemLog(`ACCESSING_${type}... OK`); }
+function playSystemSound() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator(); const gainNode = audioCtx.createGain();
+        oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(850, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
+        oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.1);
+    } catch (e) {}
+}
+function updateProfile() {
+    const nameVal = document.getElementById('edit-name').value.trim(); const iconVal = document.getElementById('edit-icon').value.trim();
+    if(nameVal) session.name = nameVal; if(iconVal) session.icon = iconVal;
+    localStorage.setItem('nya_current_session', JSON.stringify(session)); renderProfile();
+}
+function renderProfile() {
+    const iconBox = document.getElementById('session-icon'); 
+    const nameBox = document.getElementById('session-name');
+    const otherIconBox = document.getElementById('other-session-icon'); 
     
+    if (nameBox) nameBox.innerText = session.name || "Unknown";
+
+    const isImage = session && session.icon && (
+        /^https?:\/\//i.test(session.icon) || 
+        /^data:image/i.test(session.icon) || 
+        (/\.(gif|jpe?g|tiff?|png|webp|bmp)$/i.test(session.icon.split('?')[0]))
+    );
+
+    if (iconBox) {
+        iconBox.innerHTML = isImage ? `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;">` : (session.icon || '👤');
+    }
+    
+    database.ref('presence/' + otherType).once('value', (snap) => {
+        if (otherIconBox) {
+            otherIconBox.innerHTML = `
+                <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #ff7eb9, #7652ff); display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 0 5px rgba(255, 126, 185, 0.2);">
+                    🔗
+                </div>
+            `;
+        }
+    });
+}
+
+function goToWebSite() {
+    playSystemSound(); 
     if (session.type === 'me') {
-        // 내가 누르면 짝꿍(상대방)의 X 주소가 새 탭으로 열립니다
         window.open("https://x.com/ff14_bbiy", "_blank");
         systemLog("OPENING_NEW_TAB_FOR_OTHER_PROFILE...");
     } else {
-        // 짝꿍(상대방)이 누르면 나의 X 주소가 새 탭으로 열립니다
         window.open("https://x.com/Bow_wow__14", "_blank");
         systemLog("OPENING_NEW_TAB_FOR_MY_PROFILE...");
     }
@@ -657,66 +659,87 @@ function closeWebView() {
     document.getElementById('webview-modal').style.display = 'none';
     systemLog("CLOSING_WEBVIEW.");
 }
-        window.addEventListener('load', () => {
-            document.getElementById('session-icon').style.background = (session.type === 'me') ? 'linear-gradient(135deg, var(--main-pink), var(--main-purple))' : 'linear-gradient(135deg, #00c6ff, #0072ff)';
-            document.getElementById('edit-name').value = session.name; document.getElementById('edit-icon').value = session.icon || '';
-            renderProfile(); setTimeout(() => { const loader = document.getElementById('boot-loader'); if(loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 500); } }, 800);
-            
-            /* --- [실시간 알림음 연동 로직추가] --- */
-            chatRef.limitToLast(1).on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const entries = Object.entries(data);
-                    const [key, post] = entries[0];
-                    // 새로운 메시지이고, 내가 보낸 메시지가 아닐 때 알림음 재생
-                    if (lastMessageId && lastMessageId !== key && post.senderType !== session.type) {
-                        playSystemSound();
-                        systemLog("NEW_MESSAGE_RECEIVED");
-                    }
-                    lastMessageId = key;
-                }
-            });
 
-            chatRef.limitToLast(30).on('value', (snapshot) => renderComments(snapshot.val()));
-        });
-        function saveComment() {
-            const input = document.getElementById('comment-input'); const text = input.value.trim(); if (!text) return;
-            sendDirectMessage(text); input.value = ''; playSystemSound(); 
+window.addEventListener('load', () => {
+    const sessionIcon = document.getElementById('session-icon');
+    if (sessionIcon) {
+        sessionIcon.style.background = (session.type === 'me') ? 'linear-gradient(135deg, var(--main-pink), var(--main-purple))' : 'linear-gradient(135deg, #00c6ff, #0072ff)';
+    }
+    
+    const editNameInput = document.getElementById('edit-name');
+    const editIconInput = document.getElementById('edit-icon');
+    if (editNameInput) editNameInput.value = session.name; 
+    if (editIconInput) editIconInput.value = session.icon || '';
+    
+    renderProfile(); 
+    
+    setTimeout(() => { 
+        const loader = document.getElementById('boot-loader'); 
+        if(loader) { 
+            loader.style.opacity = "0"; 
+            setTimeout(() => loader.remove(), 500); 
+        } 
+    }, 800);
+    
+    chatRef.limitToLast(1).on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            const entries = Object.entries(data);
+            const [key, post] = entries[0];
+            if (lastMessageId && lastMessageId !== key && post.senderType !== session.type) {
+                playSystemSound();
+                systemLog("NEW_MESSAGE_RECEIVED");
+            }
+            lastMessageId = key;
         }
-        function renderComments(data) {
-            const postList = document.getElementById('post-list'); postList.innerHTML = ''; if (!data) return;
-            const entries = Object.entries(data); document.getElementById('post-count').innerText = `MEMORIES: ${String(entries.length).padStart(2, '0')}`;
-            entries.forEach(([key, post]) => {
-                const li = document.createElement('li'); const isMe = post.senderType === session.type; li.className = `post-item ${isMe ? 'me' : 'other'}`;
-                const isImg = post.content.startsWith('data:image/') || /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i.test(post.content);
-                li.innerHTML = ` ${isMe ? `<div class="delete-btn" onclick="deleteMessage('${key}')">✕</div>` : ''} <div class="post-sender">${post.senderName}</div> <div class="post-text">${isImg ? `<img src="${post.content}" onclick="window.open(this.src)">` : post.content}</div> <div class="post-info"><span>${post.time}</span></div> `;
-                postList.appendChild(li);
-            });
-            postList.scrollTop = postList.scrollHeight;
-        }
-        function deleteMessage(key) { if (confirm("기록을 파기할까요?")) database.ref('nya_chat_history/' + key).remove(); }
-        document.getElementById('comment-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
-        document.getElementById('diary-comment-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveDiaryComment(); });
-        function updateClock() {
-            const now = new Date(); document.getElementById('current-time').textContent = now.toLocaleTimeString('en-GB');
-            document.getElementById('current-date').textContent = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-        }
-        setInterval(updateClock, 1000); updateClock();
+    });
+
+    chatRef.limitToLast(30).on('value', (snapshot) => renderComments(snapshot.val()));
+});
+
+function saveComment() {
+    const input = document.getElementById('comment-input'); const text = input.value.trim(); if (!text) return;
+    sendDirectMessage(text); input.value = ''; playSystemSound(); 
+}
+function renderComments(data) {
+    const postList = document.getElementById('post-list'); if (!postList) return;
+    postList.innerHTML = ''; if (!data) return;
+    const entries = Object.entries(data); 
+    const postCount = document.getElementById('post-count');
+    if (postCount) postCount.innerText = `MEMORIES: ${String(entries.length).padStart(2, '0')}`;
+    entries.forEach(([key, post]) => {
+        const li = document.createElement('li'); const isMe = post.senderType === session.type; li.className = `post-item ${isMe ? 'me' : 'other'}`;
+        const isImg = post.content.startsWith('data:image/') || /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i.test(post.content);
+        li.innerHTML = ` ${isMe ? `<div class="delete-btn" onclick="deleteMessage('${key}')">✕</div>` : ''} <div class="post-sender">${post.senderName}</div> <div class="post-text">${isImg ? `<img src="${post.content}" onclick="window.open(this.src)">` : post.content}</div> <div class="post-info"><span>${post.time}</span></div> `;
+        postList.appendChild(li);
+    });
+    postList.scrollTop = postList.scrollHeight;
+}
+function deleteMessage(key) { if (confirm("기록을 파기할까요?")) database.ref('nya_chat_history/' + key).remove(); }
+document.getElementById('comment-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
+document.getElementById('diary-comment-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveDiaryComment(); });
+
+function updateClock() {
+    const timeEl = document.getElementById('current-time');
+    const dateEl = document.getElementById('current-date');
+    const now = new Date(); 
+    if (timeEl) timeEl.textContent = now.toLocaleTimeString('en-GB');
+    if (dateEl) dateEl.textContent = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+setInterval(updateClock, 1000); 
+updateClock();
 
 function toggleSettings() {
     const wrapper = document.getElementById('settings-inputs-wrapper');
     const arrow = document.getElementById('settings-arrow');
-    
-    // max-height가 0이거나 비어있으면 열기, 아니면 닫기
     if (wrapper.style.max-height === '0px' || wrapper.style.max-height === '') {
-        wrapper.style.max-height = wrapper.scrollHeight + 'px'; // 내용물 높이만큼 자동으로 스르륵 열림
+        wrapper.style.max-height = wrapper.scrollHeight + 'px'; 
         arrow.textContent = '[▼]';
     } else {
-        wrapper.style.max-height = '0px'; // 스르륵 닫힘
+        wrapper.style.max-height = '0px'; 
         arrow.textContent = '[▲]';
     }
 }
-        
     </script>
 </body>
 </html>
