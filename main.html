@@ -732,11 +732,13 @@ updateClock();
 function toggleSettings() {
     const wrapper = document.getElementById('settings-inputs-wrapper');
     const arrow = document.getElementById('settings-arrow');
-    if (wrapper.style.max-height === '0px' || wrapper.style.max-height === '') {
-        wrapper.style.max-height = wrapper.scrollHeight + 'px'; 
+    
+    // 하이픈(-)을 지우고 대문자 H를 사용한 maxHeight로 수정합니다.
+    if (wrapper.style.maxHeight === '0px' || wrapper.style.maxHeight === '') {
+        wrapper.style.maxHeight = wrapper.scrollHeight + 'px'; 
         arrow.textContent = '[▼]';
     } else {
-        wrapper.style.max-height = '0px'; 
+        wrapper.style.maxHeight = '0px'; 
         arrow.textContent = '[▲]';
     }
 }
