@@ -217,19 +217,30 @@
         const diaryRef = database.ref('nya_diaries');
         const stickerRef = database.ref('nya_stickers'); 
 
-       let session = null;
+      // 1. 세션 변수 초기화
+let session = null;
+
+// 2. localStorage 읽기 및 예외 처리 (try-catch)
 try {
-    session = JSON.parse(localStorage.getItem('nya_current_session'));
-} catch (e) {
-    console.error("세션 파싱 실패:", e);
+    const storedSession = localStorage.getItem('nya_current_session');
+    if (storedSession) {
+        session = JSON.parse(storedSession);
+    }
+} catch (error) {
+    // 세션 데이터가 깨졌거나 JSON 형식이 아닐 때 스크립트가 멈추는 것을 방지
+    console.error("세션 파싱 실패:", error);
 }
 
-// 세션이 없으면 로그인 페이지(index.html)로 튕기되, 
-// 이동이 지연되거나 실패할 경우를 대비해 로딩창을 강제로 지웁니다.
-if (!session) { 
+// 3. 세션 검증 및 리다이렉트 처리
+if (!session) {
+    // 페이지 이동이 지연될 때 사용자가 무한 로딩 창에 갇히지 않도록 로딩 UI 제거
     const loader = document.getElementById('boot-loader');
-    if (loader) loader.remove(); 
-    location.href = 'index.html'; 
+    if (loader) {
+        loader.remove();
+    }
+    
+    // 로그인 페이지로 이동
+    location.href = 'index.html';
 }
 
         /* --- [알림음 동기화 전용 변수] --- */
