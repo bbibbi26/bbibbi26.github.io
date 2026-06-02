@@ -174,20 +174,27 @@
 
         // --- Firebase에서 실시간으로 프로필을 불러오는 로직 (loadProfiles 대체) ---
         function syncProfiles() {
-            database.ref('user_profiles').on('value', (snapshot) => {
-                const profiles = snapshot.val();
-                if (profiles) {
-                    if (profiles.me) {
-                        document.getElementById('name-me').innerText = profiles.me.name;
-                        renderIcon('icon-me', profiles.me.icon);
-                    }
-                    if (profiles.other) {
-                        document.getElementById('name-other').innerText = profiles.other.name;
-                        renderIcon('icon-other', profiles.other.icon);
-                    }
-                }
-            });
+    database.ref('user_profiles').on('value', (snapshot) => {
+        const profiles = snapshot.val();
+        
+        // 데이터가 없어도 에러가 나거나 멈추지 않도록 기본값 유연하게 대처
+        if (!profiles) {
+            console.warn("Firebase에 프로필 데이터가 비어있습니다.");
+            return; 
         }
+
+        if (profiles.me) {
+            const nameMe = document.getElementById('name-me');
+            if (nameMe) nameMe.innerText = profiles.me.name;
+            renderIcon('icon-me', profiles.me.icon);
+        }
+        if (profiles.other) {
+            const nameOther = document.getElementById('name-other');
+            if (nameOther) nameOther.innerText = profiles.other.name;
+            renderIcon('icon-other', profiles.other.icon);
+        }
+    });
+}
 
         function renderIcon(elementId, iconData) {
             const container = document.getElementById(elementId);
