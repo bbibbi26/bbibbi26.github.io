@@ -261,42 +261,48 @@
         }
 
      // --- 수정된 부분: Firebase 최신 데이터를 가져와서 세션 생성 ---
-function selectUser(type) {
-    database.ref('user_profiles/' + type).once('value').then((snapshot) => {
-        const data = snapshot.val();
-        
-        // 1. 기본값 정의 (icon이 비어있을 때를 대비해 기본 이모지나 빈 문자열 세팅)
-        let sessionData = {
-            type: type,
-            name: type === 'me' ? 'USER_NYA' : 'ADMIN_UNIT',
-            icon: type === 'me' ? '🐰' : '🐱'
-        };
+// --- 수정된 부분: Firebase 최신 데이터를 가져와서 세션 생성 ---
+    function selectUser(type) {
+        database.ref('user_profiles/' + type).once('value').then((snapshot) => {
+            const data = snapshot.val();
+            
+            // 1. 기본값 정의 (icon이 비어있을 때를 대비해 기본 이모지나 빈 문자열 세팅)
+            let sessionData = {
+                type: type,
+                name: type === 'me' ? 'USER_NYA' : 'ADMIN_UNIT',
+                icon: type === 'me' ? '🐰' : '🐱'
+            };
 
-        // 2. Firebase 데이터가 존재한다면 덮어씌우기 (단, icon이 null이 되지 않도록 방어)
-        if (data) {
-            sessionData.name = data.name || sessionData.name;
-            sessionData.icon = data.icon || sessionData.icon; // icon이 없으면 기본 이모지 유지
-        }
+            // 2. Firebase 데이터가 존재한다면 덮어씌우기 (단, icon이 null이 되지 않도록 방어)
+            if (data) {
+                sessionData.name = data.name || sessionData.name;
+                sessionData.icon = data.icon || sessionData.icon;
+            }
 
-        // 3. 로컬스토리지에 저장
-       try {
-    localStorage.setItem('nya_current_session', JSON.stringify(sessionData));
-    
-    document.body.classList.add('fade-out');
-    setTimeout(() => {
-        location.href = "./main.html"; 
-    }, 600);
-} catch (e) {
-    if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-        alert("브라우저 저장 공간이 가득 찼습니다! 스티커나 이미지 기록을 삭제한 뒤 다시 시도해 주세요.");
-    } else {
-        alert("세션 저장 중 오류가 발생했습니다: " + e.message);
-    }
-}
-
-        document.getElementById('passcode').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') validateAccess();
+            // 3. 로컬스토리지에 저장 및 용량 초과 예외 처리
+            try {
+                localStorage.setItem('nya_current_session', JSON.stringify(sessionData));
+                
+                document.body.classList.add('fade-out');
+                setTimeout(() => {
+                    location.href = "./main.html"; 
+                }, 600);
+            } catch (e) {
+                if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                    alert("브라우저 저장 공간이 가득 찼습니다! 스티커나 이미지 기록을 삭제한 뒤 다시 시도해 주세요.");
+                } else {
+                    alert("세션 저장 중 오류가 발생했습니다: " + e.message);
+                }
+            }
+        }).catch((error) => {
+            console.error("유저 데이터 로드 실패:", error);
         });
+    } // ◀ 닫는 괄호가 정확히 닫혀야 합니다.
+
+    // 엔터키 로그인 이벤트 리스너는 함수 바깥에 독립적으로 위치해야 합니다.
+    document.getElementById('passcode').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') validateAccess();
+    });
     </script>
 </body>
 </html>
