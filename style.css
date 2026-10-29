@@ -146,24 +146,127 @@ body, html {
 .disconnect-btn:hover { color: #ff8fab; }
 
 /* 채팅 사이드바 */
-.chat-sidebar { width: 280px; background: var(--side-bg); border-left: 1px solid var(--border-color); display: flex; flex-direction: column; }
-.chat-header { padding: 18px; border-bottom: 1px solid var(--border-color); background: #faf9fc; }
-.chat-title { font-size: 0.7rem; color: var(--main-purple); font-weight: bold; }
-.other-status { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-#other-name { font-size: 0.7rem; color: #433852; font-weight: bold; }
-#other-session-status { font-size: 0.6rem; }
-.chat-body { flex-grow: 1; overflow-y: auto; padding: 15px; background: #ffffff; }
-.chat-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
-.chat-item { max-width: 85%; }
-.chat-item.me { margin-left: auto; text-align: right; }
-.chat-item.other { margin-right: auto; }
-.chat-sender { font-size: 0.6rem; color: #8c829e; margin-bottom: 2px; }
-.chat-text { background: #f4f2f8; padding: 10px 14px; border-radius: 12px; font-size: 0.75rem; color: #433852; }
-.chat-item.me .chat-text { background: var(--main-purple); color: #fff; }
-.linked-content { display: flex; align-items: center; gap: 8px; background: rgba(157, 124, 255, 0.08); padding: 8px; border-radius: 8px; font-size: 0.65rem; margin-top: 4px; border: 1px solid var(--border-color); }
-.linked-icon { font-size: 1rem; }
-.linked-text { color: var(--text-color); }
-.linked-btn { background: var(--main-purple); border: none; border-radius: 6px; color: #fff; font-size: 0.6rem; padding: 4px 8px; cursor: pointer; margin-left: auto; }
-.input-area { padding: 15px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; background: #faf9fc; }
-#comment-input { flex-grow: 1; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; font-size: 0.7rem; }
+/* --- 채팅창 컴팩트 & 아기자기한 스타일 복구 --- */
+.chat-sidebar {
+    width: 280px;
+    background: var(--side-bg);
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+    background: #faf9fc;
+}
+
+.chat-title {
+    font-size: 0.65rem;
+    color: var(--main-purple);
+    font-weight: bold;
+}
+
+.other-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+#other-name {
+    font-size: 0.65rem;
+    color: #433852;
+    font-weight: bold;
+}
+
+#other-session-status {
+    font-size: 0.55rem;
+}
+
+.chat-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 12px;
+    background: #ffffff;
+}
+
+.chat-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chat-item {
+    max-width: 88%;
+}
+
+.chat-item.me {
+    margin-left: auto;
+    text-align: right;
+}
+
+.chat-item.other {
+    margin-right: auto;
+}
+
+.chat-sender {
+    font-size: 0.55rem;
+    color: #8c829e;
+    margin-bottom: 2px;
+}
+
+.chat-text {
+    background: #f4f2f8;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-family: var(--font-light);
+    font-size: 0.68rem;
+    word-break: break-all;
+    color: #433852;
+    line-height: 1.3;
+}
+
+.chat-item.me .chat-text {
+    background: var(--main-purple);
+    color: #fff;
+    border-bottom-right-radius: 2px;
+}
+
+.chat-item.other .chat-text {
+    border-bottom-left-radius: 2px;
+}
+
+.chat-info {
+    font-size: 0.5rem;
+    color: #c4bccd;
+    margin-top: 2px;
+}
+
+.input-area {
+    padding: 12px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 6px;
+    background: #faf9fc;
+}
+
+#comment-input {
+    flex-grow: 1;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: var(--text-color);
+    font-family: var(--font-light);
+    font-size: 0.65rem;
+}
+
+#comment-input:focus {
+    outline: none;
+    border-color: var(--main-purple);
+}
 .save-btn { background: linear-gradient(135deg, var(--main-pink), var(--main-purple)); border: none; border-radius: 8px; color: #fff; font-size: 0.7rem; padding: 0 16px; cursor: pointer; }
