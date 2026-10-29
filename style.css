@@ -240,10 +240,10 @@ body, html {
     border-bottom-left-radius: 2px;
 }
 
-.chat-info {
-    font-size: 0.5rem;
-    color: #c4bccd;
-    margin-top: 2px;
+/* 채팅 시간 글씨 크기 부분 수정 */
+.chat-info span, .chat-info {
+    font-size: 0.45rem !important;
+    color: #c4bccd !important;
 }
 
 .input-area {
