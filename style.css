@@ -238,9 +238,12 @@ body, html {
     border-bottom-left-radius: 2px;
 }
 
-/* 채팅 시간 글씨 크기 부분 수정 */
-.chat-info span, .chat-info {
-    font-size: 0.45rem !important;
+/* 채팅 시간 글자 크기 확실한 고정 수정 */
+.chat-info, 
+.chat-info span, 
+aside.chat-sidebar .chat-info, 
+aside.chat-sidebar .chat-info span {
+    font-size: 0.42rem !important;
     color: #c4bccd !important;
 }
 
