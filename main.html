@@ -16,7 +16,7 @@
     <!-- 전체 다이어리 바인더 프레임 -->
     <div class="terminal-frame">
         <div class="content-wrapper">
-            <!-- 왼쪽 사이드바 (프로필 + 메뉴 + 음악) -->
+            <!-- 왼쪽 사이드바 (프로필 + 원래 메뉴 + 음악) -->
             <aside class="sidebar">
                 <div class="profile-section">
                     <div id="session-icon">👤</div>
@@ -26,13 +26,13 @@
                     </div>
                 </div>
 
-                <!-- 메뉴 -->
+                <!-- 원래 요청하셨던 메뉴 구성으로 복구 -->
                 <nav class="main-menu">
-                    <div class="menu-item active" onclick="handleMenu('DASHBOARD', event)">✨ 다이어리 캘린더</div>
-                    <div class="menu-item" onclick="handleMenu('JOURNAL', event)">📖 개인 일기장</div>
-                    <div class="menu-item" onclick="handleMenu('ST_NOTEBOOK', event)">📌 함께 쓰는 포스트잇</div>
-                    <div class="menu-item" onclick="handleMenu('MEMO', event)">📝 메모장</div>
-                    <div class="menu-item" onclick="handleMenu('SETTINGS', event)">⚙️ 설정</div>
+                    <div class="menu-item active" onclick="handleMenu('DASHBOARD', event)">> Dashboard (캘린더)</div>
+                    <div class="menu-item" onclick="handleMenu('JOURNAL', event)">> Journal (일기장)</div>
+                    <div class="menu-item" onclick="handleMenu('ST_NOTEBOOK', event)">> Post-it (포스트잇)</div>
+                    <div class="menu-item" onclick="handleMenu('MEMO', event)">&gt; Notebook (메모장)</div>
+                    <div class="menu-item" onclick="handleMenu('SETTINGS', event)">> Settings (설정)</div>
                 </nav>
 
                 <!-- 음악 플레이어 -->
@@ -54,10 +54,10 @@
                     <div id="current-time">00:00:00</div>
                 </div>
                 
-                <!-- 1. 다이어리 캘린더 패널 (캘린더 + 투두 + 감정 + 디데이 + 링크메모) -->
+                <!-- 1. 대시보드 (캘린더 + 투두 + 기분 + 링크 메모) -->
                 <section class="system-board active" id="DASHBOARD-panel">
                     <div class="board-header">
-                        <span>📖 OUR COZY CALENDAR & PLANNER</span>
+                        <span>OUR SPACE // CALENDAR PLANNER</span>
                         <div class="cal-nav">
                             <button class="cal-btn" onclick="changeMonth(-1)">◀</button>
                             <span id="cal-month-title">2026.10</span>
@@ -69,10 +69,10 @@
                         <!-- 달력 그리드 영역 -->
                         <div class="calendar-grid-area">
                             <div class="weekdays">
-                                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                                <span style="color:#ff8fab;">Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span style="color:#5bc0eb;">Sat</span>
                             </div>
                             <div class="days-grid" id="days-grid">
-                                <!-- 자바스크립트로 날짜 생성 -->
+                                <!-- 자바스크립트로 캘린더 날짜가 꽉 차게 생성됨 -->
                             </div>
                         </div>
 
@@ -113,22 +113,22 @@
                     </div>
                 </section>
 
-                <!-- 2. 개인 일기장 -->
+                <!-- 2. 일기장 -->
                 <section class="system-board" id="JOURNAL-panel">
-                    <div class="board-header">> PERSONAL_JOURNAL</div>
-                    <p style="font-size: 0.75rem; opacity: 0.7;">나만의 소중한 일기를 기록하는 공간입니다.</p>
+                    <div class="board-header">> JOURNAL_ARCHIVE</div>
+                    <p style="font-size: 0.75rem; opacity: 0.7;">개인 일기장 공간입니다.</p>
                 </section>
 
-                <!-- 3. 함께 쓰는 포스트잇 -->
+                <!-- 3. 포스트잇 (함께 사용하는) -->
                 <section class="system-board" id="ST_NOTEBOOK-panel">
-                    <div class="board-header">> SHARED_POST_IT_NOTEBOOK</div>
-                    <p style="font-size: 0.75rem; opacity: 0.7;">친구와 함께 붙였다 뗐다 하는 공유 포스트잇 공간입니다.</p>
+                    <div class="board-header">> SHARED_POST_IT</div>
+                    <p style="font-size: 0.75rem; opacity: 0.7;">친구와 함께 쓰는 공유 포스트잇 공간입니다.</p>
                 </section>
 
                 <!-- 4. 메모장 -->
                 <section class="system-board" id="MEMO-panel">
-                    <div class="board-header">> MEMO_PAD</div>
-                    <p style="font-size: 0.75rem; opacity: 0.7;">자유롭게 메모를 남겨두는 공간입니다.</p>
+                    <div class="board-header">> NOTEBOOK_MEMO_PAD</div>
+                    <p style="font-size: 0.75rem; opacity: 0.7;">자유롭게 적어두는 메모장 공간입니다.</p>
                 </section>
 
                 <!-- 5. 설정 -->
@@ -253,7 +253,7 @@
             document.getElementById('edit-icon').value = session.icon || '';
         }
 
-        // --- 다이어리 캘린더 로직 ---
+        // --- 다이어리 캘린더 완벽 구현 로직 ---
         let currentDateObj = new Date();
         let selectedDateStr = "";
 
@@ -267,7 +267,7 @@
             const grid = document.getElementById('days-grid');
             grid.innerHTML = '';
 
-            // 빈 칸 채우기
+            // 빈 칸 채우기 (이전 달 여백)
             for (let i = 0; i < firstDay; i++) {
                 const emptyCell = document.createElement('div');
                 emptyCell.className = 'day-cell empty';
