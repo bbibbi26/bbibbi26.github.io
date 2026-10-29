@@ -16,7 +16,7 @@
     <!-- 전체 다이어리 바인더 프레임 -->
     <div class="terminal-frame">
         <div class="content-wrapper">
-            <!-- 왼쪽 사이드바 (프로필 + 원래 메뉴 + 음악) -->
+            <!-- 왼쪽 사이드바 (프로필 + 4개 메뉴 + 음악) -->
             <aside class="sidebar">
                 <div class="profile-section">
                     <div id="session-icon">👤</div>
@@ -26,13 +26,12 @@
                     </div>
                 </div>
 
-                <!-- 원래 요청하셨던 메뉴 구성으로 복구 -->
+                <!-- 설정 메뉴를 제외한 4가지 핵심 메뉴 -->
                 <nav class="main-menu">
                     <div class="menu-item active" onclick="handleMenu('DASHBOARD', event)">> Dashboard (캘린더)</div>
                     <div class="menu-item" onclick="handleMenu('JOURNAL', event)">> Journal (일기장)</div>
                     <div class="menu-item" onclick="handleMenu('ST_NOTEBOOK', event)">> Post-it (포스트잇)</div>
                     <div class="menu-item" onclick="handleMenu('MEMO', event)">&gt; Notebook (메모장)</div>
-                    <div class="menu-item" onclick="handleMenu('SETTINGS', event)">> Settings (설정)</div>
                 </nav>
 
                 <!-- 음악 플레이어 -->
@@ -72,7 +71,7 @@
                                 <span style="color:#ff8fab;">Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span style="color:#5bc0eb;">Sat</span>
                             </div>
                             <div class="days-grid" id="days-grid">
-                                <!-- 자바스크립트로 캘린더 날짜가 꽉 차게 생성됨 -->
+                                <!-- 자바스크립트로 캘린더 날짜가 격자에 맞춰 생성됨 -->
                             </div>
                         </div>
 
@@ -119,7 +118,7 @@
                     <p style="font-size: 0.75rem; opacity: 0.7;">개인 일기장 공간입니다.</p>
                 </section>
 
-                <!-- 3. 포스트잇 (함께 사용하는) -->
+                <!-- 3. 포스트잇 -->
                 <section class="system-board" id="ST_NOTEBOOK-panel">
                     <div class="board-header">> SHARED_POST_IT</div>
                     <p style="font-size: 0.75rem; opacity: 0.7;">친구와 함께 쓰는 공유 포스트잇 공간입니다.</p>
@@ -129,16 +128,6 @@
                 <section class="system-board" id="MEMO-panel">
                     <div class="board-header">> NOTEBOOK_MEMO_PAD</div>
                     <p style="font-size: 0.75rem; opacity: 0.7;">자유롭게 적어두는 메모장 공간입니다.</p>
-                </section>
-
-                <!-- 5. 설정 -->
-                <section class="system-board" id="SETTINGS-panel">
-                    <div class="board-header">> CONFIG_USER_PROFILE</div>
-                    <div class="settings-panel">
-                        <input type="text" id="edit-name" class="setting-input" placeholder="닉네임 변경...">
-                        <input type="text" id="edit-icon" class="setting-input" placeholder="아이콘 (이모지 또는 이미지 링크)...">
-                        <button class="save-btn" onclick="updateProfile()">SAVE PROFILE</button>
-                    </div>
                 </section>
                 
                 <div class="disconnect-btn" onclick="location.href='index.html'">← RETURN TO GATE</div>
@@ -231,16 +220,7 @@
             }
         }
 
-        // 프로필 관리
-        function updateProfile() {
-            const nameVal = document.getElementById('edit-name').value.trim();
-            const iconVal = document.getElementById('edit-icon').value.trim();
-            if(nameVal) session.name = nameVal;
-            if(iconVal) session.icon = iconVal;
-            localStorage.setItem('nya_current_session', JSON.stringify(session));
-            renderProfile();
-        }
-
+        // 초기 설정된 프로필 정보 반영
         function renderProfile() {
             document.getElementById('session-name').innerText = session.name;
             const iconBox = document.getElementById('session-icon');
@@ -249,11 +229,9 @@
             } else {
                 iconBox.innerText = session.icon || '👤';
             }
-            document.getElementById('edit-name').value = session.name;
-            document.getElementById('edit-icon').value = session.icon || '';
         }
 
-        // --- 다이어리 캘린더 완벽 구현 로직 ---
+        // --- 다이어리 캘린더 로직 ---
         let currentDateObj = new Date();
         let selectedDateStr = "";
 
@@ -267,14 +245,12 @@
             const grid = document.getElementById('days-grid');
             grid.innerHTML = '';
 
-            // 빈 칸 채우기 (이전 달 여백)
             for (let i = 0; i < firstDay; i++) {
                 const emptyCell = document.createElement('div');
                 emptyCell.className = 'day-cell empty';
                 grid.appendChild(emptyCell);
             }
 
-            // 날짜 채우기
             for (let d = 1; d <= lastDate; d++) {
                 const cell = document.createElement('div');
                 cell.className = 'day-cell';
@@ -326,7 +302,6 @@
             database.ref(`diary_data/${dateStr}`).on('value', snap => {
                 const data = snap.val() || {};
                 
-                // 배지 표시
                 const badge = document.getElementById(`badge-${dateStr}`);
                 if(badge) {
                     let badgeHTML = '';
@@ -335,7 +310,6 @@
                     badge.innerHTML = badgeHTML;
                 }
 
-                // 투두 렌더링
                 const todoList = document.getElementById('todo-list');
                 todoList.innerHTML = '';
                 if(data.todos) {
@@ -346,7 +320,6 @@
                     });
                 }
 
-                // 링크 렌더링
                 const linkPreview = document.getElementById('link-memo-preview');
                 linkPreview.innerHTML = '';
                 if(data.links) {
@@ -434,5 +407,7 @@
             }, 600);
         });
     </script>
+</body>
+</html>
 </body>
 </html>
