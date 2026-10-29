@@ -28,11 +28,11 @@
 
                 <!-- 메뉴 -->
                 <nav class="main-menu">
-                    <div class="menu-item active" onclick="handleMenu('DASHBOARD')">> 캘린더 (Dashboard)</div>
-                    <div class="menu-item" onclick="handleMenu('JOURNAL')">> 일기장 (Journal)</div>
-                    <div class="menu-item" onclick="handleMenu('ST_NOTEBOOK')">> 포스트잇 (Shared)</div>
-                    <div class="menu-item" onclick="handleMenu('MEMO')">> 메모장 (Memo)</div>
-                    <div class="menu-item" onclick="handleMenu('SETTINGS')">> 설정 (Settings)</div>
+                    <div class="menu-item active" onclick="handleMenu('DASHBOARD', event)">> 캘린더 (Dashboard)</div>
+                    <div class="menu-item" onclick="handleMenu('JOURNAL', event)">> 일기장 (Journal)</div>
+                    <div class="menu-item" onclick="handleMenu('ST_NOTEBOOK', event)">> 포스트잇 (Shared)</div>
+                    <div class="menu-item" onclick="handleMenu('MEMO', event)">> 메모장 (Memo)</div>
+                    <div class="menu-item" onclick="handleMenu('SETTINGS', event)">> 설정 (Settings)</div>
                 </nav>
 
                 <!-- 음악 플레이어 -->
@@ -113,14 +113,14 @@
     <script>
         // --- [수정 필수] Firebase 설정 ---
         const firebaseConfig = {
-    apiKey: "AIzaSyDi9JQLtpp4KaF5mGkf0aApv_fcQP2PpD0",
-    authDomain: "nya-ppi.firebaseapp.com",
-    projectId: "nya-ppi",
-    storageBucket: "nya-ppi.firebasestorage.app",
-    messagingSenderId: "27439633492",
-    appId: "1:27439633492:web:1cd43fd32322f6bc62c9c1",
-    databaseURL: "https://nya-ppi-default-rtdb.firebaseio.com/" 
-};
+            apiKey: "AIzaSyDi9JQLtpp4KaF5mGkf0aApv_fcQP2PpD0",
+            authDomain: "nya-ppi.firebaseapp.com",
+            projectId: "nya-ppi",
+            storageBucket: "nya-ppi.firebasestorage.app",
+            messagingSenderId: "27439633492",
+            appId: "1:27439633492:web:1cd43fd32322f6bc62c9c1",
+            databaseURL: "https://nya-ppi-default-rtdb.firebaseio.com/"
+        };
         // -------------------------------
 
         firebase.initializeApp(firebaseConfig);
@@ -162,13 +162,15 @@
             otherStatusDisplay.className = status === 'ONLINE' ? 'status-online' : 'status-offline';
         });
 
-        function handleMenu(panelId) {
+        function handleMenu(panelId, event) {
             document.querySelectorAll('.system-board').forEach(p => p.classList.remove('active'));
             const targetPanel = document.getElementById(panelId + '-panel');
             if(targetPanel) targetPanel.classList.add('active');
             
             document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            if(event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
         }
 
         function updateProfile() {
