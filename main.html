@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NYA-PPI / INTEGRATED_TERMINAL</title>
+    <title>NYA-PPI / COZY_TERMINAL</title>
     <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- 로딩 애니메이션 -->
     <div id="boot-loader">
-        <div id="loader-text">> INITIALIZING_SECURE_CONNECTION...</div>
+        <div id="loader-text">> INITIALIZING_COZY_SPACE...</div>
     </div>
 
     <!-- 전체 프레임 -->
@@ -28,19 +28,19 @@
 
                 <!-- 메뉴 -->
                 <nav class="main-menu">
-                    <div class="menu-item active" onclick="handleMenu('DASHBOARD')">> DASHBOARD</div>
-                    <div class="menu-item" onclick="handleMenu('JOURNAL')">> JOURNAL</div>
-                    <div class="menu-item" onclick="handleMenu('ST_NOTEBOOK')">> ST_NOTEBOOK</div>
-                    <div class="menu-item" onclick="handleMenu('MEMO')">> MEMO</div>
-                    <div class="menu-item" onclick="handleMenu('SETTINGS')">> SETTINGS</div>
+                    <div class="menu-item active" onclick="handleMenu('DASHBOARD')">> 캘린더 (Dashboard)</div>
+                    <div class="menu-item" onclick="handleMenu('JOURNAL')">> 일기장 (Journal)</div>
+                    <div class="menu-item" onclick="handleMenu('ST_NOTEBOOK')">> 포스트잇 (Shared)</div>
+                    <div class="menu-item" onclick="handleMenu('MEMO')">> 메모장 (Memo)</div>
+                    <div class="menu-item" onclick="handleMenu('SETTINGS')">> 설정 (Settings)</div>
                 </nav>
 
                 <!-- 음악 플레이어 -->
                 <div class="music-section">
-                    <div class="music-info">> MUSIC_FEED_01</div>
-                    <div class="music-title">Added Tracks Only</div>
+                    <div class="music-info">> BGM_PLAYER</div>
+                    <div class="music-title">My Added Tracks</div>
                     <div class="music-controls">
-                        <button class="music-btn" onclick="toggleMusic()">⏯</button>
+                        <button class="music-btn" onclick="toggleMusic()">▶</button>
                         <button class="music-btn" onclick="prevMusic()">⏮</button>
                         <button class="music-btn" onclick="nextMusic()">⏭</button>
                     </div>
@@ -55,43 +55,41 @@
                 </div>
                 
                 <section class="system-board active" id="DASHBOARD-panel">
-                    <div class="board-header">> CONNECTION_ESTABLISHED // CALENDAR_VIEW_READY</div>
-                    <!-- 캘린더 구현 영역 (실제 라이브러리 연동 필요) -->
-                    <div class="calendar-placeholder">[ CALENDAR_GRID_PLACEHOLDER ]</div>
+                    <div class="board-header">> OUR_SPACE // CALENDAR VIEW</div>
+                    <div class="calendar-placeholder">[ COZY CALENDAR GRID AREA ]</div>
                 </section>
 
                 <section class="system-board" id="JOURNAL-panel">
-                    <div class="board-header">> JOURNAL_ARCHIVE</div>
-                    <p>개인 일기장 기능 패널</p>
+                    <div class="board-header">> PERSONAL_JOURNAL</div>
+                    <p style="font-size: 0.75rem; opacity: 0.7;">개인 일기장 공간입니다.</p>
                 </section>
 
                 <section class="system-board" id="ST_NOTEBOOK-panel">
-                    <div class="board-header">> SHARED_NOTEBOOK_V1.1</div>
-                    <p>함께 쓰는 포스트잇 기능 패널</p>
+                    <div class="board-header">> SHARED_POST_IT_NOTEBOOK</div>
+                    <p style="font-size: 0.75rem; opacity: 0.7;">친구와 함께 사용하는 포스트잇 공간입니다.</p>
                 </section>
 
                 <section class="system-board" id="MEMO-panel">
                     <div class="board-header">> MEMO_PAD</div>
-                    <p>개인 메모장 기능 패널</p>
+                    <p style="font-size: 0.75rem; opacity: 0.7;">자유롭게 적어두는 메모장 공간입니다.</p>
                 </section>
 
                 <section class="system-board" id="SETTINGS-panel">
                     <div class="board-header">> CONFIG_USER_PROFILE</div>
                     <div class="settings-panel">
-                        <input type="text" id="edit-name" class="setting-input" placeholder="이름 변경...">
-                        <input type="text" id="edit-icon" class="setting-input" placeholder="아이콘(이모지/URL)...">
-                        <button class="save-btn" onclick="updateProfile()">SAVE_PROFILE</button>
+                        <input type="text" id="edit-name" class="setting-input" placeholder="닉네임 변경...">
+                        <input type="text" id="edit-icon" class="setting-input" placeholder="아이콘 (이모지 또는 이미지 링크)...">
+                        <button class="save-btn" onclick="updateProfile()">SAVE PROFILE</button>
                     </div>
                 </section>
                 
-                <div class="disconnect-btn" onclick="location.href='index.html'">TERMINATE_SESSION_</div>
+                <div class="disconnect-btn" onclick="location.href='index.html'">← RETURN TO GATE</div>
             </main>
 
             <!-- 오른쪽 채팅 영역 -->
             <aside class="chat-sidebar">
                 <div class="chat-header">
-                    <div class="chat-title">> CHAT_STREAM_LIVE</div>
-                    <!-- 다른 접속자 정보 -->
+                    <div class="chat-title">> LIVE CHAT</div>
                     <div class="other-status">
                         <span id="other-name">[친구]</span>
                         <span id="other-session-status" class="status-offline">Offline</span>
@@ -101,49 +99,48 @@
                     <ul class="chat-list" id="chat-list"></ul>
                 </div>
                 <div class="input-area">
-                    <input type="text" id="comment-input" placeholder="메시지를 입력하거나 파일을 끌어넣으세요..." maxlength="200" onpaste="handlePaste(event)">
-                    <button class="save-btn" onclick="saveComment()">SAVE</button>
+                    <input type="text" id="comment-input" placeholder="메시지 또는 링크 입력..." maxlength="200">
+                    <button class="save-btn" onclick="saveComment()">SEND</button>
                 </div>
             </aside>
         </div>
     </div>
 
-    <!-- Firebase SDK (Compat 버전) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     
     <script>
         // --- [수정 필수] Firebase 설정 ---
         const firebaseConfig = {
-            // 여기에 본인의 Firebase 프로젝트 설정을 복사해서 붙여넣으세요!
-            apiKey: "본인의_API_KEY",
-            authDomain: "본인의_AUTH_DOMAIN",
-            projectId: "본인의_PROJECT_ID",
-            storageBucket: "본인의_STORAGE_BUCKET",
-            messagingSenderId: "본인의_MESSAGING_SENDER_ID",
-            appId: "본인의_APP_ID",
-            databaseURL: "본인의_DATABASE_URL"
-        };
+    apiKey: "AIzaSyDi9JQLtpp4KaF5mGkf0aApv_fcQP2PpD0",
+    authDomain: "nya-ppi.firebaseapp.com",
+    projectId: "nya-ppi",
+    storageBucket: "nya-ppi.firebasestorage.app",
+    messagingSenderId: "27439633492",
+    appId: "1:27439633492:web:1cd43fd32322f6bc62c9c1",
+    databaseURL: "https://nya-ppi-default-rtdb.firebaseio.com/" 
+};
         // -------------------------------
 
-        // Firebase 초기화
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const chatRef = database.ref('nya_chat_history');
 
-        // 세션 로드 및 보안
         let session = null;
         try {
             session = JSON.parse(localStorage.getItem('nya_current_session'));
         } catch(e) {}
 
-        if (!session || !session.type) { location.href = 'index.html'; throw new Error("정상 세션 없음"); }
+        if (!session || !session.type) { 
+            window.location.href = 'index.html'; 
+            throw new Error("정상 세션 없음"); 
+        }
 
         const otherType = (session.type === 'me') ? 'other' : 'me';
         const myPresenceRef = database.ref('presence/' + session.type);
         const otherPresenceRef = database.ref('presence/' + otherType);
         
-        // --- 접속 상태 실시간 업데이트 ---
         database.ref('.info/connected').on('value', (snap) => {
             if (snap.val() === true) {
                 myPresenceRef.onDisconnect().set('OFFLINE');
@@ -165,27 +162,15 @@
             otherStatusDisplay.className = status === 'ONLINE' ? 'status-online' : 'status-offline';
         });
 
-
-        // --- UI 함수들 ---
         function handleMenu(panelId) {
-            playSystemSound();
-            // 패널 전환
             document.querySelectorAll('.system-board').forEach(p => p.classList.remove('active'));
             const targetPanel = document.getElementById(panelId + '-panel');
             if(targetPanel) targetPanel.classList.add('active');
             
-            // 메뉴 하이라이트
             document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-            const activeMenuItem = Array.from(document.querySelectorAll('.menu-item')).find(m => m.innerText.includes(panelId));
-            if(activeMenuItem) activeMenuItem.classList.add('active');
-
-            systemLog(`ACCESSING_${panelId}... OK`);
+            event.currentTarget.classList.add('active');
         }
 
-        function playSystemSound() { /* 소리 재생 로직 추가 가능 */ }
-        function systemLog(msg) { /* 로그 출력 로직 추가 가능 */ }
-
-        // 프로필 업데이트
         function updateProfile() {
             const nameVal = document.getElementById('edit-name').value.trim();
             const iconVal = document.getElementById('edit-icon').value.trim();
@@ -193,24 +178,20 @@
             if(iconVal) session.icon = iconVal;
             localStorage.setItem('nya_current_session', JSON.stringify(session));
             renderProfile();
-            systemLog("PROFILE_UPDATED");
         }
 
         function renderProfile() {
             document.getElementById('session-name').innerText = session.name;
             const iconBox = document.getElementById('session-icon');
-            if (session.icon.startsWith('http') || session.icon.startsWith('data:')) {
-                iconBox.innerHTML = `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover;">`;
+            if (session.icon && (session.icon.startsWith('http') || session.icon.startsWith('data:'))) {
+                iconBox.innerHTML = `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
             } else {
-                iconBox.innerText = session.icon;
+                iconBox.innerText = session.icon || '👤';
             }
             document.getElementById('edit-name').value = session.name;
-            document.getElementById('edit-icon').value = session.icon;
+            document.getElementById('edit-icon').value = session.icon || '';
         }
 
-        // --- 채팅 및 링크 구현 ---
-
-        // 메시지 전송
         function saveComment() {
             const input = document.getElementById('comment-input');
             const text = input.value.trim();
@@ -225,7 +206,6 @@
             input.value = '';
         }
 
-        // 메시지 렌더링 (링크 처리 포함)
         chatRef.limitToLast(30).on('value', (snap) => {
             const data = snap.val();
             const list = document.getElementById('chat-list');
@@ -236,21 +216,17 @@
                 const isMe = post.senderType === session.type;
                 li.className = `chat-item ${isMe ? 'me' : 'other'}`;
                 
-                // --- 링크 처리 핵심 로직 ---
                 let content = post.content;
-                // 이미지 링크 감지 (간단한 regex)
-                const imgRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i;
-                if (imgRegex.test(content)) {
-                    // 링크를 사진 아이콘과 이동 버튼으로 변경
-                    content = `
-                        <div class="linked-content">
-                            <span class="linked-icon">🖼️</span>
-                            <span class="linked-text">Image Linked</span>
-                            <button class="linked-btn" onclick="window.open('${post.content}', '_blank')">VISIT</button>
-                        </div>
-                    `;
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                if (urlRegex.test(content)) {
+                    content = content.replace(urlRegex, (url) => {
+                        return `<div class="linked-content">
+                            <span class="linked-icon">🔗</span>
+                            <span class="linked-text">Link Attached</span>
+                            <button class="linked-btn" onclick="window.open('${url}', '_blank')">VISIT</button>
+                        </div>`;
+                    });
                 }
-                // -------------------------
 
                 li.innerHTML = `
                     <div class="chat-sender">${post.senderName}</div>
@@ -263,25 +239,18 @@
             wrapper.scrollTop = wrapper.scrollHeight;
         });
 
-        // 엔터키 전송
         document.getElementById('comment-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
 
-        // --- 음악 플레이어 시뮬레이션 (곡은 직접 추가 필요) ---
-        function toggleMusic() { systemLog("MUSIC_TOGGLE"); }
-        function prevMusic() { systemLog("MUSIC_PREV"); }
-        function nextMusic() { systemLog("MUSIC_NEXT"); }
+        function toggleMusic() {}
+        function prevMusic() {}
+        function nextMusic() {}
 
-        // 드래그 앤 드롭 파일 (생략 - 필요시 main.html에 구현 필요)
-        function handlePaste(e) { /* 파일 붙여넣기 로직 */ }
-
-        // 클럭 업데이트
         function updateClock() {
             const now = new Date();
             document.getElementById('current-time').innerText = now.toLocaleTimeString('en-GB');
             document.getElementById('current-date').innerText = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
         }
 
-        // 초기 로드
         window.addEventListener('load', () => {
             renderProfile();
             setInterval(updateClock, 1000);
@@ -291,10 +260,9 @@
             setTimeout(() => {
                 const loader = document.getElementById('boot-loader');
                 loader.style.opacity = "0";
-                setTimeout(() => loader.remove(), 500);
-            }, 800);
+                setTimeout(() => loader.remove(), 400);
+            }, 600);
         });
-
     </script>
 </body>
 </html>
