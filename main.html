@@ -26,7 +26,7 @@
                     </div>
                 </div>
 
-                <!-- 설정 메뉴를 제외한 4가지 핵심 메뉴 -->
+                <!-- 4가지 핵심 메뉴 -->
                 <nav class="main-menu">
                     <div class="menu-item active" onclick="handleMenu('DASHBOARD', event)">> Dashboard (캘린더)</div>
                     <div class="menu-item" onclick="handleMenu('JOURNAL', event)">> Journal (일기장)</div>
@@ -133,7 +133,7 @@
                 <div class="disconnect-btn" onclick="location.href='index.html'">← RETURN TO GATE</div>
             </main>
 
-            <!-- 오른쪽 채팅 영역 -->
+            <!-- 오른쪽 채팅 영역 (정상 복구) -->
             <aside class="chat-sidebar">
                 <div class="chat-header">
                     <div class="chat-title">> LIVE CHAT</div>
@@ -220,7 +220,7 @@
             }
         }
 
-        // 초기 설정된 프로필 정보 반영
+        // 프로필 반영
         function renderProfile() {
             document.getElementById('session-name').innerText = session.name;
             const iconBox = document.getElementById('session-icon');
@@ -333,7 +333,7 @@
             });
         }
 
-        // --- 채팅 로직 ---
+        // --- 채팅 로직 (정상 작동) ---
         function saveComment() {
             const input = document.getElementById('comment-input');
             const text = input.value.trim();
