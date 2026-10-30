@@ -8,12 +8,15 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- 로딩 애니메이션 -->
     <div id="boot-loader">
         <div id="loader-text">> OPENING_COZY_DIARY...</div>
     </div>
 
+    <!-- 전체 다이어리 바인더 프레임 -->
     <div class="terminal-frame">
         <div class="content-wrapper">
+            <!-- 왼쪽 사이드바 (프로필 + 4개 메뉴 + 음악) -->
             <aside class="sidebar">
                 <div class="profile-section">
                     <div id="session-icon">👤</div>
@@ -41,12 +44,14 @@
                 </div>
             </aside>
 
+            <!-- 중앙 메인 영역 (다이어리 본문) -->
             <main class="main-content">
                 <div id="current-date-info">
                     <div id="current-date">DATE</div>
                     <div id="current-time">00:00:00</div>
                 </div>
                 
+                <!-- 1. 대시보드 (캘린더 + 투두 + 일정 추가 + 포스트잇) -->
                 <section class="system-board active" id="DASHBOARD-panel">
                     <div class="board-header">
                         <span>OUR SPACE // CALENDAR PLANNER</span>
@@ -143,6 +148,7 @@
                 <div class="disconnect-btn" onclick="location.href='index.html'">← RETURN TO GATE</div>
             </main>
 
+            <!-- 오른쪽 채팅 영역 -->
             <aside class="chat-sidebar">
                 <div class="chat-header">
                     <div class="chat-title">> LIVE CHAT</div>
@@ -162,6 +168,7 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     
@@ -555,7 +562,6 @@
             document.getElementById('current-date').innerText = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
         }
 
-        // 🌟 수정 완료: 로딩 후 프로필 및 캘린더 초기화 함수 정상 호출
         window.addEventListener('load', () => {
             renderProfile();
             renderCalendar();
