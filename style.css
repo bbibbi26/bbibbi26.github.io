@@ -276,3 +276,46 @@ aside.chat-sidebar .chat-info span {
     border: none; border-radius: 8px; color: #fff;
     font-size: 0.7rem; padding: 0 16px; cursor: pointer;
 }
+
+/* 일정 추가 바 디자인 */
+.schedule-input-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #faf9fc;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    font-size: 0.65rem;
+}
+.schedule-label { color: var(--main-purple); font-weight: bold; }
+.schedule-input-bar input, .schedule-input-bar select {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 0.65rem;
+    font-family: var(--font-light);
+    color: var(--text-color);
+}
+.schedule-input-bar input[type="text"] { flex-grow: 1; }
+.schedule-input-bar button {
+    background: var(--main-purple);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 0.65rem;
+}
+
+/* 위젯 박스 디자인 */
+.widget-box {
+    background: #faf9fc;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
