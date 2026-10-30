@@ -155,7 +155,7 @@
                     <ul class="chat-list" id="chat-list"></ul>
                 </div>
                 <div class="input-area">
-                    <input type="text" id="comment-input" placeholder="오늘도 화이팅..." maxlength="200">
+                    <input type="text" id="comment-input" placeholder="메시지 또는 링크 입력..." maxlength="200">
                     <button class="save-btn" onclick="saveComment()">SEND</button>
                 </div>
             </aside>
@@ -351,10 +351,6 @@
             database.ref('postits').push({ text: '메모를 적어보세요...', color: '#ffd700' });
         }
 
-        function updatePostIt(key, el) {
-            database.ref(`postits/${key}`).update({ text: el.value });
-        }
-
         function updatePostItColor(key, color) {
             database.ref(`postits/${key}`).update({ color });
         }
@@ -431,10 +427,15 @@
                 });
             });
 
+            // 🌟 포스트잇 로직 개선 (사용자가 타이핑 중일 때는 리렌더링으로 포커스가 끊기지 않도록 분기 처리)
             database.ref('postits').on('value', snap => {
                 const postits = snap.val() || {};
                 const container = document.getElementById('postit-container');
                 if(!container) return;
+
+                const activeElement = document.activeElement;
+                const activePostItKey = (activeElement && activeElement.classList.contains('postit-textarea')) ? activeElement.getAttribute('data-key') : null;
+
                 container.innerHTML = '';
                 Object.entries(postits).forEach(([key, p]) => {
                     const div = document.createElement('div');
@@ -453,10 +454,19 @@
                             </select>
                             <span onclick="deletePostIt('${key}')" style="cursor:pointer; font-size:0.6rem; font-weight:bold;">×</span>
                         </div>
-                        <textarea oninput="updatePostIt('${key}', this)" style="width:100%; border:none; background:transparent; font-size:0.6rem; resize:none; font-family:var(--font-light); outline:none; height:35px;">${p.text || ''}</textarea>
+                        <textarea class="postit-textarea" data-key="${key}" oninput="database.ref('postits/${key}').update({text: this.value})" style="width:100%; border:none; background:transparent; font-size:0.6rem; resize:none; font-family:var(--font-light); outline:none; height:35px;">${p.text || ''}</textarea>
                     `;
                     container.appendChild(div);
                 });
+
+                // 타이핑 중이던 포스트잇이 있었다면 포커스를 다시 유지시켜 줌
+                if (activePostItKey) {
+                    const textareaToFocus = container.querySelector(`textarea[data-key="${activePostItKey}"]`);
+                    if (textareaToFocus) {
+                        textareaToFocus.focus();
+                        textareaToFocus.setSelectionRange(textareaToFocus.value.length, textareaToFocus.value.length);
+                    }
+                }
             });
         }
 
@@ -469,8 +479,8 @@
                     Object.entries(data.todos).forEach(([key, todo]) => {
                         const li = document.createElement('li');
                         li.style.display = 'flex';
-                        li.style.alignItems = 'center';
-                        li.style.justifyContent = 'space-between';
+                        li.style.alignItems: 'center';
+                        li.style.justifyContent: 'space-between';
                         li.style.marginBottom = '3px';
                         li.innerHTML = `
                             <div style="display:flex; align-items:center; gap:5px;">
@@ -552,7 +562,7 @@
             renderCalendar();
             setInterval(updateClock, 1000);
             updateClock();
-            document.getElementById('other-name').innerText = otherType === 'other' ? '[언재]' : '[삐용]';
+            document.getElementById('other-name').innerText = otherType === 'other' ? '[친구]' : '[비비]';
             
             setTimeout(() => {
                 const loader = document.getElementById('boot-loader');
