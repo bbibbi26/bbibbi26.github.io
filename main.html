@@ -8,11 +8,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 로딩 애니메이션 -->
-    <div id="boot-loader">
-        <div id="loader-text">> OPENING_COZY_DIARY...</div>
-    </div>
-
     <!-- 전체 다이어리 바인더 프레임 -->
     <div class="terminal-frame">
         <div class="content-wrapper">
@@ -247,14 +242,6 @@
         const todayStr = `${currentDateObj.getFullYear()}-${String(currentDateObj.getMonth() + 1).padStart(2, '0')}-${String(currentDateObj.getDate()).padStart(2, '0')}`;
         let selectedDateStr = todayStr;
 
-        window.addEventListener('load', () => {
-            const todayFormatted = new Date().toISOString().split('T')[0];
-            const startInput = document.getElementById('sch-start');
-            const endInput = document.getElementById('sch-end');
-            if(startInput) startInput.value = todayFormatted;
-            if(endInput) endInput.value = todayFormatted;
-        });
-
         function renderCalendar() {
             const year = currentDateObj.getFullYear();
             const month = currentDateObj.getMonth();
@@ -434,48 +421,46 @@
                 });
             });
 
-           database.ref('postits').on('value', snap => {
-    const postits = snap.val() || {};
-    const container = document.getElementById('postit-container');
-    if(!container) return;
+            database.ref('postits').on('value', snap => {
+                const postits = snap.val() || {};
+                const container = document.getElementById('postit-container');
+                if(!container) return;
 
-    // 🌟 추가: 현재 타이핑 중인 포스트잇 기억하기
-    const activeElement = document.activeElement;
-    const activePostItKey = (activeElement && activeElement.classList.contains('postit-textarea')) ? activeElement.getAttribute('data-key') : null;
+                const activeElement = document.activeElement;
+                const activePostItKey = (activeElement && activeElement.classList.contains('postit-textarea')) ? activeElement.getAttribute('data-key') : null;
 
-    container.innerHTML = '';
-    Object.entries(postits).forEach(([key, p]) => {
-        const div = document.createElement('div');
-        div.style.background = p.color || '#ffd700';
-        div.style.padding = '6px';
-        div.style.borderRadius = '6px';
-        div.style.position = 'relative';
-        div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                <select onchange="updatePostItColor('${key}', this.value)" style="font-size:0.5rem; background:transparent; border:none; cursor:pointer;">
-                    <option value="#ffd700" ${p.color==='#ffd700'?'selected':''}>노랑</option>
-                    <option value="#52b788" ${p.color==='#52b788'?'selected':''}>초록</option>
-                    <option value="#ffa500" ${p.color==='#ffa500'?'selected':''}>오렌지</option>
-                    <option value="#5bc0eb" ${p.color==='#5bc0eb'?'selected':''}>파랑</option>
-                    <option value="#ff8fab" ${p.color==='#ff8fab'?'selected':''}>핑크</option>
-                </select>
-                <span onclick="deletePostIt('${key}')" style="cursor:pointer; font-size:0.6rem; font-weight:bold;">×</span>
-            </div>
-            <!-- 🌟 수정: class, data-key 추가 및 실시간 업데이트 연동 -->
-            <textarea class="postit-textarea" data-key="${key}" oninput="database.ref('postits/${key}').update({text: this.value})" style="width:100%; border:none; background:transparent; font-size:0.6rem; resize:none; font-family:var(--font-light); outline:none; height:35px;">${p.text || ''}</textarea>
-        `;
-        container.appendChild(div);
-    });
+                container.innerHTML = '';
+                Object.entries(postits).forEach(([key, p]) => {
+                    const div = document.createElement('div');
+                    div.style.background = p.color || '#ffd700';
+                    div.style.padding = '6px';
+                    div.style.borderRadius = '6px';
+                    div.style.position = 'relative';
+                    div.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                            <select onchange="updatePostItColor('${key}', this.value)" style="font-size:0.5rem; background:transparent; border:none; cursor:pointer;">
+                                <option value="#ffd700" ${p.color==='#ffd700'?'selected':''}>노랑</option>
+                                <option value="#52b788" ${p.color==='#52b788'?'selected':''}>초록</option>
+                                <option value="#ffa500" ${p.color==='#ffa500'?'selected':''}>오렌지</option>
+                                <option value="#5bc0eb" ${p.color==='#5bc0eb'?'selected':''}>파랑</option>
+                                <option value="#ff8fab" ${p.color==='#ff8fab'?'selected':''}>핑크</option>
+                            </select>
+                            <span onclick="deletePostIt('${key}')" style="cursor:pointer; font-size:0.6rem; font-weight:bold;">×</span>
+                        </div>
+                        <textarea class="postit-textarea" data-key="${key}" oninput="database.ref('postits/${key}').update({text: this.value})" style="width:100%; border:none; background:transparent; font-size:0.6rem; resize:none; font-family:var(--font-light); outline:none; height:35px;">${p.text || ''}</textarea>
+                    `;
+                    container.appendChild(div);
+                });
 
-    // 🌟 추가: 타이핑 중이던 포스트잇에 포커스 유지
-    if (activePostItKey) {
-        const textareaToFocus = container.querySelector(`textarea[data-key="${activePostItKey}"]`);
-        if (textareaToFocus) {
-            textareaToFocus.focus();
-            textareaToFocus.setSelectionRange(textareaToFocus.value.length, textareaToFocus.value.length);
+                if (activePostItKey) {
+                    const textareaToFocus = container.querySelector(`textarea[data-key="${activePostItKey}"]`);
+                    if (textareaToFocus) {
+                        textareaToFocus.focus();
+                        textareaToFocus.setSelectionRange(textareaToFocus.value.length, textareaToFocus.value.length);
+                    }
+                }
+            });
         }
-    }
-});
 
         function loadDayData(dateStr) {
             database.ref(`diary_data/${dateStr}`).on('value', snap => {
@@ -564,28 +549,20 @@
             document.getElementById('current-date').innerText = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
         }
 
-      window.addEventListener('load', () => {
-    renderProfile();
-    renderCalendar();
-    setInterval(updateClock, 1000);
-    updateClock();
-    document.getElementById('other-name').innerText = otherType === 'other' ? '[친구]' : '[비비]';
-    
-    const todayFormatted = new Date().toISOString().split('T')[0];
-    const startInput = document.getElementById('sch-start');
-    const endInput = document.getElementById('sch-end');
-    if(startInput) startInput.value = todayFormatted;
-    if(endInput) endInput.value = todayFormatted;
-
-    // 🌟 로딩 화면 확실하게 제거
-    setTimeout(() => {
-        const loader = document.getElementById('boot-loader');
-        if(loader) {
-            loader.style.opacity = "0";
-            setTimeout(() => loader.remove(), 400);
-        }
-    }, 600);
-});
+        window.addEventListener('load', () => {
+            renderProfile();
+            renderCalendar();
+            setInterval(updateClock, 1000);
+            updateClock();
+            document.getElementById('other-name').innerText = otherType === 'other' ? '[친구]' : '[비비]';
+            
+            const todayFormatted = new Date().toISOString().split('T')[0];
+            const startInput = document.getElementById('sch-start');
+            const endInput = document.getElementById('sch-end');
+            if(startInput) startInput.value = todayFormatted;
+            if(endInput) endInput.value = todayFormatted;
+        });
     </script>
 </body>
+</html>
 </html>
