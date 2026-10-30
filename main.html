@@ -8,10 +8,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 전체 다이어리 바인더 프레임 -->
+    <div id="boot-loader">
+        <div id="loader-text">> OPENING_COZY_DIARY...</div>
+    </div>
+
     <div class="terminal-frame">
         <div class="content-wrapper">
-            <!-- 왼쪽 사이드바 (프로필 + 4개 메뉴 + 음악) -->
             <aside class="sidebar">
                 <div class="profile-section">
                     <div id="session-icon">👤</div>
@@ -39,14 +41,12 @@
                 </div>
             </aside>
 
-            <!-- 중앙 메인 영역 (다이어리 본문) -->
             <main class="main-content">
                 <div id="current-date-info">
                     <div id="current-date">DATE</div>
                     <div id="current-time">00:00:00</div>
                 </div>
                 
-                <!-- 1. 대시보드 (캘린더 + 투두 + 일정 추가 + 포스트잇) -->
                 <section class="system-board active" id="DASHBOARD-panel">
                     <div class="board-header">
                         <span>OUR SPACE // CALENDAR PLANNER</span>
@@ -143,7 +143,6 @@
                 <div class="disconnect-btn" onclick="location.href='index.html'">← RETURN TO GATE</div>
             </main>
 
-            <!-- 오른쪽 채팅 영역 -->
             <aside class="chat-sidebar">
                 <div class="chat-header">
                     <div class="chat-title">> LIVE CHAT</div>
@@ -156,27 +155,26 @@
                     <ul class="chat-list" id="chat-list"></ul>
                 </div>
                 <div class="input-area">
-                    <input type="text" id="comment-input" placeholder="메시지 또는 링크 입력..." maxlength="200">
+                    <input type="text" id="comment-input" placeholder="오늘도 화이팅..." maxlength="200">
                     <button class="save-btn" onclick="saveComment()">SEND</button>
                 </div>
             </aside>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     
     <script>
-       const firebaseConfig = {
-    apiKey: "AIzaSyDi9JQLtpp4KaF5mGkf0aApv_fcQP2PpD0",
-    authDomain: "nya-ppi.firebaseapp.com",
-    projectId: "nya-ppi",
-    storageBucket: "nya-ppi.firebasestorage.app",
-    messagingSenderId: "27439633492",
-    appId: "1:27439633492:web:1cd43fd32322f6bc62c9c1",
-    databaseURL: "https://nya-ppi-default-rtdb.firebaseio.com/" 
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyDi9JQLtpp4KaF5mGkf0aApv_fcQP2PpD0",
+            authDomain: "nya-ppi.firebaseapp.com",
+            projectId: "nya-ppi",
+            storageBucket: "nya-ppi.firebasestorage.app",
+            messagingSenderId: "27439633492",
+            appId: "1:27439633492:web:1cd43fd32322f6bc62c9c1",
+            databaseURL: "https://nya-ppi-default-rtdb.firebaseio.com/"
+        };
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -241,6 +239,14 @@
         let currentDateObj = new Date();
         const todayStr = `${currentDateObj.getFullYear()}-${String(currentDateObj.getMonth() + 1).padStart(2, '0')}-${String(currentDateObj.getDate()).padStart(2, '0')}`;
         let selectedDateStr = todayStr;
+
+        window.addEventListener('load', () => {
+            const todayFormatted = new Date().toISOString().split('T')[0];
+            const startInput = document.getElementById('sch-start');
+            const endInput = document.getElementById('sch-end');
+            if(startInput) startInput.value = todayFormatted;
+            if(endInput) endInput.value = todayFormatted;
+        });
 
         function renderCalendar() {
             const year = currentDateObj.getFullYear();
@@ -463,8 +469,8 @@
                     Object.entries(data.todos).forEach(([key, todo]) => {
                         const li = document.createElement('li');
                         li.style.display = 'flex';
-                        li.style.alignItems: 'center';
-                        li.style.justifyContent: 'space-between';
+                        li.style.alignItems = 'center';
+                        li.style.justifyContent = 'space-between';
                         li.style.marginBottom = '3px';
                         li.innerHTML = `
                             <div style="display:flex; align-items:center; gap:5px;">
@@ -546,13 +552,13 @@
             renderCalendar();
             setInterval(updateClock, 1000);
             updateClock();
-            document.getElementById('other-name').innerText = otherType === 'other' ? '[친구]' : '[비비]';
+            document.getElementById('other-name').innerText = otherType === 'other' ? '[언재]' : '[삐용]';
             
-            const todayFormatted = new Date().toISOString().split('T')[0];
-            const startInput = document.getElementById('sch-start');
-            const endInput = document.getElementById('sch-end');
-            if(startInput) startInput.value = todayFormatted;
-            if(endInput) endInput.value = todayFormatted;
+            setTimeout(() => {
+                const loader = document.getElementById('boot-loader');
+                loader.style.opacity = "0";
+                setTimeout(() => loader.remove(), 400);
+            }, 600);
         });
     </script>
 </body>
