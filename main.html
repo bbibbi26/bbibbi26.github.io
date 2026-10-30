@@ -8,15 +8,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 로딩 애니메이션 -->
     <div id="boot-loader">
         <div id="loader-text">> OPENING_COZY_DIARY...</div>
     </div>
 
-    <!-- 전체 다이어리 바인더 프레임 -->
     <div class="terminal-frame">
         <div class="content-wrapper">
-            <!-- 왼쪽 사이드바 (프로필 + 4개 메뉴 + 음악) -->
             <aside class="sidebar">
                 <div class="profile-section">
                     <div id="session-icon">👤</div>
@@ -26,7 +23,6 @@
                     </div>
                 </div>
 
-                <!-- 4가지 핵심 메뉴 -->
                 <nav class="main-menu">
                     <div class="menu-item active" onclick="handleMenu('DASHBOARD', event)">> Dashboard (캘린더)</div>
                     <div class="menu-item" onclick="handleMenu('JOURNAL', event)">> Journal (일기장)</div>
@@ -34,7 +30,6 @@
                     <div class="menu-item" onclick="handleMenu('MEMO', event)">&gt; Notebook (메모장)</div>
                 </nav>
 
-                <!-- 음악 플레이어 -->
                 <div class="music-section">
                     <div class="music-info">> BGM_PLAYER</div>
                     <div class="music-title">My Added Tracks</div>
@@ -46,14 +41,12 @@
                 </div>
             </aside>
 
-            <!-- 중앙 메인 영역 (다이어리 본문) -->
             <main class="main-content">
                 <div id="current-date-info">
                     <div id="current-date">DATE</div>
                     <div id="current-time">00:00:00</div>
                 </div>
                 
-                <!-- 1. 대시보드 (캘린더 + 일정 추가 + 이번 주 할 일 + 포스트잇 메모) -->
                 <section class="system-board active" id="DASHBOARD-panel">
                     <div class="board-header">
                         <span>OUR SPACE // CALENDAR PLANNER</span>
@@ -64,41 +57,35 @@
                         </div>
                     </div>
 
-                    <!-- 🌟 일정 추가 바 -->
                     <div class="schedule-input-bar">
                         <span class="schedule-label">일정 추가:</span>
-                        <input type="text" id="sch-text" placeholder="일정 내용 (예: 프로젝트 마감)">
+                        <input type="text" id="sch-text" placeholder="일정 내용...">
                         <input type="date" id="sch-start">
                         <span>~</span>
                         <input type="date" id="sch-end">
                         <select id="sch-color">
-                            <option value="#ff8fab">핑크톤</option>
-                            <option value="#ffa500">오렌지톤</option>
-                            <option value="#ffd700">노랑톤</option>
-                            <option value="#52b788">초록톤</option>
-                            <option value="#5bc0eb">블루톤</option>
-                            <option value="#9d7cff">보라톤</option>
+                            <option value="#ff8fab">핑크</option>
+                            <option value="#ffa500">오렌지</option>
+                            <option value="#ffd700">노랑</option>
+                            <option value="#52b788">초록</option>
+                            <option value="#5bc0eb">블루</option>
+                            <option value="#9d7cff">보라</option>
                         </select>
                         <button onclick="addSchedule()">등록</button>
                     </div>
 
                     <div class="diary-container">
-                        <!-- 달력 그리드 영역 -->
                         <div class="calendar-grid-area">
                             <div class="weekdays">
                                 <span style="color:#ff8fab;">Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span style="color:#5bc0eb;">Sat</span>
                             </div>
-                            <div class="days-grid" id="days-grid">
-                                <!-- 자바스크립트로 캘린더 날짜가 격자에 맞춰 생성됨 -->
-                            </div>
+                            <div class="days-grid" id="days-grid"></div>
                         </div>
 
-                        <!-- 우측 상세 디테일 & 위젯 영역 -->
                         <div class="diary-detail-panel">
-                            <!-- 선택한 날짜 기록 -->
                             <div>
                                 <h4 id="selected-date-title">날짜를 선택하세요</h4>
-                                <div class="detail-group" style="margin-top:8px;">
+                                <div class="detail-group" style="margin-top:6px;">
                                     <label>오늘의 컬러 하트 기록</label>
                                     <div class="mood-selector">
                                         <span onclick="setMood('❤️')">❤️</span>
@@ -122,37 +109,32 @@
                                 </div>
                             </div>
 
-                            <!-- 📌 이번 주 할 일 위젯 -->
                             <div class="widget-box">
-                                <label style="font-weight:bold; color:var(--main-purple); font-size:0.7rem;">📌 이번 주 할 일</label>
-                                <ul id="weekly-todo-list" class="todo-list" style="margin-top:4px;"></ul>
+                                <label style="font-weight:bold; color:var(--main-purple); font-size:0.65rem;">📌 이번 주 할 일</label>
+                                <ul id="weekly-todo-list" class="todo-list" style="margin-top:2px;"></ul>
                             </div>
 
-                            <!-- 💛 포스트잇 메모 위젯 -->
                             <div class="widget-box">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                    <label style="font-weight:bold; color:var(--main-purple); font-size:0.7rem;">💛 포스트잇 메모</label>
-                                    <button onclick="addPostIt()" class="cal-btn" style="font-size:0.55rem;">+ 포스트잇 추가</button>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                                    <label style="font-weight:bold; color:var(--main-purple); font-size:0.65rem;">💛 포스트잇 메모</label>
+                                    <button onclick="addPostIt()" class="cal-btn" style="font-size:0.55rem;">+ 추가</button>
                                 </div>
-                                <div id="postit-container" style="display:flex; flex-direction:column; gap:6px; max-height:120px; overflow-y:auto;"></div>
+                                <div id="postit-container" style="display:flex; flex-direction:column; gap:5px; max-height:100px; overflow-y:auto;"></div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- 2. 일기장 -->
                 <section class="system-board" id="JOURNAL-panel">
                     <div class="board-header">> JOURNAL_ARCHIVE</div>
                     <p style="font-size: 0.75rem; opacity: 0.7;">개인 일기장 공간입니다.</p>
                 </section>
 
-                <!-- 3. 포스트잇 -->
                 <section class="system-board" id="ST_NOTEBOOK-panel">
                     <div class="board-header">> SHARED_POST_IT</div>
                     <p style="font-size: 0.75rem; opacity: 0.7;">친구와 함께 쓰는 공유 포스트잇 공간입니다.</p>
                 </section>
 
-                <!-- 4. 메모장 -->
                 <section class="system-board" id="MEMO-panel">
                     <div class="board-header">> NOTEBOOK_MEMO_PAD</div>
                     <p style="font-size: 0.75rem; opacity: 0.7;">자유롭게 적어두는 메모장 공간입니다.</p>
@@ -161,7 +143,6 @@
                 <div class="disconnect-btn" onclick="location.href='index.html'">← RETURN TO GATE</div>
             </main>
 
-            <!-- 오른쪽 채팅 영역 -->
             <aside class="chat-sidebar">
                 <div class="chat-header">
                     <div class="chat-title">> LIVE CHAT</div>
@@ -174,14 +155,13 @@
                     <ul class="chat-list" id="chat-list"></ul>
                 </div>
                 <div class="input-area">
-                    <input type="text" id="comment-input" placeholder="메시지 또는 링크 입력..." maxlength="200">
+                    <input type="text" id="comment-input" placeholder="오늘도 화이팅..." maxlength="200">
                     <button class="save-btn" onclick="saveComment()">SEND</button>
                 </div>
             </aside>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     
@@ -260,7 +240,6 @@
         const todayStr = `${currentDateObj.getFullYear()}-${String(currentDateObj.getMonth() + 1).padStart(2, '0')}-${String(currentDateObj.getDate()).padStart(2, '0')}`;
         let selectedDateStr = todayStr;
 
-        // 오늘 날짜 기본 입력 설정
         window.addEventListener('load', () => {
             const todayFormatted = new Date().toISOString().split('T')[0];
             const startInput = document.getElementById('sch-start');
@@ -295,7 +274,7 @@
                     cell.style.background = '#f4f2f8';
                 }
 
-                cell.innerHTML = `<span class="day-num">${d}</span><div class="day-badge" id="badge-${dateStr}"></div><div class="schedule-badge-area" id="sch-badge-${dateStr}" style="display:flex; flex-direction:column; gap:2px; margin-top:2px;"></div>`;
+                cell.innerHTML = `<span class="day-num">${d}</span><div class="day-badge" id="badge-${dateStr}"></div><div class="schedule-badge-area" id="sch-badge-${dateStr}" style="display:flex; flex-direction:column; gap:1px; margin-top:1px;"></div>`;
                 
                 cell.onclick = () => {
                     document.querySelectorAll('.day-cell').forEach(c => { c.style.borderColor = 'var(--border-color)'; c.style.background = '#fff'; });
@@ -351,7 +330,6 @@
             }
         }
 
-        // 일정 추가 기능
         function addSchedule() {
             const text = document.getElementById('sch-text').value.trim();
             const start = document.getElementById('sch-start').value;
@@ -369,13 +347,12 @@
             database.ref(`schedules/${key}`).remove();
         }
 
-        // 포스트잇 추가
         function addPostIt() {
             database.ref('postits').push({ text: '메모를 적어보세요...', color: '#ffd700' });
         }
 
-        function updatePostIt(key, text) {
-            database.ref(`postits/${key}`).update({ text });
+        function updatePostIt(key, el) {
+            database.ref(`postits/${key}`).update({ text: el.value });
         }
 
         function updatePostItColor(key, color) {
@@ -389,7 +366,6 @@
         function loadAllData(year, month) {
             const lastDate = new Date(year, month + 1, 0).getDate();
             
-            // 배지 & 이번 주 할 일 수집
             database.ref('diary_data').on('value', snap => {
                 const allDiary = snap.val() || {};
                 let weeklyTodosHTML = '';
@@ -405,12 +381,11 @@
                         badge.innerHTML = badgeHTML;
                     }
 
-                    // 이번 주 할 일 모아보기 반영
                     if(data.todos) {
                         Object.entries(data.todos).forEach(([tKey, todo]) => {
                             if(!todo.done) {
                                 weeklyTodosHTML += `
-                                    <li style="display:flex; align-items:center; justify-content:space-between; font-size:0.6rem; margin-bottom:3px;">
+                                    <li style="display:flex; align-items:center; justify-content:space-between; font-size:0.55rem; margin-bottom:2px;">
                                         <span style="cursor:pointer;" onclick="toggleTodo('${dateStr}', '${tKey}', false)">[${dateStr.slice(5)}] ${todo.text}</span>
                                         <button onclick="deleteTodo('${dateStr}', '${tKey}')" style="background:none; border:none; color:#ff8fab; cursor:pointer;">×</button>
                                     </li>`;
@@ -419,10 +394,9 @@
                     }
                 }
                 const weeklyList = document.getElementById('weekly-todo-list');
-                if(weeklyList) weeklyList.innerHTML = weeklyTodosHTML || '<span style="font-size:0.6rem; opacity:0.5;">작성된 할 일이 없어요!</span>';
+                if(weeklyList) weeklyList.innerHTML = weeklyTodosHTML || '<span style="font-size:0.55rem; opacity:0.5;">작성된 할 일이 없어요!</span>';
             });
 
-            // 일정 표시
             database.ref('schedules').on('value', snap => {
                 const schedules = snap.val() || {};
                 for (let d = 1; d <= lastDate; d++) {
@@ -444,11 +418,11 @@
                             const div = document.createElement('div');
                             div.style.background = sch.color;
                             div.style.color = '#fff';
-                            div.style.fontSize = '0.55rem';
-                            div.style.padding = '1px 4px';
-                            div.style.borderRadius = '4px';
+                            div.style.fontSize = '0.5rem';
+                            div.style.padding = '1px 3px';
+                            div.style.borderRadius = '3px';
                             div.style.display = 'flex';
-                            div.style.justify0 = 'space-between';
+                            div.style.justifyContent = 'space-between';
                             div.innerHTML = `<span>${sch.text}</span> <span onclick="deleteSchedule('${key}')" style="cursor:pointer; margin-left:4px;">×</span>`;
                             schArea.appendChild(div);
                         }
@@ -457,7 +431,6 @@
                 });
             });
 
-            // 포스트잇 로딩
             database.ref('postits').on('value', snap => {
                 const postits = snap.val() || {};
                 const container = document.getElementById('postit-container');
@@ -466,21 +439,21 @@
                 Object.entries(postits).forEach(([key, p]) => {
                     const div = document.createElement('div');
                     div.style.background = p.color || '#ffd700';
-                    div.style.padding = '8px';
-                    div.style.borderRadius = '8px';
+                    div.style.padding = '6px';
+                    div.style.borderRadius = '6px';
                     div.style.position = 'relative';
                     div.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
                             <select onchange="updatePostItColor('${key}', this.value)" style="font-size:0.5rem; background:transparent; border:none; cursor:pointer;">
-                                <option value="#ffd700">노랑</option>
-                                <option value="#52b788">초록</option>
-                                <option value="#ffa500">오렌지</option>
-                                <option value="#5bc0eb">파랑</option>
-                                <option value="#ff8fab">핑크</option>
+                                <option value="#ffd700" ${p.color==='#ffd700'?'selected':''}>노랑</option>
+                                <option value="#52b788" ${p.color==='#52b788'?'selected':''}>초록</option>
+                                <option value="#ffa500" ${p.color==='#ffa500'?'selected':''}>오렌지</option>
+                                <option value="#5bc0eb" ${p.color==='#5bc0eb'?'selected':''}>파랑</option>
+                                <option value="#ff8fab" ${p.color==='#ff8fab'?'selected':''}>핑크</option>
                             </select>
                             <span onclick="deletePostIt('${key}')" style="cursor:pointer; font-size:0.6rem; font-weight:bold;">×</span>
                         </div>
-                        <textarea oninput="updatePostIt('${key}', this.value)" style="width:100%; border:none; background:transparent; font-size:0.65rem; resize:none; font-family:var(--font-light); outline:none;">${p.text}</textarea>
+                        <textarea oninput="updatePostIt('${key}', this)" style="width:100%; border:none; background:transparent; font-size:0.6rem; resize:none; font-family:var(--font-light); outline:none; height:35px;">${p.text || ''}</textarea>
                     `;
                     container.appendChild(div);
                 });
@@ -498,15 +471,15 @@
                         li.style.display = 'flex';
                         li.style.alignItems = 'center';
                         li.style.justifyContent = 'space-between';
-                        li.style.marginBottom = '4px';
+                        li.style.marginBottom = '3px';
                         li.innerHTML = `
-                            <div style="display:flex; align-items:center; gap:6px;">
+                            <div style="display:flex; align-items:center; gap:5px;">
                                 <input type="checkbox" ${todo.done ? 'checked' : ''} onclick="toggleTodo('${dateStr}', '${key}', ${todo.done})" style="cursor:pointer;">
                                 <span style="${todo.done ? 'text-decoration:line-through; opacity:0.4;' : ''}">${todo.text}</span>
                             </div>
-                            <div style="display:flex; gap:4px;">
-                                <button onclick="editTodo('${dateStr}', '${key}', '${todo.text}')" style="background:none; border:none; color:var(--main-purple); cursor:pointer; font-size:0.55rem;">수정</button>
-                                <button onclick="deleteTodo('${dateStr}', '${key}')" style="background:none; border:none; color:#ff8fab; cursor:pointer; font-size:0.55rem;">삭제</button>
+                            <div style="display:flex; gap:3px;">
+                                <button onclick="editTodo('${dateStr}', '${key}', '${todo.text}')" style="background:none; border:none; color:var(--main-purple); cursor:pointer; font-size:0.5rem;">수정</button>
+                                <button onclick="deleteTodo('${dateStr}', '${key}')" style="background:none; border:none; color:#ff8fab; cursor:pointer; font-size:0.5rem;">삭제</button>
                             </div>
                         `;
                         todoList.appendChild(li);
@@ -515,7 +488,6 @@
             });
         }
 
-        // --- 채팅 로직 ---
         function saveComment() {
             const input = document.getElementById('comment-input');
             const text = input.value.trim();
@@ -580,7 +552,7 @@
             renderCalendar();
             setInterval(updateClock, 1000);
             updateClock();
-            document.getElementById('other-name').innerText = otherType === 'other' ? '[친구]' : '[비비]';
+            document.getElementById('other-name').innerText = otherType === 'other' ? '[언재]' : '[삐용]';
             
             setTimeout(() => {
                 const loader = document.getElementById('boot-loader');
