@@ -1,11 +1,11 @@
 :root {
-    --bg-color: #f7f6fb;         
-    --side-bg: #ffffff;          
-    --panel-bg: #ffffff;         
-    --main-pink: #ff8fab;        
-    --main-purple: #9d7cff;      
+    --bg-color: #f7f6fb;
+    --side-bg: #ffffff;
+    --panel-bg: #ffffff;
+    --main-pink: #ff8fab;
+    --main-purple: #9d7cff;
     --accent-blue: #5bc0eb;
-    --text-color: #524860;       
+    --text-color: #524860;
     --border-color: rgba(157, 124, 255, 0.18);
     --font-main: 'GmarketSansBold', sans-serif;
     --font-light: 'GmarketSansLight', sans-serif;
@@ -82,51 +82,54 @@ body, html {
 .board-header { font-size: 0.75rem; color: var(--main-purple); margin-bottom: 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
 
 /* 안정적인 달력 레이아웃 */
-.diary-container { 
-    display: flex; 
-    gap: 20px; 
-    height: 480px; 
+.diary-container {
+    display: flex;
+    gap: 20px;
+    height: 480px;
 }
 
-.calendar-grid-area { 
-    flex: 1.6; 
-    display: flex; 
-    flex-direction: column; 
-    border: 1px solid var(--border-color); 
-    border-radius: 12px; 
-    padding: 14px; 
-    background: #faf9fc; 
+.calendar-grid-area {
+    flex: 1.6;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px;
+    background: #faf9fc;
 }
 
-.weekdays { 
-    display: grid; 
-    grid-template-columns: repeat(7, 1fr); 
-    text-align: center; 
-    font-size: 0.7rem; 
-    color: #8c829e; 
-    margin-bottom: 10px; 
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.7rem;
+    color: #8c829e;
+    margin-bottom: 10px;
     font-weight: bold;
 }
 
-.days-grid { 
-    display: grid !important; 
-    grid-template-columns: repeat(7, 1fr) !important; 
-    grid-template-rows: repeat(5, 1fr) !important; 
-    gap: 6px; 
-    flex-grow: 1; 
+/* 한 달이 최대 6줄까지 필요하므로 6행으로 고정 */
+.days-grid {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    grid-template-rows: repeat(6, 1fr) !important;
+    gap: 6px;
+    flex-grow: 1;
+    min-height: 0;
 }
 
-.day-cell { 
-    background: #fff; 
-    border-radius: 8px; 
-    border: 1px solid var(--border-color); 
-    padding: 6px; 
-    cursor: pointer; 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: space-between; 
-    transition: 0.2s; 
+.day-cell {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: 0.2s;
     min-height: 0;
+    overflow: hidden;
 }
 
 .day-cell:hover { border-color: var(--main-purple); background: #f4f2f8; }
@@ -135,16 +138,16 @@ body, html {
 .day-badge { display: flex; gap: 3px; font-size: 0.6rem; }
 
 /* 우측 다이어리 상세 패널 */
-.diary-detail-panel { 
-    flex: 1; 
-    background: #faf9fc; 
-    border: 1px solid var(--border-color); 
-    border-radius: 12px; 
-    padding: 15px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 12px; 
-    overflow-y: auto; 
+.diary-detail-panel {
+    flex: 1;
+    background: #faf9fc;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
 }
 .diary-detail-panel h4 { margin: 0; font-size: 0.75rem; color: var(--main-purple); }
 .detail-group { display: flex; flex-direction: column; gap: 6px; font-size: 0.65rem; }
@@ -190,6 +193,21 @@ body, html {
 }
 .chat-item.me .chat-text { background: var(--main-purple); color: #fff; border-bottom-right-radius: 2px; }
 .chat-item.other .chat-text { border-bottom-left-radius: 2px; }
+
+/* 채팅 속 링크 카드 */
+.linked-content {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255, 255, 255, 0.85); color: #433852;
+    border: 1px solid var(--border-color); border-radius: 8px;
+    padding: 5px 8px; margin: 2px 0; text-align: left;
+}
+.linked-icon { font-size: 0.7rem; }
+.linked-text { flex-grow: 1; font-size: 0.6rem; }
+.linked-btn {
+    background: var(--main-purple); color: #fff; border: none; border-radius: 6px;
+    padding: 3px 8px; font-size: 0.55rem; cursor: pointer; font-family: var(--font-main);
+}
+.linked-btn:hover { background: var(--main-pink); }
 
 /* 채팅 시간 글자 크기 */
 .chat-info, .chat-info span, aside.chat-sidebar .chat-info, aside.chat-sidebar .chat-info span {
