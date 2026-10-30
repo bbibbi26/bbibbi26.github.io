@@ -53,7 +53,7 @@
                     <div id="current-time">00:00:00</div>
                 </div>
                 
-                <!-- 1. 대시보드 (캘린더 + 투두 + 기분 + 링크 메모) -->
+                <!-- 1. 대시보드 (캘린더 + 일정 추가 + 이번 주 할 일 + 포스트잇 메모) -->
                 <section class="system-board active" id="DASHBOARD-panel">
                     <div class="board-header">
                         <span>OUR SPACE // CALENDAR PLANNER</span>
@@ -62,6 +62,24 @@
                             <span id="cal-month-title">2026.10</span>
                             <button class="cal-btn" onclick="changeMonth(1)">▶</button>
                         </div>
+                    </div>
+
+                    <!-- 🌟 일정 추가 바 -->
+                    <div class="schedule-input-bar">
+                        <span class="schedule-label">일정 추가:</span>
+                        <input type="text" id="sch-text" placeholder="일정 내용 (예: 프로젝트 마감)">
+                        <input type="date" id="sch-start">
+                        <span>~</span>
+                        <input type="date" id="sch-end">
+                        <select id="sch-color">
+                            <option value="#ff8fab">핑크톤</option>
+                            <option value="#ffa500">오렌지톤</option>
+                            <option value="#ffd700">노랑톤</option>
+                            <option value="#52b788">초록톤</option>
+                            <option value="#5bc0eb">블루톤</option>
+                            <option value="#9d7cff">보라톤</option>
+                        </select>
+                        <button onclick="addSchedule()">등록</button>
                     </div>
 
                     <div class="diary-container">
@@ -75,41 +93,48 @@
                             </div>
                         </div>
 
-                        <!-- 선택한 날짜 상세 디테일 (투두, 기분, 링크 메모) -->
+                        <!-- 우측 상세 디테일 & 위젯 영역 -->
                         <div class="diary-detail-panel">
-                            <h4 id="selected-date-title">날짜를 선택하세요</h4>
-                            
-                          <div class="detail-group">
-                                <label>오늘의 컬러 하트 기록</label>
-                                <div class="mood-selector">
-                                    <span onclick="setMood('❤️')">❤️</span>
-                                    <span onclick="setMood('🧡')">🧡</span>
-                                    <span onclick="setMood('💛')">💛</span>
-                                    <span onclick="setMood('💚')">💚</span>
-                                    <span onclick="setMood('💙')">💙</span>
-                                    <span onclick="setMood('💜')">💜</span>
-                                    <span onclick="setMood('🩷')">🩷</span>
-                                    <span onclick="setMood('🤍')">🤍</span>
+                            <!-- 선택한 날짜 기록 -->
+                            <div>
+                                <h4 id="selected-date-title">날짜를 선택하세요</h4>
+                                <div class="detail-group" style="margin-top:8px;">
+                                    <label>오늘의 컬러 하트 기록</label>
+                                    <div class="mood-selector">
+                                        <span onclick="setMood('❤️')">❤️</span>
+                                        <span onclick="setMood('🧡')">🧡</span>
+                                        <span onclick="setMood('💛')">💛</span>
+                                        <span onclick="setMood('💚')">💚</span>
+                                        <span onclick="setMood('💙')">💙</span>
+                                        <span onclick="setMood('💜')">💜</span>
+                                        <span onclick="setMood('🩷')">🩷</span>
+                                        <span onclick="setMood('🤍')">🤍</span>
+                                    </div>
+                                </div>
+
+                                <div class="detail-group">
+                                    <label>할 일 / 투두 체크</label>
+                                    <div class="todo-input-box">
+                                        <input type="text" id="todo-input" placeholder="할 일 입력...">
+                                        <button onclick="addTodo()">추가</button>
+                                    </div>
+                                    <ul id="todo-list" class="todo-list"></ul>
                                 </div>
                             </div>
 
-                            <div class="detail-group">
-                                <label>할 일 / 투두 체크</label>
-                                <div class="todo-input-box">
-                                    <input type="text" id="todo-input" placeholder="할 일 입력...">
-                                    <button onclick="addTodo()">추가</button>
-                                </div>
-                                <ul id="todo-list" class="todo-list"></ul>
+                            <!-- 📌 이번 주 할 일 위젯 -->
+                            <div class="widget-box">
+                                <label style="font-weight:bold; color:var(--main-purple); font-size:0.7rem;">📌 이번 주 할 일</label>
+                                <ul id="weekly-todo-list" class="todo-list" style="margin-top:4px;"></ul>
                             </div>
 
-                            <div class="detail-group">
-                                <label>순간 기록 링크 (트윗/사진 등)</label>
-                                <div class="link-input-box">
-                                    <input type="text" id="link-url" placeholder="https:// 링크 주소">
-                                    <input type="text" id="link-text" placeholder="설명 텍스트">
-                                    <button onclick="addLinkMemo()">저장</button>
+                            <!-- 💛 포스트잇 메모 위젯 -->
+                            <div class="widget-box">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                    <label style="font-weight:bold; color:var(--main-purple); font-size:0.7rem;">💛 포스트잇 메모</label>
+                                    <button onclick="addPostIt()" class="cal-btn" style="font-size:0.55rem;">+ 포스트잇 추가</button>
                                 </div>
-                                <div id="link-memo-preview"></div>
+                                <div id="postit-container" style="display:flex; flex-direction:column; gap:6px; max-height:120px; overflow-y:auto;"></div>
                             </div>
                         </div>
                     </div>
@@ -136,7 +161,7 @@
                 <div class="disconnect-btn" onclick="location.href='index.html'">← RETURN TO GATE</div>
             </main>
 
-            <!-- 오른쪽 채팅 영역 (정상 복구) -->
+            <!-- 오른쪽 채팅 영역 -->
             <aside class="chat-sidebar">
                 <div class="chat-header">
                     <div class="chat-title">> LIVE CHAT</div>
@@ -161,7 +186,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     
     <script>
-        // --- [수정 필수] Firebase 설정 ---
         const firebaseConfig = {
             apiKey: "AIzaSyDi9JQLtpp4KaF5mGkf0aApv_fcQP2PpD0",
             authDomain: "nya-ppi.firebaseapp.com",
@@ -211,7 +235,6 @@
             otherStatusDisplay.className = status === 'ONLINE' ? 'status-online' : 'status-offline';
         });
 
-        // 메뉴 전환
         function handleMenu(panelId, event) {
             document.querySelectorAll('.system-board').forEach(p => p.classList.remove('active'));
             const targetPanel = document.getElementById(panelId + '-panel');
@@ -223,7 +246,6 @@
             }
         }
 
-        // 프로필 반영
         function renderProfile() {
             document.getElementById('session-name').innerText = session.name;
             const iconBox = document.getElementById('session-icon');
@@ -234,9 +256,18 @@
             }
         }
 
-        // --- 다이어리 캘린더 로직 ---
         let currentDateObj = new Date();
-        let selectedDateStr = "";
+        const todayStr = `${currentDateObj.getFullYear()}-${String(currentDateObj.getMonth() + 1).padStart(2, '0')}-${String(currentDateObj.getDate()).padStart(2, '0')}`;
+        let selectedDateStr = todayStr;
+
+        // 오늘 날짜 기본 입력 설정
+        window.addEventListener('load', () => {
+            const todayFormatted = new Date().toISOString().split('T')[0];
+            const startInput = document.getElementById('sch-start');
+            const endInput = document.getElementById('sch-end');
+            if(startInput) startInput.value = todayFormatted;
+            if(endInput) endInput.value = todayFormatted;
+        });
 
         function renderCalendar() {
             const year = currentDateObj.getFullYear();
@@ -258,11 +289,25 @@
                 const cell = document.createElement('div');
                 cell.className = 'day-cell';
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                cell.innerHTML = `<span class="day-num">${d}</span><div class="day-badge" id="badge-${dateStr}"></div>`;
                 
-                cell.onclick = () => selectDate(dateStr, d);
+                if (dateStr === selectedDateStr) {
+                    cell.style.borderColor = 'var(--main-purple)';
+                    cell.style.background = '#f4f2f8';
+                }
+
+                cell.innerHTML = `<span class="day-num">${d}</span><div class="day-badge" id="badge-${dateStr}"></div><div class="schedule-badge-area" id="sch-badge-${dateStr}" style="display:flex; flex-direction:column; gap:2px; margin-top:2px;"></div>`;
+                
+                cell.onclick = () => {
+                    document.querySelectorAll('.day-cell').forEach(c => { c.style.borderColor = 'var(--border-color)'; c.style.background = '#fff'; });
+                    cell.style.borderColor = 'var(--main-purple)';
+                    cell.style.background = '#f4f2f8';
+                    selectDate(dateStr);
+                };
                 grid.appendChild(cell);
             }
+
+            loadAllData(year, month);
+            selectDate(selectedDateStr);
         }
 
         function changeMonth(diff) {
@@ -270,20 +315,20 @@
             renderCalendar();
         }
 
-        function selectDate(dateStr, dayNum) {
+        function selectDate(dateStr) {
             selectedDateStr = dateStr;
             document.getElementById('selected-date-title').innerText = `📅 ${dateStr} 기록장`;
             loadDayData(dateStr);
         }
 
         function setMood(moodEmoji) {
-            if(!selectedDateStr) { alert("먼저 날짜를 선택해주세요!"); return; }
+            if(!selectedDateStr) return;
             database.ref(`diary_data/${selectedDateStr}/mood`).set(moodEmoji);
             loadDayData(selectedDateStr);
         }
 
         function addTodo() {
-            if(!selectedDateStr) { alert("먼저 날짜를 선택해주세요!"); return; }
+            if(!selectedDateStr) return;
             const input = document.getElementById('todo-input');
             const text = input.value.trim();
             if(!text) return;
@@ -291,52 +336,186 @@
             input.value = '';
         }
 
-        function addLinkMemo() {
-            if(!selectedDateStr) { alert("먼저 날짜를 선택해주세요!"); return; }
-            const url = document.getElementById('link-url').value.trim();
-            const text = document.getElementById('link-text').value.trim();
-            if(!url) return;
-            database.ref(`diary_data/${selectedDateStr}/links`).push({ url, text: text || url });
-            document.getElementById('link-url').value = '';
-            document.getElementById('link-text').value = '';
+        function toggleTodo(dateKey, todoKey, currentDone) {
+            database.ref(`diary_data/${dateKey}/todos/${todoKey}`).update({ done: !currentDone });
+        }
+
+        function deleteTodo(dateKey, todoKey) {
+            database.ref(`diary_data/${dateKey}/todos/${todoKey}`).remove();
+        }
+
+        function editTodo(dateKey, todoKey, currentText) {
+            const newText = prompt("수정할 내용을 입력하세요:", currentText);
+            if(newText !== null && newText.trim() !== "") {
+                database.ref(`diary_data/${dateKey}/todos/${todoKey}`).update({ text: newText.trim() });
+            }
+        }
+
+        // 일정 추가 기능
+        function addSchedule() {
+            const text = document.getElementById('sch-text').value.trim();
+            const start = document.getElementById('sch-start').value;
+            const end = document.getElementById('sch-end').value;
+            const color = document.getElementById('sch-color').value;
+            if(!text || !start || !end) {
+                alert("일정 내용과 기간을 모두 입력해주세요!");
+                return;
+            }
+            database.ref('schedules').push({ text, start, end, color });
+            document.getElementById('sch-text').value = '';
+        }
+
+        function deleteSchedule(key) {
+            database.ref(`schedules/${key}`).remove();
+        }
+
+        // 포스트잇 추가
+        function addPostIt() {
+            database.ref('postits').push({ text: '메모를 적어보세요...', color: '#ffd700' });
+        }
+
+        function updatePostIt(key, text) {
+            database.ref(`postits/${key}`).update({ text });
+        }
+
+        function updatePostItColor(key, color) {
+            database.ref(`postits/${key}`).update({ color });
+        }
+
+        function deletePostIt(key) {
+            database.ref(`postits/${key}`).remove();
+        }
+
+        function loadAllData(year, month) {
+            const lastDate = new Date(year, month + 1, 0).getDate();
+            
+            // 배지 & 이번 주 할 일 수집
+            database.ref('diary_data').on('value', snap => {
+                const allDiary = snap.val() || {};
+                let weeklyTodosHTML = '';
+
+                for (let d = 1; d <= lastDate; d++) {
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    const data = allDiary[dateStr] || {};
+                    
+                    const badge = document.getElementById(`badge-${dateStr}`);
+                    if(badge) {
+                        let badgeHTML = '';
+                        if(data.mood) badgeHTML += `<span>${data.mood}</span>`;
+                        badge.innerHTML = badgeHTML;
+                    }
+
+                    // 이번 주 할 일 모아보기 반영
+                    if(data.todos) {
+                        Object.entries(data.todos).forEach(([tKey, todo]) => {
+                            if(!todo.done) {
+                                weeklyTodosHTML += `
+                                    <li style="display:flex; align-items:center; justify-content:space-between; font-size:0.6rem; margin-bottom:3px;">
+                                        <span style="cursor:pointer;" onclick="toggleTodo('${dateStr}', '${tKey}', false)">[${dateStr.slice(5)}] ${todo.text}</span>
+                                        <button onclick="deleteTodo('${dateStr}', '${tKey}')" style="background:none; border:none; color:#ff8fab; cursor:pointer;">×</button>
+                                    </li>`;
+                            }
+                        });
+                    }
+                }
+                const weeklyList = document.getElementById('weekly-todo-list');
+                if(weeklyList) weeklyList.innerHTML = weeklyTodosHTML || '<span style="font-size:0.6rem; opacity:0.5;">작성된 할 일이 없어요!</span>';
+            });
+
+            // 일정 표시
+            database.ref('schedules').on('value', snap => {
+                const schedules = snap.val() || {};
+                for (let d = 1; d <= lastDate; d++) {
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    const schArea = document.getElementById(`sch-badge-${dateStr}`);
+                    if(schArea) schArea.innerHTML = '';
+                }
+
+                Object.entries(schedules).forEach(([key, sch]) => {
+                    let curr = new Date(sch.start);
+                    const end = new Date(sch.end);
+                    while(curr <= end) {
+                        const y = curr.getFullYear();
+                        const m = String(curr.getMonth() + 1).padStart(2, '0');
+                        const day = String(curr.getDate()).padStart(2, '0');
+                        const dateStr = `${y}-${m}-${day}`;
+                        const schArea = document.getElementById(`sch-badge-${dateStr}`);
+                        if(schArea) {
+                            const div = document.createElement('div');
+                            div.style.background = sch.color;
+                            div.style.color = '#fff';
+                            div.style.fontSize = '0.55rem';
+                            div.style.padding = '1px 4px';
+                            div.style.borderRadius = '4px';
+                            div.style.display = 'flex';
+                            div.style.justify0 = 'space-between';
+                            div.innerHTML = `<span>${sch.text}</span> <span onclick="deleteSchedule('${key}')" style="cursor:pointer; margin-left:4px;">×</span>`;
+                            schArea.appendChild(div);
+                        }
+                        curr.setDate(curr.getDate() + 1);
+                    }
+                });
+            });
+
+            // 포스트잇 로딩
+            database.ref('postits').on('value', snap => {
+                const postits = snap.val() || {};
+                const container = document.getElementById('postit-container');
+                if(!container) return;
+                container.innerHTML = '';
+                Object.entries(postits).forEach(([key, p]) => {
+                    const div = document.createElement('div');
+                    div.style.background = p.color || '#ffd700';
+                    div.style.padding = '8px';
+                    div.style.borderRadius = '8px';
+                    div.style.position = 'relative';
+                    div.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <select onchange="updatePostItColor('${key}', this.value)" style="font-size:0.5rem; background:transparent; border:none; cursor:pointer;">
+                                <option value="#ffd700">노랑</option>
+                                <option value="#52b788">초록</option>
+                                <option value="#ffa500">오렌지</option>
+                                <option value="#5bc0eb">파랑</option>
+                                <option value="#ff8fab">핑크</option>
+                            </select>
+                            <span onclick="deletePostIt('${key}')" style="cursor:pointer; font-size:0.6rem; font-weight:bold;">×</span>
+                        </div>
+                        <textarea oninput="updatePostIt('${key}', this.value)" style="width:100%; border:none; background:transparent; font-size:0.65rem; resize:none; font-family:var(--font-light); outline:none;">${p.text}</textarea>
+                    `;
+                    container.appendChild(div);
+                });
+            });
         }
 
         function loadDayData(dateStr) {
             database.ref(`diary_data/${dateStr}`).on('value', snap => {
                 const data = snap.val() || {};
-                
-                const badge = document.getElementById(`badge-${dateStr}`);
-                if(badge) {
-                    let badgeHTML = '';
-                    if(data.mood) badgeHTML += `<span>${data.mood}</span>`;
-                    if(data.links) badgeHTML += `<span>🔗</span>`;
-                    badge.innerHTML = badgeHTML;
-                }
-
                 const todoList = document.getElementById('todo-list');
                 todoList.innerHTML = '';
                 if(data.todos) {
                     Object.entries(data.todos).forEach(([key, todo]) => {
                         const li = document.createElement('li');
-                        li.innerHTML = `<span style="${todo.done ? 'text-decoration:line-through; opacity:0.5;' : ''}">${todo.text}</span>`;
+                        li.style.display = 'flex';
+                        li.style.alignItems = 'center';
+                        li.style.justifyContent = 'space-between';
+                        li.style.marginBottom = '4px';
+                        li.innerHTML = `
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <input type="checkbox" ${todo.done ? 'checked' : ''} onclick="toggleTodo('${dateStr}', '${key}', ${todo.done})" style="cursor:pointer;">
+                                <span style="${todo.done ? 'text-decoration:line-through; opacity:0.4;' : ''}">${todo.text}</span>
+                            </div>
+                            <div style="display:flex; gap:4px;">
+                                <button onclick="editTodo('${dateStr}', '${key}', '${todo.text}')" style="background:none; border:none; color:var(--main-purple); cursor:pointer; font-size:0.55rem;">수정</button>
+                                <button onclick="deleteTodo('${dateStr}', '${key}')" style="background:none; border:none; color:#ff8fab; cursor:pointer; font-size:0.55rem;">삭제</button>
+                            </div>
+                        `;
                         todoList.appendChild(li);
-                    });
-                }
-
-                const linkPreview = document.getElementById('link-memo-preview');
-                linkPreview.innerHTML = '';
-                if(data.links) {
-                    Object.entries(data.links).forEach(([key, link]) => {
-                        const div = document.createElement('div');
-                        div.className = 'linked-content';
-                        div.innerHTML = `<span class="linked-icon">🔗</span><span class="linked-text">${link.text}</span><button class="linked-btn" onclick="window.open('${link.url}', '_blank')">VISIT</button>`;
-                        linkPreview.appendChild(div);
                     });
                 }
             });
         }
 
-        // --- 채팅 로직 (정상 작동) ---
+        // --- 채팅 로직 ---
         function saveComment() {
             const input = document.getElementById('comment-input');
             const text = input.value.trim();
@@ -410,7 +589,5 @@
             }, 600);
         });
     </script>
-</body>
-</html>
 </body>
 </html>
