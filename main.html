@@ -180,6 +180,19 @@
         const database = firebase.database();
         const chatRef = database.ref('nya_chat_history');
 
+        // ---------- 공용 헬퍼 ----------
+        const pad = (n) => String(n).padStart(2, '0');
+        // 로컬(한국) 시간 기준 YYYY-MM-DD
+        function fmtDate(d) {
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        }
+        // HTML 이스케이프 (사용자 입력을 innerHTML에 넣을 때만 사용)
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
         let session = null;
         try {
             session = JSON.parse(localStorage.getItem('nya_current_session'));
@@ -230,28 +243,30 @@
             document.getElementById('session-name').innerText = session.name;
             const iconBox = document.getElementById('session-icon');
             if (session.icon && (session.icon.startsWith('http') || session.icon.startsWith('data:'))) {
-                iconBox.innerHTML = `<img src="${session.icon}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                const img = document.createElement('img');
+                img.src = session.icon;
+                img.style.cssText = 'width:100%; height:100%; object-fit:cover; border-radius:50%;';
+                iconBox.innerHTML = '';
+                iconBox.appendChild(img);
             } else {
                 iconBox.innerText = session.icon || '👤';
             }
         }
 
         let currentDateObj = new Date();
-        const todayStr = `${currentDateObj.getFullYear()}-${String(currentDateObj.getMonth() + 1).padStart(2, '0')}-${String(currentDateObj.getDate()).padStart(2, '0')}`;
+        const todayStr = fmtDate(currentDateObj);   // 로컬 기준 오늘
         let selectedDateStr = todayStr;
 
-        window.addEventListener('load', () => {
-            const todayFormatted = new Date().toISOString().split('T')[0];
-            const startInput = document.getElementById('sch-start');
-            const endInput = document.getElementById('sch-end');
-            if(startInput) startInput.value = todayFormatted;
-            if(endInput) endInput.value = todayFormatted;
-        });
+        // Firebase 리스너 참조 (다시 붙이기 전에 .off()로 정리)
+        let diaryRef = null;
+        let scheduleRef = null;
+        let postitRef = null;
+        let dayRef = null;
 
         function renderCalendar() {
             const year = currentDateObj.getFullYear();
             const month = currentDateObj.getMonth();
-            document.getElementById('cal-month-title').innerText = `${year}.${String(month + 1).padStart(2, '0')}`;
+            document.getElementById('cal-month-title').innerText = `${year}.${pad(month + 1)}`;
 
             const firstDay = new Date(year, month, 1).getDay();
             const lastDate = new Date(year, month + 1, 0).getDate();
@@ -267,7 +282,7 @@
             for (let d = 1; d <= lastDate; d++) {
                 const cell = document.createElement('div');
                 cell.className = 'day-cell';
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dateStr = `${year}-${pad(month + 1)}-${pad(d)}`;
                 
                 if (dateStr === selectedDateStr) {
                     cell.style.borderColor = 'var(--main-purple)';
@@ -277,7 +292,8 @@
                 cell.innerHTML = `<span class="day-num">${d}</span><div class="day-badge" id="badge-${dateStr}"></div><div class="schedule-badge-area" id="sch-badge-${dateStr}" style="display:flex; flex-direction:column; gap:1px; margin-top:1px;"></div>`;
                 
                 cell.onclick = () => {
-                    document.querySelectorAll('.day-cell').forEach(c => { c.style.borderColor = 'var(--border-color)'; c.style.background = '#fff'; });
+                    // 빈 칸(.empty)은 건드리지 않도록 제외
+                    document.querySelectorAll('.day-cell:not(.empty)').forEach(c => { c.style.borderColor = 'var(--border-color)'; c.style.background = '#fff'; });
                     cell.style.borderColor = 'var(--main-purple)';
                     cell.style.background = '#f4f2f8';
                     selectDate(dateStr);
@@ -290,6 +306,8 @@
         }
 
         function changeMonth(diff) {
+            // 30일 등에서 달을 넘길 때 날짜가 밀리지 않도록 1일로 먼저 고정
+            currentDateObj.setDate(1);
             currentDateObj.setMonth(currentDateObj.getMonth() + diff);
             renderCalendar();
         }
@@ -303,7 +321,6 @@
         function setMood(moodEmoji) {
             if(!selectedDateStr) return;
             database.ref(`diary_data/${selectedDateStr}/mood`).set(moodEmoji);
-            loadDayData(selectedDateStr);
         }
 
         function addTodo() {
@@ -339,6 +356,10 @@
                 alert("일정 내용과 기간을 모두 입력해주세요!");
                 return;
             }
+            if(start > end) {
+                alert("종료일이 시작일보다 빠를 수 없어요!");
+                return;
+            }
             database.ref('schedules').push({ text, start, end, color });
             document.getElementById('sch-text').value = '';
         }
@@ -365,65 +386,109 @@
 
         function loadAllData(year, month) {
             const lastDate = new Date(year, month + 1, 0).getDate();
-            
-            database.ref('diary_data').on('value', snap => {
+
+            // 이전 달에 붙였던 리스너 정리
+            if(diaryRef) diaryRef.off();
+            if(scheduleRef) scheduleRef.off();
+            if(postitRef) postitRef.off();
+
+            // ---- 일기 데이터: 달력 하트 뱃지 + 이번 주 할 일 ----
+            diaryRef = database.ref('diary_data');
+            diaryRef.on('value', snap => {
                 const allDiary = snap.val() || {};
-                let weeklyTodosHTML = '';
 
                 for (let d = 1; d <= lastDate; d++) {
-                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    const dateStr = `${year}-${pad(month + 1)}-${pad(d)}`;
                     const data = allDiary[dateStr] || {};
-                    
                     const badge = document.getElementById(`badge-${dateStr}`);
                     if(badge) {
-                        let badgeHTML = '';
-                        if(data.mood) badgeHTML += `<span>${data.mood}</span>`;
-                        badge.innerHTML = badgeHTML;
-                    }
-
-                    if(data.todos) {
-                        Object.entries(data.todos).forEach(([tKey, todo]) => {
-                            if(!todo.done) {
-                                weeklyTodosHTML += `
-                                    <li style="display:flex; align-items:center; justify-content:space-between; font-size:0.55rem; margin-bottom:2px;">
-                                        <span style="cursor:pointer;" onclick="toggleTodo('${dateStr}', '${tKey}', false)">[${dateStr.slice(5)}] ${todo.text}</span>
-                                        <button onclick="deleteTodo('${dateStr}', '${tKey}')" style="background:none; border:none; color:#ff8fab; cursor:pointer;">×</button>
-                                    </li>`;
-                            }
-                        });
+                        badge.innerHTML = '';
+                        if(data.mood) {
+                            const m = document.createElement('span');
+                            m.textContent = data.mood;
+                            badge.appendChild(m);
+                        }
                     }
                 }
+
+                // 이번 주(일~토, 오늘 기준) 미완료 할 일
+                const now = new Date();
+                const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+                const weekEnd = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 6);
+                const wsStr = fmtDate(weekStart);
+                const weStr = fmtDate(weekEnd);
+
                 const weeklyList = document.getElementById('weekly-todo-list');
-                if(weeklyList) weeklyList.innerHTML = weeklyTodosHTML || '<span style="font-size:0.55rem; opacity:0.5;">작성된 할 일이 없어요!</span>';
+                if(!weeklyList) return;
+                weeklyList.innerHTML = '';
+                let count = 0;
+
+                Object.keys(allDiary).sort().forEach(dateStr => {
+                    if(dateStr < wsStr || dateStr > weStr) return;
+                    const todos = allDiary[dateStr] && allDiary[dateStr].todos;
+                    if(!todos) return;
+                    Object.entries(todos).forEach(([tKey, todo]) => {
+                        if(todo.done) return;
+                        count++;
+                        const li = document.createElement('li');
+                        li.style.cssText = 'display:flex; align-items:center; justify-content:space-between; font-size:0.55rem; margin-bottom:2px;';
+
+                        const span = document.createElement('span');
+                        span.style.cursor = 'pointer';
+                        span.textContent = `[${dateStr.slice(5)}] ${todo.text}`;
+                        span.addEventListener('click', () => toggleTodo(dateStr, tKey, false));
+
+                        const del = document.createElement('button');
+                        del.textContent = '×';
+                        del.style.cssText = 'background:none; border:none; color:#ff8fab; cursor:pointer;';
+                        del.addEventListener('click', () => deleteTodo(dateStr, tKey));
+
+                        li.appendChild(span);
+                        li.appendChild(del);
+                        weeklyList.appendChild(li);
+                    });
+                });
+
+                if(count === 0) {
+                    const empty = document.createElement('span');
+                    empty.style.cssText = 'font-size:0.55rem; opacity:0.5;';
+                    empty.textContent = '이번 주에 남은 할 일이 없어요!';
+                    weeklyList.appendChild(empty);
+                }
             });
 
-            database.ref('schedules').on('value', snap => {
+            // ---- 일정 (기간 막대) ----
+            scheduleRef = database.ref('schedules');
+            scheduleRef.on('value', snap => {
                 const schedules = snap.val() || {};
                 for (let d = 1; d <= lastDate; d++) {
-                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    const dateStr = `${year}-${pad(month + 1)}-${pad(d)}`;
                     const schArea = document.getElementById(`sch-badge-${dateStr}`);
                     if(schArea) schArea.innerHTML = '';
                 }
 
                 Object.entries(schedules).forEach(([key, sch]) => {
-                    let curr = new Date(sch.start);
-                    const end = new Date(sch.end);
+                    // 'T00:00:00'을 붙여 로컬 자정으로 해석 (UTC 해석으로 하루 밀리는 것 방지)
+                    let curr = new Date(sch.start + 'T00:00:00');
+                    const end = new Date(sch.end + 'T00:00:00');
                     while(curr <= end) {
-                        const y = curr.getFullYear();
-                        const m = String(curr.getMonth() + 1).padStart(2, '0');
-                        const day = String(curr.getDate()).padStart(2, '0');
-                        const dateStr = `${y}-${m}-${day}`;
+                        const dateStr = fmtDate(curr);
                         const schArea = document.getElementById(`sch-badge-${dateStr}`);
                         if(schArea) {
                             const div = document.createElement('div');
-                            div.style.background = sch.color;
-                            div.style.color = '#fff';
-                            div.style.fontSize = '0.5rem';
-                            div.style.padding = '1px 3px';
-                            div.style.borderRadius = '3px';
-                            div.style.display = 'flex';
-                            div.style.justifyContent = 'space-between';
-                            div.innerHTML = `<span>${sch.text}</span> <span onclick="deleteSchedule('${key}')" style="cursor:pointer; margin-left:4px;">×</span>`;
+                            Object.assign(div.style, {
+                                background: sch.color, color: '#fff', fontSize: '0.5rem',
+                                padding: '1px 3px', borderRadius: '3px',
+                                display: 'flex', justifyContent: 'space-between'
+                            });
+                            const label = document.createElement('span');
+                            label.textContent = sch.text;
+                            const x = document.createElement('span');
+                            x.textContent = '×';
+                            x.style.cssText = 'cursor:pointer; margin-left:4px;';
+                            x.addEventListener('click', (e) => { e.stopPropagation(); deleteSchedule(key); });
+                            div.appendChild(label);
+                            div.appendChild(x);
                             schArea.appendChild(div);
                         }
                         curr.setDate(curr.getDate() + 1);
@@ -431,57 +496,108 @@
                 });
             });
 
-            database.ref('postits').on('value', snap => {
-                const postits = snap.val() || {};
+            // ---- 포스트잇 ----
+            postitRef = database.ref('postits');
+            postitRef.on('value', snap => {
                 const container = document.getElementById('postit-container');
                 if(!container) return;
+                // 입력 중일 때 다시 그리면 커서/포커스가 사라지므로 건너뜀
+                // (내가 친 글자는 이미 화면에 있고 DB에도 저장됨)
+                const active = document.activeElement;
+                if(active && active.tagName === 'TEXTAREA' && container.contains(active)) return;
+
+                const postits = snap.val() || {};
                 container.innerHTML = '';
+                const colorOptions = [
+                    ['#ffd700', '노랑'], ['#52b788', '초록'], ['#ffa500', '오렌지'],
+                    ['#5bc0eb', '파랑'], ['#ff8fab', '핑크']
+                ];
+
                 Object.entries(postits).forEach(([key, p]) => {
                     const div = document.createElement('div');
-                    div.style.background = p.color || '#ffd700';
-                    div.style.padding = '6px';
-                    div.style.borderRadius = '6px';
-                    div.style.position = 'relative';
-                    div.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                            <select onchange="updatePostItColor('${key}', this.value)" style="font-size:0.5rem; background:transparent; border:none; cursor:pointer;">
-                                <option value="#ffd700" ${p.color==='#ffd700'?'selected':''}>노랑</option>
-                                <option value="#52b788" ${p.color==='#52b788'?'selected':''}>초록</option>
-                                <option value="#ffa500" ${p.color==='#ffa500'?'selected':''}>오렌지</option>
-                                <option value="#5bc0eb" ${p.color==='#5bc0eb'?'selected':''}>파랑</option>
-                                <option value="#ff8fab" ${p.color==='#ff8fab'?'selected':''}>핑크</option>
-                            </select>
-                            <span onclick="deletePostIt('${key}')" style="cursor:pointer; font-size:0.6rem; font-weight:bold;">×</span>
-                        </div>
-                        <textarea oninput="updatePostIt('${key}', this)" style="width:100%; border:none; background:transparent; font-size:0.6rem; resize:none; font-family:var(--font-light); outline:none; height:35px;">${p.text || ''}</textarea>
-                    `;
+                    div.style.cssText = `background:${p.color || '#ffd700'}; padding:6px; border-radius:6px; position:relative;`;
+
+                    const head = document.createElement('div');
+                    head.style.cssText = 'display:flex; justify-content:space-between; margin-bottom:2px;';
+
+                    const select = document.createElement('select');
+                    select.style.cssText = 'font-size:0.5rem; background:transparent; border:none; cursor:pointer;';
+                    colorOptions.forEach(([val, label]) => {
+                        const opt = document.createElement('option');
+                        opt.value = val;
+                        opt.textContent = label;
+                        if(p.color === val) opt.selected = true;
+                        select.appendChild(opt);
+                    });
+                    select.addEventListener('change', () => updatePostItColor(key, select.value));
+
+                    const del = document.createElement('span');
+                    del.textContent = '×';
+                    del.style.cssText = 'cursor:pointer; font-size:0.6rem; font-weight:bold;';
+                    del.addEventListener('click', () => deletePostIt(key));
+
+                    head.appendChild(select);
+                    head.appendChild(del);
+
+                    const ta = document.createElement('textarea');
+                    ta.style.cssText = 'width:100%; border:none; background:transparent; font-size:0.6rem; resize:none; font-family:var(--font-light); outline:none; height:35px;';
+                    ta.value = p.text || '';
+                    ta.addEventListener('input', () => updatePostIt(key, ta));
+
+                    div.appendChild(head);
+                    div.appendChild(ta);
                     container.appendChild(div);
                 });
             });
         }
 
         function loadDayData(dateStr) {
-            database.ref(`diary_data/${dateStr}`).on('value', snap => {
+            // 이전에 선택했던 날짜의 리스너를 끊어야 다른 날짜 데이터가 덮어쓰지 않음
+            if(dayRef) dayRef.off();
+            dayRef = database.ref(`diary_data/${dateStr}`);
+            dayRef.on('value', snap => {
                 const data = snap.val() || {};
                 const todoList = document.getElementById('todo-list');
                 todoList.innerHTML = '';
                 if(data.todos) {
                     Object.entries(data.todos).forEach(([key, todo]) => {
                         const li = document.createElement('li');
-                        li.style.display = 'flex';
-                        li.style.alignItems = 'center';
-                        li.style.justifyContent = 'space-between';
-                        li.style.marginBottom = '3px';
-                        li.innerHTML = `
-                            <div style="display:flex; align-items:center; gap:5px;">
-                                <input type="checkbox" ${todo.done ? 'checked' : ''} onclick="toggleTodo('${dateStr}', '${key}', ${todo.done})" style="cursor:pointer;">
-                                <span style="${todo.done ? 'text-decoration:line-through; opacity:0.4;' : ''}">${todo.text}</span>
-                            </div>
-                            <div style="display:flex; gap:3px;">
-                                <button onclick="editTodo('${dateStr}', '${key}', '${todo.text}')" style="background:none; border:none; color:var(--main-purple); cursor:pointer; font-size:0.5rem;">수정</button>
-                                <button onclick="deleteTodo('${dateStr}', '${key}')" style="background:none; border:none; color:#ff8fab; cursor:pointer; font-size:0.5rem;">삭제</button>
-                            </div>
-                        `;
+                        li.style.cssText = 'display:flex; align-items:center; justify-content:space-between; margin-bottom:3px;';
+
+                        const left = document.createElement('div');
+                        left.style.cssText = 'display:flex; align-items:center; gap:5px;';
+
+                        const cb = document.createElement('input');
+                        cb.type = 'checkbox';
+                        cb.checked = !!todo.done;
+                        cb.style.cursor = 'pointer';
+                        cb.addEventListener('click', () => toggleTodo(dateStr, key, !!todo.done));
+
+                        const label = document.createElement('span');
+                        label.textContent = todo.text;
+                        if(todo.done) label.style.cssText = 'text-decoration:line-through; opacity:0.4;';
+
+                        left.appendChild(cb);
+                        left.appendChild(label);
+
+                        const right = document.createElement('div');
+                        right.style.cssText = 'display:flex; gap:3px;';
+
+                        const editBtn = document.createElement('button');
+                        editBtn.textContent = '수정';
+                        editBtn.style.cssText = 'background:none; border:none; color:var(--main-purple); cursor:pointer; font-size:0.5rem;';
+                        editBtn.addEventListener('click', () => editTodo(dateStr, key, todo.text));
+
+                        const delBtn = document.createElement('button');
+                        delBtn.textContent = '삭제';
+                        delBtn.style.cssText = 'background:none; border:none; color:#ff8fab; cursor:pointer; font-size:0.5rem;';
+                        delBtn.addEventListener('click', () => deleteTodo(dateStr, key));
+
+                        right.appendChild(editBtn);
+                        right.appendChild(delBtn);
+
+                        li.appendChild(left);
+                        li.appendChild(right);
                         todoList.appendChild(li);
                     });
                 }
@@ -512,27 +628,30 @@
                 const isMe = post.senderType === session.type;
                 li.className = `chat-item ${isMe ? 'me' : 'other'}`;
                 
-                let content = post.content;
-                const urlRegex = /(https?:\/\/[^\s]+)/g;
-                if (urlRegex.test(content)) {
-                    content = content.replace(urlRegex, (url) => {
-                        return `<div class="linked-content">
-                            <span class="linked-icon">🔗</span>
-                            <span class="linked-text">Link Attached</span>
-                            <button class="linked-btn" onclick="window.open('${url}', '_blank')">VISIT</button>
-                        </div>`;
-                    });
-                }
+                // 먼저 이스케이프한 뒤 http(s) 링크만 버튼으로 변환
+                const content = esc(post.content).replace(/(https?:\/\/[^\s]+)/g, (url) => {
+                    return `<div class="linked-content">
+                        <span class="linked-icon">🔗</span>
+                        <span class="linked-text">Link Attached</span>
+                        <button class="linked-btn" data-url="${url}">VISIT</button>
+                    </div>`;
+                });
 
                 li.innerHTML = `
-                    <div class="chat-sender">${post.senderName}</div>
+                    <div class="chat-sender">${esc(post.senderName)}</div>
                     <div class="chat-text">${content}</div>
-                    <div class="chat-info"><span>${post.time}</span></div>
+                    <div class="chat-info"><span>${esc(post.time)}</span></div>
                 `;
                 list.appendChild(li);
             });
             const wrapper = document.getElementById('chat-list-wrapper');
             wrapper.scrollTop = wrapper.scrollHeight;
+        });
+
+        // VISIT 버튼 클릭 (이벤트 위임)
+        document.getElementById('chat-list').addEventListener('click', (e) => {
+            const btn = e.target.closest('.linked-btn');
+            if (btn) window.open(btn.dataset.url, '_blank', 'noopener');
         });
 
         document.getElementById('comment-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
@@ -552,7 +671,13 @@
             renderCalendar();
             setInterval(updateClock, 1000);
             updateClock();
-            document.getElementById('other-name').innerText = otherType === 'other' ? '[언재]' : '[삐용]';
+
+            // 일정 입력 기본 날짜 (로컬 기준 오늘)
+            document.getElementById('sch-start').value = todayStr;
+            document.getElementById('sch-end').value = todayStr;
+
+            // 상대방 이름: 내가 언재(me)면 상대는 삐용(other)
+            document.getElementById('other-name').innerText = otherType === 'other' ? '[삐용]' : '[언재]';
             
             setTimeout(() => {
                 const loader = document.getElementById('boot-loader');
