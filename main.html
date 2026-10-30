@@ -427,7 +427,6 @@
                 });
             });
 
-            // 🌟 포스트잇 로직 개선 (사용자가 타이핑 중일 때는 리렌더링으로 포커스가 끊기지 않도록 분기 처리)
             database.ref('postits').on('value', snap => {
                 const postits = snap.val() || {};
                 const container = document.getElementById('postit-container');
@@ -459,7 +458,6 @@
                     container.appendChild(div);
                 });
 
-                // 타이핑 중이던 포스트잇이 있었다면 포커스를 다시 유지시켜 줌
                 if (activePostItKey) {
                     const textareaToFocus = container.querySelector(`textarea[data-key="${activePostItKey}"]`);
                     if (textareaToFocus) {
@@ -557,6 +555,7 @@
             document.getElementById('current-date').innerText = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
         }
 
+        // 🌟 수정 완료: 로딩 후 프로필 및 캘린더 초기화 함수 정상 호출
         window.addEventListener('load', () => {
             renderProfile();
             renderCalendar();
