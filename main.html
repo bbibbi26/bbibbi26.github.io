@@ -6,6 +6,7 @@
     <title>NYA-PPI / COZY_DIARY</title>
     <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script>try{var _v=parseInt(localStorage.getItem('nya_font_level'),10);var _s=[0.92,1,1.12,1.25][_v];if(_s)document.documentElement.style.fontSize=(16*_s)+'px';}catch(e){}</script>
 </head>
 <body>
     <div id="boot-loader">
@@ -26,8 +27,14 @@
                 <nav class="main-menu">
                     <div class="menu-item active" data-panel="DASHBOARD" onclick="handleMenu('DASHBOARD')">> Dashboard (캘린더)</div>
                     <div class="menu-item" data-panel="JOURNAL" onclick="handleMenu('JOURNAL')">> Journal (일기장)<span id="menu-journal-new" class="new-badge" style="display:none;">NEW</span></div>
-                    <div class="menu-item" data-panel="ST_NOTEBOOK" onclick="handleMenu('ST_NOTEBOOK')">> Post-it (포스트잇)</div>
-                    <div class="menu-item" data-panel="MEMO" onclick="handleMenu('MEMO')">&gt; Notebook (메모장)</div>
+                    <div class="menu-group" id="menu-group-twitter">
+                        <div class="menu-item menu-toggle" role="button" tabindex="0" aria-expanded="false" onclick="toggleMenuGroup('twitter')">> Twitter (트위터)<span class="menu-caret">▾</span></div>
+                        <div class="menu-sub" id="menu-sub-twitter"></div>
+                    </div>
+                    <div class="menu-group" id="menu-group-ff14">
+                        <div class="menu-item menu-toggle" role="button" tabindex="0" aria-expanded="false" onclick="toggleMenuGroup('ff14')">> FF14<span class="menu-caret">▾</span></div>
+                        <div class="menu-sub" id="menu-sub-ff14"></div>
+                    </div>
                 </nav>
 
                 <div class="music-section">
@@ -43,8 +50,15 @@
 
             <main class="main-content">
                 <div id="current-date-info">
-                    <div id="current-date">DATE</div>
-                    <div id="current-time">00:00:00</div>
+                    <div>
+                        <div id="current-date">DATE</div>
+                        <div id="current-time">00:00:00</div>
+                    </div>
+                    <div class="font-ctrl" title="글자 크기">
+                        <button type="button" id="font-down" onclick="changeFontSize(-1)">가-</button>
+                        <span id="font-level">보통</span>
+                        <button type="button" id="font-up" onclick="changeFontSize(1)">가+</button>
+                    </div>
                 </div>
 
                 <!-- ===== 대시보드 (캘린더) ===== -->
@@ -114,7 +128,7 @@
                             </div>
 
                             <div class="widget-box">
-                                <label style="font-weight:bold; color:var(--main-purple); font-size:0.65rem;">📌 이번 주 할 일</label>
+                                <label style="font-weight:bold; color:var(--main-purple); font-size:0.78rem;">📌 이번 주 할 일</label>
                                 <ul id="weekly-todo-list" class="todo-list" style="margin-top:2px;"></ul>
                             </div>
 
@@ -129,42 +143,70 @@
                     </div>
                 </section>
 
-                <!-- ===== 일기장 ===== -->
+                                <!-- ===== 일기장 (블로그형: 피드 / 읽기 / 쓰기) ===== -->
                 <section class="system-board" id="JOURNAL-panel">
-                    <div class="board-header">
-                        <span>> JOURNAL // 우리의 일기장</span>
-                        <div class="cal-nav">
-                            <button class="cal-btn" onclick="changeJournalMonth(-1)">◀</button>
-                            <span id="j-month-title">2026.10</span>
-                            <button class="cal-btn" onclick="changeJournalMonth(1)">▶</button>
-                        </div>
-                    </div>
 
-                    <div class="journal-toolbar">
-                        <div class="j-tabs">
-                            <button class="j-tab active" id="j-tab-mine" onclick="setJournalTab('mine')">📖 내 일기</button>
-                            <button class="j-tab" id="j-tab-other" onclick="setJournalTab('other')">💌 상대 일기</button>
-                        </div>
-                        <input type="text" id="j-search" placeholder="제목·내용 검색..." oninput="renderJournalList()">
-                    </div>
-
-                    <div class="journal-body">
-                        <div class="journal-list-wrap">
-                            <button id="j-new-btn" class="j-new-btn" onclick="journalWriteToday()">✏️ 오늘 일기 쓰기</button>
-                            <ul id="j-list" class="j-list"></ul>
-                        </div>
-
-                        <!-- 내 일기 작성/수정 -->
-                        <div class="journal-pane active" id="j-pane-mine">
-                            <div class="j-row">
-                                <input type="date" id="j-date">
-                                <span id="j-state" class="j-state">새 일기</span>
-                                <label class="j-share" title="공유하면 상대가 읽을 수 있어요">
-                                    <input type="checkbox" id="j-shared">
-                                    <span id="j-share-label">🔒 비공개</span>
-                                </label>
+                    <!-- 피드: 두 사람의 글이 최신순으로 -->
+                    <div class="j-view active" id="jv-feed">
+                        <div class="board-header">
+                            <span>> JOURNAL // 우리의 일기장</span>
+                            <div class="cal-nav">
+                                <button class="cal-btn" onclick="changeJournalMonth(-1)">◀</button>
+                                <span id="j-month-title">2026.10</span>
+                                <button class="cal-btn" onclick="changeJournalMonth(1)">▶</button>
                             </div>
-                            <input type="text" id="j-title" maxlength="60" placeholder="제목">
+                        </div>
+                        <div class="journal-toolbar">
+                            <div class="j-tabs">
+                                <button class="j-tab active" id="j-f-all" onclick="setJournalFilter('all')">전체</button>
+                                <button class="j-tab" id="j-f-mine" onclick="setJournalFilter('mine')">내 글</button>
+                                <button class="j-tab" id="j-f-other" onclick="setJournalFilter('other')">상대 글</button>
+                            </div>
+                            <input type="text" id="j-search" placeholder="제목·내용 검색 (모든 달)..." oninput="renderFeed()">
+                            <button class="j-new-btn" onclick="journalWriteToday()">✏️ 글쓰기</button>
+                        </div>
+                        <div id="j-feed" class="j-feed"></div>
+                    </div>
+
+                    <!-- 읽기 -->
+                    <div class="j-view" id="jv-read">
+                        <div class="j-topbar">
+                            <button class="j-btn j-btn-ghost" onclick="backToFeed()">← 목록으로</button>
+                            <span class="j-spacer"></span>
+                            <span id="r-actions" class="j-actions-inline">
+                                <button class="j-btn j-btn-ghost" onclick="openWrite(jRead.date)">✏️ 수정</button>
+                                <button class="j-btn j-btn-del" onclick="deleteMyJournal(jRead.date)">🗑 삭제</button>
+                            </span>
+                        </div>
+                        <article class="j-article">
+                            <div class="j-meta">
+                                <span id="r-author"></span>
+                                <span id="r-date"></span>
+                                <span id="r-mood" class="j-meta-emoji"></span>
+                                <span id="r-weather" class="j-meta-emoji"></span>
+                            </div>
+                            <h1 id="r-title" class="j-article-title"></h1>
+                            <div id="r-body" class="j-rich"></div>
+                            <button id="r-sameday" class="j-sameday" style="display:none;"></button>
+                            <div id="r-feedback" class="j-feedback"></div>
+                        </article>
+                    </div>
+
+                    <!-- 쓰기 -->
+                    <div class="j-view" id="jv-write">
+                        <div class="j-topbar">
+                            <button class="j-btn j-btn-ghost" onclick="closeWrite()">← 취소</button>
+                            <span id="j-state" class="j-state">새 글</span>
+                            <span class="j-spacer"></span>
+                            <span id="j-draft-note" class="j-draft-note"></span>
+                            <button class="j-btn j-btn-save" onclick="saveMyJournal()">저장</button>
+                        </div>
+                        <div class="j-write-inner">
+                            <div class="j-row">
+                                <span class="j-label">날짜</span>
+                                <input type="date" id="j-date">
+                            </div>
+                            <input type="text" id="j-title" maxlength="60" placeholder="제목을 적어 주세요">
                             <div class="j-row">
                                 <span class="j-label">기분</span>
                                 <div class="mood-selector" id="j-mood-sel"></div>
@@ -173,41 +215,23 @@
                                 <span class="j-label">날씨</span>
                                 <div class="mood-selector" id="j-weather-sel"></div>
                             </div>
-                            <textarea id="j-body" maxlength="5000" placeholder="오늘은 어떤 하루였나요?&#10;사진 링크(https://...)를 붙여 넣으면 아래에 '사진 보기' 버튼이 생겨요."></textarea>
-                            <div id="j-links" class="j-links"></div>
-                            <div class="j-row j-actions">
-                                <span id="j-draft-note" class="j-draft-note"></span>
-                                <button class="j-btn j-btn-del" onclick="deleteMyJournal()">삭제</button>
-                                <button class="j-btn j-btn-save" onclick="saveMyJournal()">저장</button>
+                            <div class="j-fmt-bar" id="j-fmt-bar">
+                                <button type="button" class="fmt-btn" title="큰 제목" onmousedown="event.preventDefault()" onclick="fmtPrefix('# ')">H1</button>
+                                <button type="button" class="fmt-btn" title="소제목" onmousedown="event.preventDefault()" onclick="fmtPrefix('## ')">H2</button>
+                                <button type="button" class="fmt-btn fmt-bold" title="굵게" onmousedown="event.preventDefault()" onclick="fmtWrap('**','**','굵은 글씨')">B</button>
+                                <button type="button" class="fmt-btn fmt-italic" title="기울임" onmousedown="event.preventDefault()" onclick="fmtWrap('*','*','기울인 글씨')">I</button>
+                                <button type="button" class="fmt-btn" title="인용" onmousedown="event.preventDefault()" onclick="fmtPrefix('> ')">❝ 인용</button>
+                                <button type="button" class="fmt-btn" title="목록" onmousedown="event.preventDefault()" onclick="fmtPrefix('- ')">• 목록</button>
+                                <button type="button" class="fmt-btn" title="구분선" onmousedown="event.preventDefault()" onclick="fmtHr()">― 구분선</button>
+                                <span class="j-spacer"></span>
+                                <button type="button" class="j-mode active" id="j-mode-edit" onclick="setWriteMode('edit')">✏️ 쓰기</button>
+                                <button type="button" class="j-mode" id="j-mode-preview" onclick="setWriteMode('preview')">👁 미리보기</button>
                             </div>
-                            <div id="j-my-feedback" class="j-feedback"></div>
-                        </div>
-
-                        <!-- 상대가 공유한 일기 (읽기 전용) -->
-                        <div class="journal-pane" id="j-pane-other">
-                            <div id="j-reader-empty" class="j-empty">왼쪽에서 읽고 싶은 일기를 골라 주세요.</div>
-                            <div id="j-reader" style="display:none;">
-                                <div class="j-reader-head">
-                                    <span id="r-date"></span>
-                                    <span id="r-mood"></span>
-                                    <span id="r-weather"></span>
-                                </div>
-                                <h4 id="r-title" class="j-reader-title"></h4>
-                                <div id="r-body" class="j-reader-body"></div>
-                                <div id="r-feedback" class="j-feedback"></div>
-                            </div>
+                            <textarea id="j-body" maxlength="5000" placeholder="오늘은 어떤 하루였나요?&#10;위 버튼으로 제목·굵게·인용 같은 서식을 넣을 수 있어요."></textarea>
+                            <div id="j-preview" class="j-rich j-preview" style="display:none;"></div>
+                            <div class="j-hint">🖼️ 사진 링크(https://...)를 붙여 넣으면 읽는 화면에서 "사진 보기" 버튼이 돼요. 글은 저장하는 순간 상대도 읽을 수 있어요.</div>
                         </div>
                     </div>
-                </section>
-
-                <section class="system-board" id="ST_NOTEBOOK-panel">
-                    <div class="board-header">> SHARED_POST_IT</div>
-                    <p style="font-size: 0.75rem; opacity: 0.7;">친구와 함께 쓰는 공유 포스트잇 공간입니다.</p>
-                </section>
-
-                <section class="system-board" id="MEMO-panel">
-                    <div class="board-header">> NOTEBOOK_MEMO_PAD</div>
-                    <p style="font-size: 0.75rem; opacity: 0.7;">자유롭게 적어두는 메모장 공간입니다.</p>
                 </section>
 
                 <div class="disconnect-btn" onclick="location.href='index.html'">← RETURN TO GATE</div>
@@ -237,6 +261,18 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <script>
+        // ---------- 바깥으로 나가는 링크 (주소가 바뀌면 여기만 고치면 돼요) ----------
+        const EXTERNAL_LINKS = {
+            twitter: [
+                { icon: '🐱', label: '언재', url: 'https://x.com/Bow_wow__14' },
+                { icon: '🐰', label: '삐용', url: 'https://x.com/ff14_bbiy' }
+            ],
+            ff14: [
+                { icon: '🌐', label: '한국 서비스 공식 사이트', url: 'https://www.ff14.co.kr' },
+                { icon: '💎', label: '크리스탈 샵', url: 'https://www.ff14.co.kr/shop' }
+            ]
+        };
+
         const firebaseConfig = {
             apiKey: "AIzaSyDi9JQLtpp4KaF5mGkf0aApv_fcQP2PpD0",
             authDomain: "nya-ppi.firebaseapp.com",
@@ -335,6 +371,54 @@
             otherStatusDisplay.innerText = status;
             otherStatusDisplay.className = status === 'ONLINE' ? 'status-online' : 'status-offline';
         });
+
+        // ---------- 펼침 메뉴 (Twitter / FF14) ----------
+        function toggleMenuGroup(key) {
+            const g = document.getElementById('menu-group-' + key);
+            const open = g.classList.toggle('open');
+            g.querySelector('.menu-toggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        function buildExternalMenus() {
+            Object.keys(EXTERNAL_LINKS).forEach(key => {
+                const sub = document.getElementById('menu-sub-' + key);
+                EXTERNAL_LINKS[key].forEach(l => {
+                    const a = document.createElement('a');
+                    a.className = 'menu-sublink';
+                    a.href = l.url;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.textContent = `${l.icon} ${l.label} ↗`;
+                    sub.appendChild(a);
+                });
+                document.querySelector(`#menu-group-${key} .menu-toggle`).addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMenuGroup(key); }
+                });
+            });
+        }
+
+        // ---------- 글자 크기 (가- / 가+) ----------
+        const FONT_LEVELS = [
+            { label: '작게', scale: 0.92 },
+            { label: '보통', scale: 1 },
+            { label: '크게', scale: 1.12 },
+            { label: '아주 크게', scale: 1.25 }
+        ];
+        let fontLevel = 1;
+        try {
+            const v = parseInt(localStorage.getItem('nya_font_level'), 10);
+            if (v >= 0 && v < FONT_LEVELS.length) fontLevel = v;
+        } catch (e) {}
+        function applyFontLevel() {
+            document.documentElement.style.fontSize = (16 * FONT_LEVELS[fontLevel].scale) + 'px';
+            document.getElementById('font-level').textContent = FONT_LEVELS[fontLevel].label;
+            document.getElementById('font-down').disabled = fontLevel === 0;
+            document.getElementById('font-up').disabled = fontLevel === FONT_LEVELS.length - 1;
+        }
+        function changeFontSize(diff) {
+            fontLevel = Math.max(0, Math.min(FONT_LEVELS.length - 1, fontLevel + diff));
+            try { localStorage.setItem('nya_font_level', String(fontLevel)); } catch (e) {}
+            applyFontLevel();
+        }
 
         // ---------- 메뉴 ----------
         function handleMenu(panelId) {
@@ -442,7 +526,7 @@
             loadDayData(dateStr);
         }
 
-        // 일기가 있는 날 표시: 📖 내 일기 / 💌 상대가 공유한 일기
+        // 일기가 있는 날 표시: 쓴 사람의 아이콘(🐱 언재 / 🐰 삐용)
         function updateCalendarJournalMarks() {
             const year = currentDateObj.getFullYear();
             const month = currentDateObj.getMonth();
@@ -453,8 +537,8 @@
                 if (!el) continue;
                 const mine = !!myJournals[ds];
                 const theirs = !!otherJournals[ds];
-                el.textContent = (mine ? '📖' : '') + (theirs ? '💌' : '');
-                el.title = (mine ? '내 일기 ' : '') + (theirs ? `${otherName}가 공유한 일기` : '');
+                el.textContent = (mine ? AUTHORS[myType].icon : '') + (theirs ? AUTHORS[otherType].icon : '');
+                el.title = (mine ? `${AUTHORS[myType].name}의 일기 ` : '') + (theirs ? `${AUTHORS[otherType].name}의 일기` : '');
             }
         }
 
@@ -549,7 +633,7 @@
                         if (todo.done) return;
                         count++;
                         const li = document.createElement('li');
-                        li.style.cssText = 'display:flex; align-items:center; justify-content:space-between; font-size:0.55rem; margin-bottom:2px;';
+                        li.style.cssText = 'display:flex; align-items:center; justify-content:space-between; font-size:0.75rem; margin-bottom:2px;';
 
                         const span = document.createElement('span');
                         span.style.cursor = 'pointer';
@@ -569,7 +653,7 @@
 
                 if (count === 0) {
                     const empty = document.createElement('span');
-                    empty.style.cssText = 'font-size:0.55rem; opacity:0.5;';
+                    empty.style.cssText = 'font-size:0.75rem; opacity:0.5;';
                     empty.textContent = '이번 주에 남은 할 일이 없어요!';
                     weeklyList.appendChild(empty);
                 }
@@ -647,12 +731,12 @@
 
                         const editBtn = document.createElement('button');
                         editBtn.textContent = '수정';
-                        editBtn.style.cssText = 'background:none; border:none; color:var(--main-purple); cursor:pointer; font-size:0.5rem;';
+                        editBtn.style.cssText = 'background:none; border:none; color:var(--main-purple); cursor:pointer; font-size:0.75rem;';
                         editBtn.addEventListener('click', () => editTodo(dateStr, key, todo.text));
 
                         const delBtn = document.createElement('button');
                         delBtn.textContent = '삭제';
-                        delBtn.style.cssText = 'background:none; border:none; color:#ff8fab; cursor:pointer; font-size:0.5rem;';
+                        delBtn.style.cssText = 'background:none; border:none; color:#ff8fab; cursor:pointer; font-size:0.75rem;';
                         delBtn.addEventListener('click', () => deleteTodo(dateStr, key));
 
                         right.appendChild(editBtn);
@@ -735,30 +819,134 @@
         }
 
         // =====================================================
-        //  일기장 (하루 한 편 / 기본 비공개 / 공유 토글)
+        //  일기장 (블로그형: 합친 피드 / 읽기 / 쓰기)
+        //  전부 공개 · 한 사람이 하루 한 편
         //  저장 위치: journals/{me|other}/{YYYY-MM-DD}
         // =====================================================
+        const byId = (id) => document.getElementById(id);
         const MOODS = ['❤️', '🧡', '💛', '💚', '💙', '💜', '🩷', '🤍'];
         const WEATHERS = ['☀️', '⛅', '☁️', '🌧️', '⛈️', '❄️'];
+        const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+        const AUTHORS = {
+            me:    { name: '언재', icon: '🐱', cls: 'a-me' },
+            other: { name: '삐용', icon: '🐰', cls: 'a-other' }
+        };
 
-        let myJournals = {};        // 내 일기 전체
-        let otherJournals = {};     // 상대가 '공유한' 일기만
-        let journalTab = 'mine';
-        let jMonth = new Date(); jMonth.setDate(1);
+        let myJournals = {};        // 내 글 전체
+        let otherJournals = {};     // 상대 글 전체 (모두 공개)
+        let jView = 'feed';         // feed | read | write
+        let jFilter = 'all';        // all | mine | other
+        let jMonth = (() => { const d = new Date(); d.setDate(1); return d; })();
+        let jRead = null;           // 읽는 중인 글 { owner, date }
         const jEdit = { date: null, mood: null, weather: null };
         let jDirty = false;         // 저장 안 한 수정이 있는지
         let jLoadedSig = '';
         let jDraftTimer = null;
-        let jOtherSel = null;
+        let jPreview = false;
         let jSeenTs = null;         // 일기장을 마지막으로 본 시각(서버 시간)
         let jSeenAtOpen = 0;        // 이번에 일기장을 열었을 때의 기준 시각 (NEW 표시용)
         let jEls = {};
 
-        const isJournalActive = () => document.getElementById('JOURNAL-panel').classList.contains('active');
+        const isJournalActive = () => byId('JOURNAL-panel').classList.contains('active');
+        const postsOf = (owner) => (owner === myType ? myJournals : otherJournals);
+        const tsOf = (v) => (typeof v === 'number' ? v : 0);
+        const newTsOf = (j) => tsOf(j.createdAt) || tsOf(j.sharedAt) || tsOf(j.updatedAt);   // 글이 처음 올라온 시각
 
         function sigOf(j) {
             const x = j || {};
-            return JSON.stringify([x.title || '', x.body || '', x.mood || null, x.weather || null, !!x.shared]);
+            return JSON.stringify([x.title || '', x.body || '', x.mood || null, x.weather || null]);
+        }
+
+        // ----- 서식 (간단 마크다운) 보여주기: 모든 글자는 textContent로만 넣어서 안전 -----
+        function appendInline(parent, text) {
+            const pushStyled = (s) => {
+                s.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g).forEach(p => {
+                    if (!p) return;
+                    if (/^\*\*[^*\n]+\*\*$/.test(p)) {
+                        const b = document.createElement('strong'); b.textContent = p.slice(2, -2); parent.appendChild(b);
+                    } else if (/^\*[^*\n]+\*$/.test(p)) {
+                        const i = document.createElement('em'); i.textContent = p.slice(1, -1); parent.appendChild(i);
+                    } else {
+                        parent.appendChild(document.createTextNode(p));
+                    }
+                });
+            };
+            const re = new RegExp(URL_RE.source, 'g');
+            let last = 0, m;
+            while ((m = re.exec(text)) !== null) {
+                if (m.index > last) pushStyled(text.slice(last, m.index));
+                parent.appendChild(makePhotoButton(m[0]));
+                last = m.index + m[0].length;
+            }
+            if (last < text.length) pushStyled(text.slice(last));
+        }
+
+        function renderRich(container, text) {
+            container.innerHTML = '';
+            const lines = (text || '').replace(/\r/g, '').split('\n');
+            let i = 0, para = [];
+            const flushPara = () => {
+                if (!para.length) return;
+                const p = document.createElement('p');
+                para.forEach((ln, idx) => { if (idx) p.appendChild(document.createElement('br')); appendInline(p, ln); });
+                container.appendChild(p);
+                para = [];
+            };
+            while (i < lines.length) {
+                const ln = lines[i];
+                let m;
+                if (/^\s*$/.test(ln)) { flushPara(); i++; continue; }
+                if (/^---+\s*$/.test(ln)) { flushPara(); container.appendChild(document.createElement('hr')); i++; continue; }
+                if ((m = ln.match(/^(#{1,2})\s+(.*)$/))) {
+                    flushPara();
+                    const h = document.createElement(m[1].length === 1 ? 'h2' : 'h3');
+                    appendInline(h, m[2]);
+                    container.appendChild(h);
+                    i++; continue;
+                }
+                if (/^>\s?/.test(ln)) {
+                    flushPara();
+                    const bq = document.createElement('blockquote');
+                    let first = true;
+                    while (i < lines.length && /^>\s?/.test(lines[i])) {
+                        if (!first) bq.appendChild(document.createElement('br'));
+                        appendInline(bq, lines[i].replace(/^>\s?/, ''));
+                        first = false; i++;
+                    }
+                    container.appendChild(bq);
+                    continue;
+                }
+                if (/^[-*]\s+/.test(ln)) {
+                    flushPara();
+                    const ul = document.createElement('ul');
+                    while (i < lines.length && /^[-*]\s+/.test(lines[i])) {
+                        const li = document.createElement('li');
+                        appendInline(li, lines[i].replace(/^[-*]\s+/, ''));
+                        ul.appendChild(li);
+                        i++;
+                    }
+                    container.appendChild(ul);
+                    continue;
+                }
+                para.push(ln); i++;
+            }
+            flushPara();
+        }
+
+        function excerptOf(body) {
+            return (body || '')
+                .replace(URL_RE, ' 🖼️ ')
+                .replace(/^#{1,2}\s+/gm, '').replace(/^>\s?/gm, '').replace(/^[-*]\s+/gm, '').replace(/^---+$/gm, '')
+                .replace(/\*\*([^*\n]+)\*\*/g, '$1').replace(/\*([^*\n]+)\*/g, '$1')
+                .replace(/\s+/g, ' ').trim().slice(0, 160);
+        }
+
+        function authorBadge(owner) {
+            const a = AUTHORS[owner];
+            const s = document.createElement('span');
+            s.className = 'author-badge ' + a.cls;
+            s.textContent = `${a.icon} ${a.name}`;
+            return s;
         }
 
         // ----- 임시저장 (이 브라우저에 저장) -----
@@ -770,267 +958,159 @@
         function clearDraft(date) { try { localStorage.removeItem(draftKey(date)); } catch (e) {} }
 
         function readEditor() {
-            return { title: jEls.title.value, body: jEls.body.value, mood: jEdit.mood, weather: jEdit.weather, shared: jEls.shared.checked };
+            return { title: jEls.title.value, body: jEls.body.value, mood: jEdit.mood, weather: jEdit.weather };
         }
         function flushDraft() {
             if (jDraftTimer) { clearTimeout(jDraftTimer); jDraftTimer = null; }
             if (jDirty && jEdit.date) saveDraft(jEdit.date, readEditor());
         }
 
-        function buildPicker(el, options, onPick) {
-            el.innerHTML = '';
-            options.forEach(opt => {
-                const s = document.createElement('span');
-                s.textContent = opt;
-                s.dataset.v = opt;
-                s.addEventListener('click', () => onPick(opt));
-                el.appendChild(s);
-            });
+        // ----- 화면 전환 -----
+        function showJournalView(v) {
+            jView = v;
+            ['feed', 'read', 'write'].forEach(n => byId('jv-' + n).classList.toggle('active', n === v));
         }
-        function markPicker(el, value) {
-            el.querySelectorAll('span').forEach(s => s.classList.toggle('selected', s.dataset.v === value));
-        }
-
-        function updateShareLabel() {
-            jEls.shareLabel.textContent = jEls.shared.checked ? '🌐 공유 중' : '🔒 비공개';
-        }
-        function renderEditorLinks() {
-            jEls.links.innerHTML = '';
-            const urls = extractUrls(jEls.body.value);
-            jEls.links.style.display = urls.length ? 'flex' : 'none';
-            urls.forEach((u, i) => jEls.links.appendChild(makePhotoButton(u, `🖼️ 사진 보기${urls.length > 1 ? ' ' + (i + 1) : ''}`)));
-        }
-
-        function fillEditor(c) {
-            jEls.title.value = c.title || '';
-            jEls.body.value = c.body || '';
-            jEdit.mood = c.mood || null;
-            jEdit.weather = c.weather || null;
-            jEls.shared.checked = !!c.shared;
-            markPicker(jEls.moodSel, jEdit.mood);
-            markPicker(jEls.weatherSel, jEdit.weather);
-            updateShareLabel();
-            renderEditorLinks();
-        }
-
-        function openMyJournal(date) {
-            if (!date) return;
-            flushDraft();                       // 다른 날로 넘어가기 전에 쓰던 내용 보관
-            jEdit.date = date;
-            jEls.date.value = date;
-
-            const saved = myJournals[date];
-            const base = saved
-                ? { title: saved.title, body: saved.body, mood: saved.mood, weather: saved.weather, shared: saved.shared }
-                : { title: '', body: '', mood: null, weather: null, shared: false };
-            const draft = loadDraft(date);
-            let note = '';
-            if (draft && sigOf(draft) !== sigOf(base)) {
-                fillEditor(draft);
-                jDirty = true;
-                note = '⏱ 임시저장된 내용을 불러왔어요';
-            } else {
-                fillEditor(base);
-                jDirty = false;
-                if (draft) clearDraft(date);
-            }
-            jLoadedSig = sigOf(base);
-            jEls.state.textContent = jDirty ? '수정 중' : (saved ? '저장됨' : '새 일기');
-            jEls.draftNote.textContent = note;
-            renderMyFeedback();
-            renderJournalList();
-        }
-
-        function onJournalInput() {
-            jDirty = true;
-            updateShareLabel();
-            renderEditorLinks();
-            jEls.state.textContent = '수정 중';
-            jEls.draftNote.textContent = '';
-            if (jDraftTimer) clearTimeout(jDraftTimer);
-            jDraftTimer = setTimeout(() => {
-                jDraftTimer = null;
-                saveDraft(jEdit.date, readEditor());
-                const n = new Date();
-                jEls.draftNote.textContent = `⏱ 임시저장됨 ${pad(n.getHours())}:${pad(n.getMinutes())}`;
-            }, 500);
-        }
-
-        function saveMyJournal() {
-            const date = jEdit.date;
-            if (!date) return;
-            const c = readEditor();
-            const title = c.title.trim();
-            const body = c.body.replace(/\s+$/, '');
-            if (!title && !body.trim()) { alert('제목이나 내용을 적어주세요!'); return; }
-
-            const prev = myJournals[date];
-            const payload = {
-                title, body,
-                mood: c.mood || null,
-                weather: c.weather || null,
-                shared: !!c.shared,
-                updatedAt: SERVER_TS
-            };
-            if (!prev) payload.createdAt = SERVER_TS;
-            if (c.shared) { if (!prev || !prev.shared) payload.sharedAt = SERVER_TS; }   // 처음 공유한 시각 (상대에게 NEW 알림)
-            else payload.sharedAt = null;
-
-            // update()라서 상대가 남긴 반응/댓글은 그대로 유지됨
-            database.ref(`journals/${myType}/${date}`).update(payload).then(() => {
-                if (jEdit.date === date) {
-                    clearDraft(date);
-                    jDirty = false;
-                    jLoadedSig = sigOf({ title, body, mood: payload.mood, weather: payload.weather, shared: payload.shared });
-                    jEls.state.textContent = '저장됨';
-                    jEls.draftNote.textContent = '';
-                    renderMyFeedback();
-                    renderJournalList();
-                }
-            }).catch(err => alert('저장에 실패했어요: ' + err.message));
-        }
-
-        function deleteMyJournal() {
-            const date = jEdit.date;
-            if (!date || !myJournals[date]) { alert('아직 저장된 일기가 없어요.'); return; }
-            if (!confirm(`${date} 일기를 삭제할까요?\n상대가 남긴 반응과 댓글도 함께 사라져요.`)) return;
-            database.ref(`journals/${myType}/${date}`).remove().then(() => {
-                clearDraft(date);
-                jDirty = false;
-                openMyJournal(date);
-            }).catch(err => alert('삭제에 실패했어요: ' + err.message));
-        }
-
-        function journalWriteToday() {
-            const t = fmtDate(new Date());
-            jMonth = new Date(); jMonth.setDate(1);
-            jEls.search.value = '';
-            updateJournalMonthTitle();
-            openMyJournal(t);
+        function backToFeed() {
+            jRead = null;
+            showJournalView('feed');
+            renderFeed();
         }
 
         function updateJournalMonthTitle() {
-            document.getElementById('j-month-title').textContent = `${jMonth.getFullYear()}.${pad(jMonth.getMonth() + 1)}`;
+            byId('j-month-title').textContent = `${jMonth.getFullYear()}.${pad(jMonth.getMonth() + 1)}`;
         }
         function changeJournalMonth(diff) {
             jMonth.setDate(1);
             jMonth.setMonth(jMonth.getMonth() + diff);
             updateJournalMonthTitle();
-            renderJournalList();
+            renderFeed();
+        }
+        function setJournalFilter(f) {
+            jFilter = f;
+            updateFilterChips();
+            renderFeed();
+        }
+        function updateFilterChips() {
+            [['all', 'j-f-all'], ['mine', 'j-f-mine'], ['other', 'j-f-other']].forEach(([k, id]) => byId(id).classList.toggle('active', jFilter === k));
         }
 
-        function setJournalTab(tab) {
-            journalTab = tab;
-            document.getElementById('j-tab-mine').classList.toggle('active', tab === 'mine');
-            document.getElementById('j-tab-other').classList.toggle('active', tab === 'other');
-            document.getElementById('j-pane-mine').classList.toggle('active', tab === 'mine');
-            document.getElementById('j-pane-other').classList.toggle('active', tab === 'other');
-            document.getElementById('j-new-btn').style.display = tab === 'mine' ? '' : 'none';
-            if (tab === 'other') {
-                if (!jOtherSel || !otherJournals[jOtherSel]) {
-                    const first = journalRows().find(Boolean);
-                    jOtherSel = first ? first[0] : null;
-                }
-                renderReader();
-            }
-            renderJournalList();
-        }
-
-        // 현재 탭/월/검색어에 맞는 일기 목록 (최신순)
-        function journalRows() {
-            const src = journalTab === 'mine' ? myJournals : otherJournals;
+        // ----- 피드 -----
+        function feedRows() {
             const q = jEls.search.value.trim().toLowerCase();
             const prefix = `${jMonth.getFullYear()}-${pad(jMonth.getMonth() + 1)}`;
-            return Object.entries(src)
-                .filter(([d, j]) => {
-                    if (!j) return false;
-                    if (q) return ((j.title || '') + ' ' + (j.body || '')).toLowerCase().includes(q);
-                    return d.startsWith(prefix);
-                })
-                .sort((a, b) => (a[0] < b[0] ? 1 : -1));
+            const rows = [];
+            [myType, otherType].forEach(owner => {
+                if (jFilter === 'mine' && owner !== myType) return;
+                if (jFilter === 'other' && owner !== otherType) return;
+                Object.entries(postsOf(owner)).forEach(([date, j]) => {
+                    if (!j) return;
+                    if (q) { if (!((j.title || '') + ' ' + (j.body || '')).toLowerCase().includes(q)) return; }   // 검색은 모든 달
+                    else if (!date.startsWith(prefix)) return;
+                    rows.push({ owner, date, j });
+                });
+            });
+            rows.sort((a, b) => (a.date === b.date ? newTsOf(b.j) - newTsOf(a.j) : (a.date < b.date ? 1 : -1)));
+            return rows;
         }
 
-        function renderJournalList() {
-            if (!jEls.list) return;
-            const ul = jEls.list;
-            ul.innerHTML = '';
-            const rows = journalRows();
+        function isNewPost(owner, j, since) {
+            return (owner !== myType && newTsOf(j) > since) || feedbackNewCount(j, since) > 0;
+        }
+
+        function renderFeed() {
+            if (!jEls.feed) return;
+            const box = jEls.feed;
+            box.innerHTML = '';
+            const rows = feedRows();
             if (!rows.length) {
-                const li = document.createElement('li');
-                li.className = 'j-empty-li';
-                li.textContent = jEls.search.value.trim()
-                    ? '검색 결과가 없어요.'
-                    : (journalTab === 'mine' ? '이 달에는 쓴 일기가 없어요.' : `${otherName}가 이 달에 공유한 일기가 없어요.`);
-                ul.appendChild(li);
+                const e = document.createElement('div');
+                e.className = 'j-empty';
+                e.textContent = jEls.search.value.trim() ? '검색 결과가 없어요.' : '이 달에는 아직 글이 없어요. ✏️ 글쓰기로 첫 글을 남겨 보세요!';
+                box.appendChild(e);
                 return;
             }
-            rows.forEach(([d, j]) => {
-                const li = document.createElement('li');
-                const selected = journalTab === 'mine' ? d === jEdit.date : d === jOtherSel;
-                li.className = 'j-item' + (selected ? ' selected' : '');
+            rows.forEach(({ owner, date, j }) => {
+                const card = document.createElement('div');
+                card.className = 'j-card ' + AUTHORS[owner].cls;
 
-                const top = document.createElement('div');
-                top.className = 'j-item-top';
-                const dateSpan = document.createElement('span');
-                dateSpan.textContent = d;
-                const icons = document.createElement('span');
-                icons.textContent = (journalTab === 'mine' ? (j.shared ? '🌐' : '🔒') : '') + (j.mood || '') + (j.weather || '');
-                top.appendChild(dateSpan);
-                top.appendChild(icons);
-
-                const title = document.createElement('div');
-                title.className = 'j-item-title';
-                title.textContent = j.title || '(제목 없음)';
-
-                li.appendChild(top);
-                li.appendChild(title);
-
-                const isNew = journalTab === 'mine'
-                    ? feedbackNewCount(j, jSeenAtOpen) > 0
-                    : (tsOf(j.sharedAt) > jSeenAtOpen || feedbackNewCount(j, jSeenAtOpen) > 0);
-                if (isNew) {
+                const head = document.createElement('div');
+                head.className = 'j-card-head';
+                head.appendChild(authorBadge(owner));
+                const d = document.createElement('span');
+                d.className = 'j-card-date';
+                d.textContent = `${date} (${WEEKDAYS[new Date(date + 'T00:00:00').getDay()]})`;
+                head.appendChild(d);
+                if (isNewPost(owner, j, jSeenAtOpen)) {
                     const tag = document.createElement('span');
                     tag.className = 'new-badge';
                     tag.textContent = 'NEW';
-                    top.insertBefore(tag, icons);
+                    head.appendChild(tag);
+                }
+                const emo = document.createElement('span');
+                emo.className = 'j-card-emoji';
+                emo.textContent = (j.mood || '') + (j.weather || '');
+                head.appendChild(emo);
+
+                const title = document.createElement('h3');
+                title.className = 'j-card-title';
+                title.textContent = j.title || '(제목 없음)';
+
+                const ex = document.createElement('p');
+                ex.className = 'j-card-excerpt';
+                ex.textContent = excerptOf(j.body);
+
+                card.appendChild(head);
+                card.appendChild(title);
+                if (ex.textContent) card.appendChild(ex);
+
+                const hearts = Object.values(j.reactions || {}).map(r => r && r.emoji).filter(Boolean).join('');
+                const cmCount = Object.keys(j.comments || {}).length;
+                if (hearts || cmCount) {
+                    const foot = document.createElement('div');
+                    foot.className = 'j-card-foot';
+                    foot.textContent = (hearts ? hearts + ' ' : '') + (cmCount ? `💬 ${cmCount}` : '');
+                    card.appendChild(foot);
                 }
 
-                li.addEventListener('click', () => {
-                    if (journalTab === 'mine') openMyJournal(d);
-                    else openOtherJournal(d);
-                });
-                ul.appendChild(li);
+                card.addEventListener('click', () => openRead(owner, date));
+                box.appendChild(card);
             });
         }
 
-        // ----- 상대가 공유한 일기 읽기 -----
-        function openOtherJournal(date) {
-            jOtherSel = date;
-            renderReader();
-            renderJournalList();
+        // ----- 읽기 -----
+        function openRead(owner, date) {
+            jRead = { owner, date };
+            showJournalView('read');
+            renderRead();
+            byId('jv-read').scrollTop = 0;
         }
 
-        function renderReader() {
-            const j = otherJournals[jOtherSel];
-            const empty = document.getElementById('j-reader-empty');
-            const reader = document.getElementById('j-reader');
-            if (!j) {
-                empty.style.display = '';
-                empty.textContent = Object.keys(otherJournals).length
-                    ? '왼쪽에서 읽고 싶은 일기를 골라 주세요.'
-                    : `${otherName}가 공유한 일기가 아직 없어요.`;
-                reader.style.display = 'none';
-                return;
+        function renderRead() {
+            const j = jRead && postsOf(jRead.owner)[jRead.date];
+            if (!j) { backToFeed(); return; }
+            const { owner, date } = jRead;
+            const mine = owner === myType;
+
+            const ab = byId('r-author');
+            ab.innerHTML = '';
+            ab.appendChild(authorBadge(owner));
+            byId('r-date').textContent = `${date} (${WEEKDAYS[new Date(date + 'T00:00:00').getDay()]})`;
+            byId('r-mood').textContent = j.mood || '';
+            byId('r-weather').textContent = j.weather || '';
+            byId('r-title').textContent = j.title || '(제목 없음)';
+            renderRich(byId('r-body'), j.body || '');
+            byId('r-actions').style.display = mine ? '' : 'none';   // 수정/삭제는 내가 쓴 글에서만
+
+            // 같은 날 상대(또는 내) 글이 있으면 바로 이동
+            const otherOwner = mine ? otherType : myType;
+            const sd = byId('r-sameday');
+            const oj = postsOf(otherOwner)[date];
+            sd.style.display = oj ? '' : 'none';
+            if (oj) {
+                sd.textContent = `${AUTHORS[otherOwner].icon} 같은 날 ${AUTHORS[otherOwner].name}의 글 보기 →`;
+                sd.onclick = () => openRead(otherOwner, date);
             }
-            empty.style.display = 'none';
-            reader.style.display = '';
-            const wd = ['일', '월', '화', '수', '목', '금', '토'][new Date(jOtherSel + 'T00:00:00').getDay()];
-            document.getElementById('r-date').textContent = `${jOtherSel} (${wd})`;
-            document.getElementById('r-mood').textContent = j.mood || '';
-            document.getElementById('r-weather').textContent = j.weather || '';
-            document.getElementById('r-title').textContent = j.title || '(제목 없음)';
-            appendTextWithLinkButtons(document.getElementById('r-body'), j.body || '');
-            renderFeedback(document.getElementById('r-feedback'), otherType, jOtherSel, j);
+            renderFeedback(byId('r-feedback'), owner, date, j);
         }
 
         // ----- 반응(하트) + 한 줄 댓글 -----
@@ -1061,36 +1141,32 @@
                 box.appendChild(react); box.appendChild(list); box.appendChild(row);
             }
 
-            // 반응
             const react = box.querySelector('.fb-react');
             react.innerHTML = '';
             const reactions = (j && j.reactions) || {};
+            const label = document.createElement('span');
+            label.className = 'fb-label';
             if (iAmOwner) {
                 const r = reactions[otherType];
-                const label = document.createElement('span');
-                label.className = 'fb-label';
                 label.textContent = r && r.emoji ? `${otherName}의 반응 ${r.emoji}` : `${otherName}의 반응이 아직 없어요`;
                 react.appendChild(label);
             } else {
-                const label = document.createElement('span');
-                label.className = 'fb-label';
                 label.textContent = '반응 남기기';
                 react.appendChild(label);
-                const mine = reactions[myType] && reactions[myType].emoji;
+                const mineR = reactions[myType] && reactions[myType].emoji;
                 MOODS.forEach(emo => {
                     const b = document.createElement('span');
-                    b.className = 'fb-heart' + (mine === emo ? ' selected' : '');
+                    b.className = 'fb-heart' + (mineR === emo ? ' selected' : '');
                     b.textContent = emo;
                     b.addEventListener('click', () => {
                         const ref = database.ref(`${basePath}/reactions/${myType}`);
-                        if (mine === emo) ref.remove();
+                        if (mineR === emo) ref.remove();
                         else ref.set({ emoji: emo, at: SERVER_TS });
                     });
                     react.appendChild(b);
                 });
             }
 
-            // 댓글
             const list = box.querySelector('.fb-comments');
             list.innerHTML = '';
             Object.entries((j && j.comments) || {}).forEach(([ck, c]) => {
@@ -1115,23 +1191,180 @@
             });
         }
 
-        function renderMyFeedback() {
-            const box = document.getElementById('j-my-feedback');
-            const saved = myJournals[jEdit.date];
-            if (!saved || !saved.shared) {
-                box.dataset.key = '';
-                box.innerHTML = '';
-                const hint = document.createElement('div');
-                hint.className = 'j-hint';
-                hint.textContent = saved ? `🔒 비공개 일기예요. 공유하면 ${otherName}가 반응과 댓글을 남길 수 있어요.` : '';
-                box.appendChild(hint);
-                return;
-            }
-            renderFeedback(box, myType, jEdit.date, saved);
+        // ----- 쓰기 -----
+        function buildPicker(el, options, onPick) {
+            el.innerHTML = '';
+            options.forEach(opt => {
+                const s = document.createElement('span');
+                s.textContent = opt;
+                s.dataset.v = opt;
+                s.addEventListener('click', () => onPick(opt));
+                el.appendChild(s);
+            });
+        }
+        function markPicker(el, value) {
+            el.querySelectorAll('span').forEach(s => s.classList.toggle('selected', s.dataset.v === value));
         }
 
-        // ----- NEW 표시 (상대가 새로 공유했거나, 내 일기에 반응/댓글을 남겼을 때) -----
-        const tsOf = (v) => (typeof v === 'number' ? v : 0);
+        function fillEditor(c) {
+            jEls.title.value = c.title || '';
+            jEls.body.value = c.body || '';
+            jEdit.mood = c.mood || null;
+            jEdit.weather = c.weather || null;
+            markPicker(jEls.moodSel, jEdit.mood);
+            markPicker(jEls.weatherSel, jEdit.weather);
+        }
+
+        // 날짜에 맞는 내 글(또는 임시저장)을 편집기에 불러오기
+        function loadEditorFor(date) {
+            if (!date) return;
+            flushDraft();                       // 다른 날로 넘어가기 전에 쓰던 내용 보관
+            jEdit.date = date;
+            jEls.date.value = date;
+
+            const saved = myJournals[date];
+            const base = saved
+                ? { title: saved.title, body: saved.body, mood: saved.mood, weather: saved.weather }
+                : { title: '', body: '', mood: null, weather: null };
+            const draft = loadDraft(date);
+            let note = '';
+            if (draft && sigOf(draft) !== sigOf(base)) {
+                fillEditor(draft);
+                jDirty = true;
+                note = '⏱ 임시저장된 내용을 불러왔어요';
+            } else {
+                fillEditor(base);
+                jDirty = false;
+                if (draft) clearDraft(date);
+            }
+            jLoadedSig = sigOf(base);
+            jEls.state.textContent = jDirty ? '수정 중' : (saved ? '저장된 글 수정' : '새 글');
+            jEls.draftNote.textContent = note;
+            setWriteMode('edit');
+        }
+
+        function openWrite(date) {
+            loadEditorFor(date);
+            showJournalView('write');
+        }
+
+        function closeWrite() {
+            flushDraft();
+            const saved = myJournals[jEdit.date];
+            if (saved && jRead && jRead.owner === myType && jRead.date === jEdit.date) { showJournalView('read'); renderRead(); }
+            else backToFeed();
+        }
+
+        function journalWriteToday() {
+            jMonth = new Date(); jMonth.setDate(1);
+            jEls.search.value = '';
+            updateJournalMonthTitle();
+            openWrite(fmtDate(new Date()));
+        }
+
+        function onJournalInput() {
+            jDirty = true;
+            jEls.state.textContent = '수정 중';
+            jEls.draftNote.textContent = '';
+            if (jDraftTimer) clearTimeout(jDraftTimer);
+            jDraftTimer = setTimeout(() => {
+                jDraftTimer = null;
+                saveDraft(jEdit.date, readEditor());
+                const n = new Date();
+                jEls.draftNote.textContent = `⏱ 임시저장됨 ${pad(n.getHours())}:${pad(n.getMinutes())}`;
+            }, 500);
+        }
+
+        function setWriteMode(mode) {
+            jPreview = mode === 'preview';
+            byId('j-mode-edit').classList.toggle('active', !jPreview);
+            byId('j-mode-preview').classList.toggle('active', jPreview);
+            byId('j-fmt-bar').classList.toggle('previewing', jPreview);
+            jEls.body.style.display = jPreview ? 'none' : '';
+            jEls.preview.style.display = jPreview ? '' : 'none';
+            if (jPreview) {
+                const t = jEls.title.value.trim();
+                renderRich(jEls.preview, jEls.body.value);
+                if (!jEls.body.value.trim()) jEls.preview.textContent = '아직 쓴 내용이 없어요.';
+                jEls.preview.dataset.title = t;
+            }
+        }
+
+        // ----- 서식 도구 -----
+        function afterFormat() {
+            jEls.body.focus();
+            onJournalInput();
+        }
+        function fmtWrap(before, after, placeholder) {
+            const t = jEls.body;
+            const s = t.selectionStart, e = t.selectionEnd;
+            const sel = t.value.slice(s, e) || placeholder;
+            t.setRangeText(before + sel + after, s, e, 'end');
+            t.setSelectionRange(s + before.length, s + before.length + sel.length);
+            afterFormat();
+        }
+        function fmtPrefix(prefix) {
+            const t = jEls.body;
+            const v = t.value;
+            const s = t.selectionStart, e = t.selectionEnd;
+            const ls = s > 0 ? v.lastIndexOf('\n', s - 1) + 1 : 0;
+            let le = v.indexOf('\n', e);
+            if (le === -1) le = v.length;
+            const out = v.slice(ls, le).split('\n')
+                .map(l => prefix + l.replace(/^(#{1,2}\s+|>\s?|[-*]\s+)/, ''))   // 기존 서식은 바꿔 끼움
+                .join('\n');
+            t.setRangeText(out, ls, le, 'end');
+            afterFormat();
+        }
+        function fmtHr() {
+            const t = jEls.body;
+            const s = t.selectionStart;
+            const needBreak = s > 0 && t.value[s - 1] !== '\n';
+            t.setRangeText((needBreak ? '\n' : '') + '---\n', s, t.selectionEnd, 'end');
+            afterFormat();
+        }
+
+        function saveMyJournal() {
+            const date = jEdit.date;
+            if (!date) return;
+            const c = readEditor();
+            const title = c.title.trim();
+            const body = c.body.replace(/\s+$/, '');
+            if (!title && !body.trim()) { alert('제목이나 내용을 적어주세요!'); return; }
+
+            const prev = myJournals[date];
+            const payload = {
+                title, body,
+                mood: c.mood || null,
+                weather: c.weather || null,
+                updatedAt: SERVER_TS
+            };
+            if (!prev) payload.createdAt = SERVER_TS;
+
+            // update()라서 상대가 남긴 반응/댓글은 그대로 유지됨
+            database.ref(`journals/${myType}/${date}`).update(payload).then(() => {
+                clearDraft(date);
+                if (jEdit.date === date) {
+                    jDirty = false;
+                    jLoadedSig = sigOf({ title, body, mood: payload.mood, weather: payload.weather });
+                    jEls.draftNote.textContent = '';
+                    openRead(myType, date);
+                }
+            }).catch(err => alert('저장에 실패했어요: ' + err.message));
+        }
+
+        function deleteMyJournal(date) {
+            date = date || jEdit.date;
+            if (!date || !myJournals[date]) { alert('아직 저장된 글이 없어요.'); return; }
+            if (!confirm(`${date} 글을 삭제할까요?\n상대가 남긴 반응과 댓글도 함께 사라져요.`)) return;
+            database.ref(`journals/${myType}/${date}`).remove().then(() => {
+                clearDraft(date);
+                if (jEdit.date === date) jDirty = false;
+                backToFeed();
+            }).catch(err => alert('삭제에 실패했어요: ' + err.message));
+        }
+
+        // ----- NEW 표시 (상대가 새 글을 쓰거나, 내 글에 반응/댓글이 달렸을 때) -----
         function feedbackNewCount(j, since) {
             let n = 0;
             const r = j.reactions && j.reactions[otherType];
@@ -1140,19 +1373,14 @@
             return n;
         }
         function journalHasNew(since) {
-            for (const j of Object.values(otherJournals)) {
-                if (tsOf(j.sharedAt) > since || feedbackNewCount(j, since) > 0) return true;
-            }
-            for (const j of Object.values(myJournals)) {
-                if (feedbackNewCount(j, since) > 0) return true;
-            }
+            for (const j of Object.values(otherJournals)) if (j && isNewPost(otherType, j, since)) return true;
+            for (const j of Object.values(myJournals)) if (j && feedbackNewCount(j, since) > 0) return true;
             return false;
         }
         function updateJournalBadge() {
-            const badge = document.getElementById('menu-journal-new');
+            const badge = byId('menu-journal-new');
             if (!badge) return;
-            const show = jSeenTs !== null && !isJournalActive() && journalHasNew(jSeenTs);
-            badge.style.display = show ? '' : 'none';
+            badge.style.display = (jSeenTs !== null && !isJournalActive() && journalHasNew(jSeenTs)) ? '' : 'none';
         }
         function markJournalSeen() {
             database.ref('journal_seen/' + myType).set(SERVER_TS);
@@ -1161,11 +1389,13 @@
         function onEnterJournal() {
             jSeenAtOpen = jSeenTs || Date.now();
             markJournalSeen();
-            if (!jDirty || !jEdit.date) openMyJournal(jEdit.date || fmtDate(new Date()));
-            setJournalTab(journalTab);
+            if (!(jView === 'write' && jDirty)) {   // 쓰던 글이 있으면 그대로 두고, 아니면 피드부터
+                showJournalView('feed');
+                renderFeed();
+            }
         }
 
-        // 캘린더에서 날짜를 골라 그 날의 일기로 이동
+        // 캘린더에서 날짜를 골라 그 날의 글로 이동 (글이 없으면 그 날짜로 쓰기)
         function openJournalForDate(ds) {
             if (!ds) return;
             handleMenu('JOURNAL');
@@ -1173,54 +1403,44 @@
             jMonth = new Date(p[0], p[1] - 1, 1);
             updateJournalMonthTitle();
             jEls.search.value = '';
-            if (!myJournals[ds] && otherJournals[ds]) {
-                jOtherSel = ds;
-                setJournalTab('other');
-            } else {
-                setJournalTab('mine');
-                openMyJournal(ds);
-            }
+            if (myJournals[ds]) openRead(myType, ds);
+            else if (otherJournals[ds]) openRead(otherType, ds);
+            else openWrite(ds);
         }
 
         function onJournalsChanged() {
             updateCalendarJournalMarks();
             updateJournalBadge();
             if (!isJournalActive()) return;
-            renderJournalList();
-            if (journalTab === 'mine') {
-                // 쓰는 중이 아닐 때만 저장된 내용으로 새로고침 (타이핑을 방해하지 않음)
-                if (!jDirty && sigOf(myJournals[jEdit.date]) !== jLoadedSig) openMyJournal(jEdit.date);
-                renderMyFeedback();
-            } else {
-                renderReader();
-            }
+            if (jView === 'feed') renderFeed();
+            else if (jView === 'read') renderRead();
+            else if (!jDirty && sigOf(myJournals[jEdit.date]) !== jLoadedSig) loadEditorFor(jEdit.date);   // 쓰는 중이 아닐 때만 새로고침
         }
 
         function initJournalUI() {
             jEls = {
-                date: document.getElementById('j-date'),
-                state: document.getElementById('j-state'),
-                shared: document.getElementById('j-shared'),
-                shareLabel: document.getElementById('j-share-label'),
-                title: document.getElementById('j-title'),
-                body: document.getElementById('j-body'),
-                links: document.getElementById('j-links'),
-                draftNote: document.getElementById('j-draft-note'),
-                moodSel: document.getElementById('j-mood-sel'),
-                weatherSel: document.getElementById('j-weather-sel'),
-                list: document.getElementById('j-list'),
-                search: document.getElementById('j-search')
+                feed: byId('j-feed'),
+                search: byId('j-search'),
+                date: byId('j-date'),
+                state: byId('j-state'),
+                title: byId('j-title'),
+                body: byId('j-body'),
+                preview: byId('j-preview'),
+                draftNote: byId('j-draft-note'),
+                moodSel: byId('j-mood-sel'),
+                weatherSel: byId('j-weather-sel')
             };
-            document.getElementById('j-tab-other').textContent = `💌 ${otherName} 일기`;
+            byId('j-f-mine').textContent = '내 글';
+            byId('j-f-other').textContent = `${AUTHORS[otherType].icon} ${otherName} 글`;
             updateJournalMonthTitle();
+            updateFilterChips();
 
             buildPicker(jEls.moodSel, MOODS, (v) => { jEdit.mood = jEdit.mood === v ? null : v; markPicker(jEls.moodSel, jEdit.mood); onJournalInput(); });
             buildPicker(jEls.weatherSel, WEATHERS, (v) => { jEdit.weather = jEdit.weather === v ? null : v; markPicker(jEls.weatherSel, jEdit.weather); onJournalInput(); });
 
             jEls.title.addEventListener('input', onJournalInput);
             jEls.body.addEventListener('input', onJournalInput);
-            jEls.shared.addEventListener('change', onJournalInput);
-            jEls.date.addEventListener('change', () => { if (jEls.date.value) openMyJournal(jEls.date.value); });
+            jEls.date.addEventListener('change', () => { if (jEls.date.value) loadEditorFor(jEls.date.value); });
             window.addEventListener('pagehide', flushDraft);
 
             jEdit.date = fmtDate(new Date());
@@ -1233,10 +1453,7 @@
                 onJournalsChanged();
             });
             database.ref('journals/' + otherType).on('value', snap => {
-                const all = snap.val() || {};
-                otherJournals = {};
-                // 상대가 '공유'로 표시한 일기만 보여줌
-                Object.entries(all).forEach(([d, j]) => { if (j && j.shared) otherJournals[d] = j; });
+                otherJournals = snap.val() || {};   // 전부 공개: 공유 여부와 상관없이 모두 보여줌
                 onJournalsChanged();
             });
             database.ref('journal_seen/' + myType).on('value', snap => {
@@ -1381,6 +1598,8 @@
 
         window.addEventListener('load', () => {
             renderProfile();
+            applyFontLevel();
+            buildExternalMenus();
             updateMuteBtn();
             initJournalUI();
             renderCalendar();
