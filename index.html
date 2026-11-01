@@ -3,58 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NYA-PPI / INTRO_GATE</title>
+    <title>NYA-PPI / GATE</title>
     <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
+    <script>try{var _v=parseInt(localStorage.getItem('nya_font_level'),10);var _s=[0.92,1,1.12,1.25][_v];if(_s)document.documentElement.style.fontSize=(16*_s)+'px';}catch(e){}</script>
     <style>
         :root {
-            --bg-color: #f3f0f7; /* 화사하고 포근한 라이트 라벤더 그레이 배경 */
+            --key: 64px;
             --main-pink: #ff8fab;
             --main-purple: #9d7cff;
-            --accent-blue: #5bc0eb;
             --text-color: #4a4556;
-            --font-main: 'GmarketSansBold', sans-serif;
+            --text-soft: #8c829e;
+            --font-main: 'GmarketSansBold', 'GmarketSansMedium', sans-serif;
+            --font-light: 'GmarketSansLight', 'GmarketSansMedium', sans-serif;
         }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg-color); color: var(--text-color); font-family: var(--font-main); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .gate-frame { width: 320px; text-align: center; }
-        .logo-area { font-size: 1.2rem; color: #6c5ce7; text-shadow: 0 2px 10px rgba(108, 92, 231, 0.15); margin-bottom: 20px; }
-        .logo-sub { font-size: 0.6rem; opacity: 0.5; margin-top: 5px; }
-        #gate-loader { font-family: 'Courier New', monospace; font-size: 11px; color: var(--main-purple); }
-        .gate-btn-container { display: flex; flex-direction: column; gap: 15px; width: 220px; margin: 0 auto; opacity: 0; transition: opacity 0.5s ease-in; }
-        .gate-btn { padding: 12px 10px; border: 1px solid rgba(108, 92, 231, 0.2); border-radius: 8px; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; color: var(--text-color); font-family: var(--font-main); letter-spacing: 1px; transition: 0.3s; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
-        .gate-btn:hover { background: #6c5ce7; color: #fff; border-color: #6c5ce7; box-shadow: 0 6px 15px rgba(108, 92, 231, 0.3); }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100%; }
+        body {
+            min-height: 100vh; min-height: 100dvh;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+            font-family: var(--font-main); color: var(--text-color); overflow: hidden;
+            background: linear-gradient(135deg, #f6f0ff 0%, #fff0f5 52%, #eaf4ff 100%);
+        }
+
+        /* 배경에 천천히 떠다니는 은은한 빛 */
+        .blob { position: fixed; border-radius: 50%; filter: blur(60px); opacity: 0.55; pointer-events: none; z-index: 0; animation: float 14s ease-in-out infinite; }
+        .blob.b1 { width: 340px; height: 340px; background: #d9ccff; top: -80px; left: -60px; }
+        .blob.b2 { width: 300px; height: 300px; background: #ffd3e0; bottom: -70px; right: -40px; animation-delay: -5s; }
+        .blob.b3 { width: 220px; height: 220px; background: #cfe6ff; top: 55%; left: 62%; animation-delay: -9s; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(24px, -28px) scale(1.08); } }
+
+        .card {
+            position: relative; z-index: 1; width: min(400px, 100%);
+            padding: 38px 30px 30px; text-align: center;
+            background: rgba(255, 255, 255, 0.68);
+            -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 30px;
+            box-shadow: 0 24px 64px rgba(157, 124, 255, 0.18), 0 2px 8px rgba(157, 124, 255, 0.06);
+            animation: rise 0.7s cubic-bezier(.2, .8, .2, 1) both;
+        }
+        @keyframes rise { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: none; } }
+        .card.leaving { animation: leave 0.5s ease forwards; }
+        @keyframes leave { to { opacity: 0; transform: translateY(-10px) scale(1.02); } }
+
+        .logo {
+            font-size: 2.1rem; letter-spacing: 0.5px; margin: 0;
+            background: linear-gradient(120deg, var(--main-purple), var(--main-pink));
+            -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+        }
+        .logo-sub { margin: 6px 0 26px; font-family: var(--font-light); font-size: 0.9rem; color: var(--text-soft); }
+
+        .step { display: none; }
+        .step.active { display: block; animation: fade 0.35s ease both; }
+        @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+        .step-title { margin: 0 0 18px; font-size: 1rem; color: var(--text-color); }
+
+        /* 1단계: 누구인지 고르기 */
+        .profiles { display: flex; gap: 14px; justify-content: center; }
+        .profile {
+            flex: 1; max-width: 160px; padding: 20px 10px 16px; cursor: pointer;
+            background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(157, 124, 255, 0.16); border-radius: 22px;
+            font-family: var(--font-main); color: var(--text-color); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            box-shadow: 0 6px 18px rgba(157, 124, 255, 0.08);
+        }
+        .profile:hover, .profile:focus-visible { transform: translateY(-3px); border-color: var(--main-purple); box-shadow: 0 12px 28px rgba(157, 124, 255, 0.2); outline: none; }
+        .profile:active { transform: translateY(0) scale(0.98); }
+        .avatar {
+            width: 68px; height: 68px; margin: 0 auto 10px; border-radius: 50%; font-size: 2rem;
+            display: flex; align-items: center; justify-content: center; color: #fff;
+            background: linear-gradient(135deg, var(--main-pink), var(--main-purple));
+            box-shadow: 0 8px 18px rgba(157, 124, 255, 0.28);
+        }
+        .profile-name { font-size: 1.05rem; }
+
+        /* 2단계: 비밀번호 */
+        .who { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
+        .who .avatar { width: 46px; height: 46px; margin: 0; font-size: 1.4rem; box-shadow: 0 5px 12px rgba(157, 124, 255, 0.25); }
+        .who-name { font-size: 1.1rem; }
+        .pin-hint { margin: 0 0 20px; font-family: var(--font-light); font-size: 0.9rem; color: var(--text-soft); min-height: 1.4em; transition: color 0.2s; }
+        .pin-hint.error { color: #e0577d; }
+
+        .dots { display: flex; justify-content: center; gap: 16px; margin-bottom: 24px; }
+        .dot {
+            width: 15px; height: 15px; border-radius: 50%; border: 2px solid rgba(157, 124, 255, 0.45);
+            background: transparent; transition: background 0.15s, transform 0.15s, border-color 0.15s;
+        }
+        .dot.filled { background: linear-gradient(135deg, var(--main-pink), var(--main-purple)); border-color: transparent; transform: scale(1.12); }
+        .dots.shake { animation: shake 0.45s; }
+        .dots.shake .dot { border-color: #ff8fab; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-10px); } 40% { transform: translateX(9px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(4px); } }
+        .dots.ok .dot { background: linear-gradient(135deg, #7ad9a8, #52b788); border-color: transparent; }
+
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: min(264px, 100%); margin: 0 auto; }
+        .key {
+            width: var(--key); height: var(--key); justify-self: center; border-radius: 50%; cursor: pointer; touch-action: manipulation;
+            background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(157, 124, 255, 0.14);
+            font-family: var(--font-main); font-size: 1.4rem; color: var(--text-color);
+            box-shadow: 0 4px 12px rgba(157, 124, 255, 0.08); transition: transform 0.1s, background 0.15s, color 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .key:hover { background: #f4efff; }
+        .key:active { transform: scale(0.92); background: var(--main-purple); color: #fff; }
+        .key.ghost { background: transparent; border-color: transparent; box-shadow: none; font-size: 1.2rem; color: var(--text-soft); }
+        .key.ghost:hover { color: var(--main-purple); background: transparent; }
+        .key:focus-visible, .back-link:focus-visible { outline: 2px solid var(--main-purple); outline-offset: 2px; }
+
+        .back-link {
+            margin-top: 20px; background: none; border: none; cursor: pointer; padding: 6px 10px;
+            font-family: var(--font-light); font-size: 0.9rem; color: var(--text-soft);
+        }
+        .back-link:hover { color: var(--main-purple); }
+        .foot { margin-top: 22px; font-family: var(--font-light); font-size: 0.8rem; color: #b3aac0; }
+
+        @media (max-height: 640px) { .card { padding: 24px 22px 20px; } .logo-sub { margin-bottom: 14px; } :root { --key: 52px; } .keypad { gap: 8px; } .dots { margin-bottom: 14px; } }
+        @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
     </style>
 </head>
 <body>
-    <div class="gate-frame">
-        <div class="logo-area">
-            <div>Nya-Ppi Space</div>
-            <div class="logo-sub">> COZY_CONNECTION_HUB</div>
-        </div>
-        <div id="gate-loader">CONNECTING_TO_DATABASE...</div>
-        <div class="gate-btn-container" id="btn-container">
-            <div class="gate-btn" id="btn-me">_ SESSION: [언재]</div>
-            <div class="gate-btn" id="btn-other">_ SESSION: [삐용]</div>
-        </div>
-    </div>
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+    <main class="card" id="card">
+        <h1 class="logo">Nya-Ppi</h1>
+        <p class="logo-sub">우리 둘만의 아늑한 공간</p>
+
+        <!-- 1단계: 누구인지 고르기 -->
+        <section class="step active" id="step-profile">
+            <p class="step-title">누구로 들어갈까요?</p>
+            <div class="profiles">
+                <button type="button" class="profile" data-type="me">
+                    <div class="avatar">🐱</div>
+                    <div class="profile-name">언재</div>
+                </button>
+                <button type="button" class="profile" data-type="other">
+                    <div class="avatar">🐰</div>
+                    <div class="profile-name">삐용</div>
+                </button>
+            </div>
+        </section>
+
+        <!-- 2단계: 비밀번호 -->
+        <section class="step" id="step-pin">
+            <div class="who">
+                <div class="avatar" id="who-avatar"></div>
+                <div class="who-name" id="who-name"></div>
+            </div>
+            <p class="pin-hint" id="pin-hint" aria-live="polite">비밀번호 4자리를 눌러 주세요</p>
+            <div class="dots" id="dots" role="img" aria-label="비밀번호 입력 상태">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+            <div class="keypad" id="keypad">
+                <button type="button" class="key" data-k="1">1</button>
+                <button type="button" class="key" data-k="2">2</button>
+                <button type="button" class="key" data-k="3">3</button>
+                <button type="button" class="key" data-k="4">4</button>
+                <button type="button" class="key" data-k="5">5</button>
+                <button type="button" class="key" data-k="6">6</button>
+                <button type="button" class="key" data-k="7">7</button>
+                <button type="button" class="key" data-k="8">8</button>
+                <button type="button" class="key" data-k="9">9</button>
+                <span></span>
+                <button type="button" class="key" data-k="0">0</button>
+                <button type="button" class="key ghost" data-k="back" aria-label="지우기">⌫</button>
+            </div>
+            <button type="button" class="back-link" id="back-link">← 다른 사람으로 선택</button>
+        </section>
+
+        <div class="foot">✦ cozy diary for two ✦</div>
+    </main>
+
     <script>
-        window.addEventListener('load', () => {
-            const loader = document.getElementById('gate-loader');
-            const btns = document.getElementById('btn-container');
-            const meBtn = document.getElementById('btn-me');
-            const otherBtn = document.getElementById('btn-other');
+        // 비밀번호 (바꾸고 싶으면 여기만 고치세요)
+        const PASSCODE = '0525';
+        const PROFILES = {
+            me:    { name: '언재', icon: '🐱' },
+            other: { name: '삐용', icon: '🐰' }
+        };
 
-            setTimeout(() => { loader.innerText = "> ACCESS_GRANTED. CHOOSE SESSION..."; loader.style.opacity = "0.7"; }, 1200);
-            setTimeout(() => { btns.style.opacity = '1'; }, 1800);
+        const card = document.getElementById('card');
+        const stepProfile = document.getElementById('step-profile');
+        const stepPin = document.getElementById('step-pin');
+        const dotsEl = document.getElementById('dots');
+        const dotEls = Array.from(dotsEl.querySelectorAll('.dot'));
+        const hint = document.getElementById('pin-hint');
 
-            // 세션 저장 키 이름 통일 (nya_current_session)
-            const setSession = (type, name, icon) => {
-                const sessionData = { type, name, icon };
-                localStorage.setItem('nya_current_session', JSON.stringify(sessionData));
-                window.location.href = 'main.html';
-            };
+        let chosen = null;      // 'me' | 'other'
+        let entered = '';
+        let busy = false;       // 확인 중이거나 넘어가는 중에는 입력 잠금
 
-            meBtn.addEventListener('click', () => setSession('me', '언재', '🐱'));
-            otherBtn.addEventListener('click', () => setSession('other', '삐용', '🐰'));
+        // 이미 로그인해 둔 브라우저면 바로 사이트로
+        (function autoLogin() {
+            try {
+                const s = JSON.parse(localStorage.getItem('nya_current_session'));
+                const a = JSON.parse(localStorage.getItem('nya_auth'));
+                if (s && s.type && PROFILES[s.type] && a && a.ok === true && a.type === s.type) {
+                    busy = true;
+                    location.replace('main.html');
+                }
+            } catch (e) {}
+        })();
+
+        function showStep(which) {
+            stepProfile.classList.toggle('active', which === 'profile');
+            stepPin.classList.toggle('active', which === 'pin');
+        }
+
+        function renderDots() {
+            dotEls.forEach((d, i) => d.classList.toggle('filled', i < entered.length));
+        }
+
+        function setHint(text, isError) {
+            hint.textContent = text;
+            hint.classList.toggle('error', !!isError);
+        }
+
+        function chooseProfile(type) {
+            chosen = type;
+            entered = '';
+            busy = false;
+            dotsEl.classList.remove('shake', 'ok');
+            document.getElementById('who-avatar').textContent = PROFILES[type].icon;
+            document.getElementById('who-name').textContent = PROFILES[type].name;
+            setHint('비밀번호 4자리를 눌러 주세요', false);
+            renderDots();
+            showStep('pin');
+        }
+
+        function backToProfiles() {
+            if (busy) return;
+            chosen = null;
+            entered = '';
+            renderDots();
+            showStep('profile');
+        }
+
+        function pressKey(k) {
+            if (busy || !chosen) return;
+            if (k === 'back') {
+                entered = entered.slice(0, -1);
+                renderDots();
+                return;
+            }
+            if (entered.length >= PASSCODE.length) return;
+            entered += k;
+            renderDots();
+            if (entered.length === PASSCODE.length) check();
+        }
+
+        function check() {
+            busy = true;
+            if (entered === PASSCODE) {
+                dotsEl.classList.add('ok');
+                setHint('어서 와요! ' + PROFILES[chosen].name + ' 님', false);
+                try {
+                    const p = PROFILES[chosen];
+                    localStorage.setItem('nya_current_session', JSON.stringify({ type: chosen, name: p.name, icon: p.icon }));
+                    localStorage.setItem('nya_auth', JSON.stringify({ ok: true, type: chosen, at: Date.now() }));
+                } catch (e) {
+                    dotsEl.classList.remove('ok');
+                    setHint('이 브라우저에서는 로그인 정보를 저장할 수 없어요', true);
+                    entered = ''; renderDots(); busy = false;
+                    return;
+                }
+                setTimeout(() => card.classList.add('leaving'), 350);
+                setTimeout(() => { location.href = 'main.html'; }, 800);
+            } else {
+                dotsEl.classList.add('shake');
+                setHint('비밀번호가 달라요. 다시 눌러 주세요', true);
+                setTimeout(() => {
+                    dotsEl.classList.remove('shake');
+                    entered = '';
+                    renderDots();
+                    busy = false;
+                }, 480);
+            }
+        }
+
+        document.querySelectorAll('.profile').forEach(b => b.addEventListener('click', () => chooseProfile(b.dataset.type)));
+        document.getElementById('keypad').addEventListener('click', (e) => {
+            const btn = e.target.closest('.key');
+            if (btn) pressKey(btn.dataset.k);
+        });
+        document.getElementById('back-link').addEventListener('click', backToProfiles);
+
+        // 키보드 입력: 숫자 / Backspace / Esc
+        document.addEventListener('keydown', (e) => {
+            if (!chosen) return;
+            if (/^[0-9]$/.test(e.key)) { e.preventDefault(); pressKey(e.key); }
+            else if (e.key === 'Backspace') { e.preventDefault(); pressKey('back'); }
+            else if (e.key === 'Escape') { backToProfiles(); }
         });
     </script>
 </body>
