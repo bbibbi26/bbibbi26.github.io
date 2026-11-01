@@ -234,7 +234,7 @@
                     </div>
                 </section>
 
-                <div class="disconnect-btn" onclick="location.href='index.html'">← RETURN TO GATE</div>
+                <div class="disconnect-btn" onclick="logout()" title="로그아웃하고 처음 화면으로">← RETURN TO GATE</div>
             </main>
 
             <aside class="chat-sidebar">
@@ -340,9 +340,16 @@
             session = JSON.parse(localStorage.getItem('nya_current_session'));
         } catch(e) {}
 
-        if (!session || !session.type) {
+        // 로그인(비밀번호)을 거쳤는지 확인: index.html에서 통과하면 nya_auth가 저장돼요
+        let authed = false;
+        try {
+            const a = JSON.parse(localStorage.getItem('nya_auth'));
+            authed = !!(session && a && a.ok === true && a.type === session.type);
+        } catch (e) {}
+
+        if (!session || !session.type || !authed) {
             window.location.href = 'index.html';
-            throw new Error("정상 세션 없음");
+            throw new Error("로그인 필요");
         }
 
         const myType = session.type;
@@ -371,6 +378,14 @@
             otherStatusDisplay.innerText = status;
             otherStatusDisplay.className = status === 'ONLINE' ? 'status-online' : 'status-offline';
         });
+
+        // ---------- 로그아웃 (RETURN TO GATE) ----------
+        function logout() {
+            try { flushMemo(); flushDraft(); } catch (e) {}   // 쓰던 내용 보관
+            try { localStorage.removeItem('nya_auth'); localStorage.removeItem('nya_current_session'); } catch (e) {}
+            try { myPresenceRef.set('OFFLINE'); } catch (e) {}
+            window.location.href = 'index.html';
+        }
 
         // ---------- 펼침 메뉴 (Twitter / FF14) ----------
         function toggleMenuGroup(key) {
