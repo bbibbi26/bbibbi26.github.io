@@ -5,9 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NYA-PPI / GATE</title>
     <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
-    <script>try{var _v=parseInt(localStorage.getItem('nya_font_level'),10);var _s=[0.92,1,1.12,1.25][_v];if(_s)document.documentElement.style.fontSize=(16*_s)+'px';}catch(e){}</script>
+    <script>try{var _v=parseInt(localStorage.getItem('nya_font_level'),10);var _s=[0.92,1,1.12,1.25][_v];if(_s)document.documentElement.style.fontSize=(16*_s)+'px';if(localStorage.getItem('nya_theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
     <style>
         :root {
+            color-scheme: light;
+            --page-bg: linear-gradient(135deg, #f6f0ff 0%, #fff0f5 52%, #eaf4ff 100%);
+            --blob-1: #d9ccff; --blob-2: #ffd3e0; --blob-3: #cfe6ff; --blob-opacity: 0.55;
+            --card-bg: rgba(255, 255, 255, 0.68);
+            --card-border: rgba(255, 255, 255, 0.9);
+            --card-shadow: 0 24px 64px rgba(157, 124, 255, 0.18), 0 2px 8px rgba(157, 124, 255, 0.06);
+            --tile-bg: rgba(255, 255, 255, 0.85);
+            --key-bg: rgba(255, 255, 255, 0.9);
+            --key-hover: #f4efff;
+            --faint: #b3aac0;
+            --err: #e0577d;
             --key: 64px;
             --main-pink: #ff8fab;
             --main-purple: #9d7cff;
@@ -16,29 +27,45 @@
             --font-main: 'GmarketSansBold', 'GmarketSansMedium', sans-serif;
             --font-light: 'GmarketSansLight', 'GmarketSansMedium', sans-serif;
         }
+        /* 다크: 사이트 안에서 마지막으로 고른 테마를 따라가요 */
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --page-bg: linear-gradient(135deg, #1c1a2a 0%, #241e33 52%, #1b2233 100%);
+            --blob-1: #4a3a86; --blob-2: #7a3a5a; --blob-3: #2f4a7a; --blob-opacity: 0.35;
+            --card-bg: rgba(42, 38, 57, 0.72);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 24px 64px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
+            --tile-bg: rgba(58, 52, 78, 0.85);
+            --key-bg: rgba(58, 52, 78, 0.9);
+            --key-hover: #453f5c;
+            --text-color: #d8d2e8;
+            --text-soft: #a8a0bd;
+            --faint: #8f87a3;
+            --err: #ff9fba;
+        }
         * { box-sizing: border-box; }
         html, body { margin: 0; padding: 0; width: 100%; min-height: 100%; }
         body {
             min-height: 100vh; min-height: 100dvh;
             display: flex; align-items: center; justify-content: center; padding: 20px;
             font-family: var(--font-main); color: var(--text-color); overflow: hidden;
-            background: linear-gradient(135deg, #f6f0ff 0%, #fff0f5 52%, #eaf4ff 100%);
+            background: var(--page-bg);
         }
 
         /* 배경에 천천히 떠다니는 은은한 빛 */
-        .blob { position: fixed; border-radius: 50%; filter: blur(60px); opacity: 0.55; pointer-events: none; z-index: 0; animation: float 14s ease-in-out infinite; }
-        .blob.b1 { width: 340px; height: 340px; background: #d9ccff; top: -80px; left: -60px; }
-        .blob.b2 { width: 300px; height: 300px; background: #ffd3e0; bottom: -70px; right: -40px; animation-delay: -5s; }
-        .blob.b3 { width: 220px; height: 220px; background: #cfe6ff; top: 55%; left: 62%; animation-delay: -9s; }
+        .blob { position: fixed; border-radius: 50%; filter: blur(60px); opacity: var(--blob-opacity); pointer-events: none; z-index: 0; animation: float 14s ease-in-out infinite; }
+        .blob.b1 { width: 340px; height: 340px; background: var(--blob-1); top: -80px; left: -60px; }
+        .blob.b2 { width: 300px; height: 300px; background: var(--blob-2); bottom: -70px; right: -40px; animation-delay: -5s; }
+        .blob.b3 { width: 220px; height: 220px; background: var(--blob-3); top: 55%; left: 62%; animation-delay: -9s; }
         @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(24px, -28px) scale(1.08); } }
 
         .card {
             position: relative; z-index: 1; width: min(400px, 100%);
             padding: 38px 30px 30px; text-align: center;
-            background: rgba(255, 255, 255, 0.68);
+            background: var(--card-bg);
             -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 30px;
-            box-shadow: 0 24px 64px rgba(157, 124, 255, 0.18), 0 2px 8px rgba(157, 124, 255, 0.06);
+            border: 1px solid var(--card-border); border-radius: 30px;
+            box-shadow: var(--card-shadow);
             animation: rise 0.7s cubic-bezier(.2, .8, .2, 1) both;
         }
         @keyframes rise { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: none; } }
@@ -61,7 +88,7 @@
         .profiles { display: flex; gap: 14px; justify-content: center; }
         .profile {
             flex: 1; max-width: 160px; padding: 20px 10px 16px; cursor: pointer;
-            background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(157, 124, 255, 0.16); border-radius: 22px;
+            background: var(--tile-bg); border: 1px solid rgba(157, 124, 255, 0.16); border-radius: 22px;
             font-family: var(--font-main); color: var(--text-color); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
             box-shadow: 0 6px 18px rgba(157, 124, 255, 0.08);
         }
@@ -80,7 +107,7 @@
         .who .avatar { width: 46px; height: 46px; margin: 0; font-size: 1.4rem; box-shadow: 0 5px 12px rgba(157, 124, 255, 0.25); }
         .who-name { font-size: 1.1rem; }
         .pin-hint { margin: 0 0 20px; font-family: var(--font-light); font-size: 0.9rem; color: var(--text-soft); min-height: 1.4em; transition: color 0.2s; }
-        .pin-hint.error { color: #e0577d; }
+        .pin-hint.error { color: var(--err); }
 
         .dots { display: flex; justify-content: center; gap: 16px; margin-bottom: 24px; }
         .dot {
@@ -96,12 +123,12 @@
         .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: min(264px, 100%); margin: 0 auto; }
         .key {
             width: var(--key); height: var(--key); justify-self: center; border-radius: 50%; cursor: pointer; touch-action: manipulation;
-            background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(157, 124, 255, 0.14);
+            background: var(--key-bg); border: 1px solid rgba(157, 124, 255, 0.14);
             font-family: var(--font-main); font-size: 1.4rem; color: var(--text-color);
             box-shadow: 0 4px 12px rgba(157, 124, 255, 0.08); transition: transform 0.1s, background 0.15s, color 0.15s;
             -webkit-tap-highlight-color: transparent;
         }
-        .key:hover { background: #f4efff; }
+        .key:hover { background: var(--key-hover); }
         .key:active { transform: scale(0.92); background: var(--main-purple); color: #fff; }
         .key.ghost { background: transparent; border-color: transparent; box-shadow: none; font-size: 1.2rem; color: var(--text-soft); }
         .key.ghost:hover { color: var(--main-purple); background: transparent; }
@@ -112,7 +139,7 @@
             font-family: var(--font-light); font-size: 0.9rem; color: var(--text-soft);
         }
         .back-link:hover { color: var(--main-purple); }
-        .foot { margin-top: 22px; font-family: var(--font-light); font-size: 0.8rem; color: #b3aac0; }
+        .foot { margin-top: 22px; font-family: var(--font-light); font-size: 0.8rem; color: var(--faint); }
 
         @media (max-height: 640px) { .card { padding: 24px 22px 20px; } .logo-sub { margin-bottom: 14px; } :root { --key: 52px; } .keypad { gap: 8px; } .dots { margin-bottom: 14px; } }
         @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
