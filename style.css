@@ -101,6 +101,33 @@ body, html {
 .music-controls { display: flex; gap: 6px; }
 .music-btn { background: var(--surface); border: 1px solid var(--border-color); border-radius: 6px; color: var(--accent-text); cursor: pointer; padding: 6px 12px; }
 .music-btn:hover { background: var(--main-purple); color: var(--on-accent); }
+.music-btn.on { border-color: var(--main-purple); background: rgba(157, 124, 255, 0.18); }
+.music-btn.on:hover { background: var(--main-purple); }
+.music-btn:focus-visible, .music-icon-btn:focus-visible, .music-range:focus-visible { outline: 2px solid var(--main-purple); outline-offset: 2px; }
+.music-seek { margin-top: 10px; }
+.music-time { margin-top: 3px; font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.music-vol { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+.music-icon-btn { background: none; border: none; cursor: pointer; padding: 0 2px; font-size: 0.95rem; line-height: 1; flex-shrink: 0; }
+.music-status { min-height: 1.1em; margin-top: 6px; font-size: 0.75rem; color: var(--pink-text); }
+
+/* 재생 위치 / 음량 막대 (채워진 만큼 보라색) */
+.music-range {
+    --fill: 0%;
+    -webkit-appearance: none; appearance: none; width: 100%; min-width: 0; height: 14px; margin: 0; padding: 0;
+    background: transparent; cursor: pointer;
+}
+.music-range:disabled { cursor: default; opacity: 0.5; }
+.music-range::-webkit-slider-runnable-track {
+    height: 5px; border-radius: 3px;
+    background: linear-gradient(to right, var(--main-purple) var(--fill), rgba(157, 124, 255, 0.25) var(--fill));
+}
+.music-range::-moz-range-track { height: 5px; border-radius: 3px; background: rgba(157, 124, 255, 0.25); }
+.music-range::-moz-range-progress { height: 5px; border-radius: 3px; background: var(--main-purple); }
+.music-range::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 13px; height: 13px; border-radius: 50%; margin-top: -4px;
+    background: var(--accent-text); border: 2px solid var(--panel-bg);
+}
+.music-range::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--accent-text); border: 2px solid var(--panel-bg); }
 
 /* 중앙 메인 영역 */
 .main-content {
