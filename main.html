@@ -39,12 +39,22 @@
 
                 <div class="music-section">
                     <div class="music-info">> BGM_PLAYER</div>
-                    <div class="music-title">My Added Tracks</div>
+                    <div class="music-title" id="bgm-title">FF14리믹스</div>
+                    <audio id="bgm-audio" src="bgm.mp3" preload="metadata"></audio>
                     <div class="music-controls">
-                        <button class="music-btn" onclick="toggleMusic()">▶</button>
-                        <button class="music-btn" onclick="prevMusic()">⏮</button>
-                        <button class="music-btn" onclick="nextMusic()">⏭</button>
+                        <button class="music-btn" id="bgm-play" onclick="toggleMusic()" aria-label="재생" title="재생 / 일시정지">▶</button>
+                        <button class="music-btn" id="bgm-restart" onclick="restartMusic()" aria-label="처음부터 다시" title="처음부터 다시">⏮</button>
+                        <button class="music-btn" id="bgm-repeat" onclick="toggleRepeat()" aria-pressed="true" aria-label="반복" title="반복 켜기 / 끄기">🔁</button>
                     </div>
+                    <div class="music-seek">
+                        <input type="range" id="bgm-seek" class="music-range" min="0" max="1000" value="0" step="1" disabled aria-label="재생 위치">
+                        <div class="music-time" id="bgm-time">0:00 / --:--</div>
+                    </div>
+                    <div class="music-vol">
+                        <button class="music-icon-btn" id="bgm-mute" onclick="toggleBgmMute()" aria-label="음소거" title="음소거">🔊</button>
+                        <input type="range" id="bgm-vol" class="music-range" min="0" max="100" value="50" step="1" aria-label="음량">
+                    </div>
+                    <div class="music-status" id="bgm-status" aria-live="polite"></div>
                 </div>
             </aside>
 
@@ -1713,9 +1723,135 @@
 
         document.getElementById('comment-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') saveComment(); });
 
-        function toggleMusic() {}
-        function prevMusic() {}
-        function nextMusic() {}
+        // =====================================================
+        //  BGM 플레이어 (한 곡 · 이 브라우저에서만 재생 — 상대 화면에는 영향 없음)
+        //  곡 파일: main.html과 같은 폴더의 bgm.mp3
+        //  저장: nya_bgm_volume(0~100), nya_bgm_repeat('1' | '0')
+        // =====================================================
+        let bgm = null;
+        let bgmSeeking = false;
+        const bgmFmt = (s) => {
+            if (!isFinite(s) || s < 0) return '--:--';
+            s = Math.floor(s);
+            return Math.floor(s / 60) + ':' + pad(s % 60);
+        };
+        const bgmSet = (el, pct) => el.style.setProperty('--fill', pct + '%');
+
+        function bgmStatus(msg) { bgm.status.textContent = msg || ''; }
+
+        function bgmRenderTime() {
+            const a = bgm.audio;
+            bgm.time.textContent = `${bgmFmt(a.currentTime)} / ${bgmFmt(a.duration)}`;
+        }
+        function bgmRenderSeek() {
+            const a = bgm.audio;
+            if (!bgmSeeking && isFinite(a.duration) && a.duration > 0) {
+                bgm.seek.value = Math.round((a.currentTime / a.duration) * 1000);
+                bgmSet(bgm.seek, bgm.seek.value / 10);
+            }
+            bgmRenderTime();
+        }
+        function bgmRenderPlay() {
+            const playing = !bgm.audio.paused;
+            bgm.playBtn.textContent = playing ? '⏸' : '▶';
+            bgm.playBtn.setAttribute('aria-label', playing ? '일시정지' : '재생');
+        }
+        function bgmRenderRepeat() {
+            const on = bgm.audio.loop;
+            bgm.repeatBtn.classList.toggle('on', on);
+            bgm.repeatBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            bgm.repeatBtn.title = on ? '반복 켜짐 (누르면 끄기)' : '반복 꺼짐 (누르면 켜기)';
+        }
+        function bgmRenderVolume() {
+            const a = bgm.audio;
+            const v = Math.round(a.volume * 100);
+            bgm.vol.value = v;
+            bgmSet(bgm.vol, v);
+            bgm.muteBtn.textContent = (a.muted || v === 0) ? '🔇' : (v < 40 ? '🔉' : '🔊');
+        }
+
+        function toggleMusic() {
+            const a = bgm.audio;
+            if (a.paused) {
+                bgmStatus('');
+                const p = a.play();
+                if (p && p.catch) p.catch(() => bgmStatus('재생할 수 없어요. 곡 파일(bgm.mp3)을 확인해 주세요.'));
+            } else {
+                a.pause();
+                bgmRenderPlay();
+            }
+        }
+        function restartMusic() {          // 처음부터 다시 재생
+            bgm.audio.currentTime = 0;
+            if (bgm.audio.paused) toggleMusic();
+            bgmRenderSeek();
+        }
+        function toggleRepeat() {
+            bgm.audio.loop = !bgm.audio.loop;
+            try { localStorage.setItem('nya_bgm_repeat', bgm.audio.loop ? '1' : '0'); } catch (e) {}
+            bgmRenderRepeat();
+        }
+        function toggleBgmMute() {
+            const a = bgm.audio;
+            if (a.volume === 0) { a.volume = 0.5; a.muted = false; }   // 음량이 0이면 눌렀을 때 소리가 나도록
+            else a.muted = !a.muted;
+            bgmRenderVolume();
+        }
+
+        function initBgm() {
+            const audio = byId('bgm-audio');
+            if (!audio) return;
+            bgm = {
+                audio,
+                playBtn: byId('bgm-play'), repeatBtn: byId('bgm-repeat'), muteBtn: byId('bgm-mute'),
+                seek: byId('bgm-seek'), vol: byId('bgm-vol'), time: byId('bgm-time'), status: byId('bgm-status')
+            };
+            // 저장된 설정 불러오기 (처음에는 음량 50%, 반복 켜짐)
+            let vol = 50, rep = '1';
+            try {
+                const v = parseInt(localStorage.getItem('nya_bgm_volume'), 10);
+                if (v >= 0 && v <= 100) vol = v;
+                const r = localStorage.getItem('nya_bgm_repeat');
+                if (r === '0' || r === '1') rep = r;
+            } catch (e) {}
+            audio.volume = vol / 100;
+            audio.loop = rep === '1';
+            bgmRenderVolume(); bgmRenderRepeat(); bgmRenderPlay(); bgmRenderTime();
+            bgmSet(bgm.seek, 0);
+
+            const syncDuration = () => { bgm.seek.disabled = !(audio.duration > 0); bgmRenderSeek(); };
+            audio.addEventListener('loadedmetadata', syncDuration);
+            audio.addEventListener('durationchange', syncDuration);
+            if (audio.readyState >= 1) syncDuration();   // 페이지가 열리기 전에 이미 길이를 읽었다면 바로 반영
+            audio.addEventListener('timeupdate', bgmRenderSeek);
+            audio.addEventListener('play', bgmRenderPlay);
+            audio.addEventListener('pause', bgmRenderPlay);
+            audio.addEventListener('ended', () => { bgmRenderPlay(); bgmRenderSeek(); });
+            audio.addEventListener('playing', () => bgmStatus(''));
+            audio.addEventListener('waiting', () => bgmStatus('불러오는 중…'));
+            audio.addEventListener('canplay', () => { if (bgm.status.textContent === '불러오는 중…') bgmStatus(''); });
+            audio.addEventListener('error', () => bgmStatus('곡을 불러오지 못했어요. (bgm.mp3 확인)'));
+
+            // 재생 위치: 끄는 동안은 시간만 미리 보여주고, 놓으면 이동
+            bgm.seek.addEventListener('input', () => {
+                bgmSeeking = true;
+                bgmSet(bgm.seek, bgm.seek.value / 10);
+                if (isFinite(audio.duration)) bgm.time.textContent = `${bgmFmt(audio.duration * bgm.seek.value / 1000)} / ${bgmFmt(audio.duration)}`;
+            });
+            bgm.seek.addEventListener('change', () => {
+                if (isFinite(audio.duration)) audio.currentTime = audio.duration * bgm.seek.value / 1000;
+                bgmSeeking = false;
+                bgmRenderSeek();
+            });
+
+            bgm.vol.addEventListener('input', () => {
+                const v = parseInt(bgm.vol.value, 10);
+                audio.volume = v / 100;
+                audio.muted = false;
+                try { localStorage.setItem('nya_bgm_volume', String(v)); } catch (e) {}
+                bgmRenderVolume();
+            });
+        }
 
         function updateClock() {
             const now = new Date();
@@ -1729,6 +1865,7 @@
             applyFontLevel();
             buildExternalMenus();
             updateMuteBtn();
+            initBgm();
             initJournalUI();
             renderCalendar();
             initMemo();
